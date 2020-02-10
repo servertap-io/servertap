@@ -1,0 +1,5 @@
+name: ServerTap
+main: io.servertap.PluginEntrypoint
+version: 1.0-SNAPSHOT
+api-version: 1.13
+commands:
