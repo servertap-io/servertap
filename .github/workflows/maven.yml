@@ -15,3 +15,10 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        # Artifact name
+        name: ServerTap
+        # Directory containing files to upload
+        path: target/ServerTap-*.jar
