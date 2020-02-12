@@ -1,6 +1,6 @@
 package io.servertap.api.v1;
 
-import io.servertap.gen.models.Player;
+import io.servertap.api.v1.models.Player;
 import org.bukkit.Bukkit;
 import spark.Request;
 import spark.Response;

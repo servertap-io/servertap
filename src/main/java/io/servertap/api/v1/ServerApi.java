@@ -1,10 +1,9 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
-import io.servertap.gen.models.Server;
-import io.servertap.gen.models.World;
+import io.servertap.api.v1.models.Server;
+import io.servertap.api.v1.models.World;
 import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
 import spark.Request;
 import spark.Response;
 
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static spark.Spark.*;
+import static spark.Spark.halt;
 
 public class ServerApi {
 

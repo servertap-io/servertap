@@ -3,12 +3,8 @@ package io.servertap;
 import com.google.gson.Gson;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
-import io.servertap.gen.models.Player;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import static spark.Spark.*;
@@ -28,19 +24,19 @@ public class PluginEntrypoint extends JavaPlugin {
         //Routes for v1 of the API
         path(Constants.API_VERSION, () -> {
             // Pings
-            get("/ping", CTYPE, ServerApi::ping, gson::toJson);
-            post("/ping", CTYPE, ServerApi::ping, gson::toJson);
+            get("/ping", ServerApi::ping, gson::toJson);
+            post("/ping", ServerApi::ping, gson::toJson);
 
             // Server routes
-            get("/server", CTYPE, ServerApi::base, gson::toJson);
-            get("/worlds", CTYPE, ServerApi::worlds, gson::toJson);
-            get("/worlds/:world", CTYPE, ServerApi::world, gson::toJson);
+            get("/server", ServerApi::base, gson::toJson);
+            get("/worlds", ServerApi::worlds, gson::toJson);
+            get("/worlds/:world", ServerApi::world, gson::toJson);
 
             // Communication
-            post("/broadcast", CTYPE, ServerApi::broadcast, gson::toJson);
+            post("/broadcast", ServerApi::broadcast, gson::toJson);
 
             // Player routes
-            get("/players", CTYPE, PlayerApi::players, gson::toJson);
+            get("/players", PlayerApi::players, gson::toJson);
         });
 
         // Default fallthrough. Just give them a 404.
