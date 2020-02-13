@@ -12,6 +12,7 @@ import spark.Response;
 
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,11 @@ public class ServerApi {
         server.setMotd(bukkitServer.getMotd());
         server.setVersion(bukkitServer.getVersion());
         server.setBukkitVersion(bukkitServer.getBukkitVersion());
+
+        // Probably a better way to do this
+        DecimalFormat df = new DecimalFormat("#.##");
+        // Possibly add 5m and 15m in the future?
+        server.setTps(df.format(String.valueOf(bukkitServer.getTPS()[0])));
 
         // Get the list of IP bans
         Set<ServerBan> bannedIps = new HashSet<>();
@@ -143,8 +149,22 @@ public class ServerApi {
         world.setAllowMonsters(bukkitWorld.getAllowMonsters());
         world.setGenerateStructures(bukkitWorld.canGenerateStructures());
 
-        // TODO: Find a non-deprecated way to convert the difficulty
-        world.setDifficulty(bukkitWorld.getDifficulty().getValue());
+        int value = 0;
+        switch (bukkitWorld.getDifficulty()) {
+            case PEACEFUL:
+                value = 0;
+                break;
+            case EASY:
+                value = 1;
+                break;
+            case NORMAL:
+                value = 3;
+                break;
+            case HARD:
+                value = 2;
+                break;
+        }
+        world.setDifficulty(value);
 
         world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
         world.setStorm(bukkitWorld.hasStorm());
@@ -152,5 +172,4 @@ public class ServerApi {
 
         return world;
     }
-
 }
