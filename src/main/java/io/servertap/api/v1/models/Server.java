@@ -21,6 +21,9 @@ public class Server {
     private String bukkitVersion = null;
 
     @Expose
+    private String tps = null;
+
+    @Expose
     private ServerHealth health = null;
 
     @Expose
@@ -69,6 +72,14 @@ public class Server {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getTps() {
+        return tps;
+    }
+
+    public void setTps(String tps) {
+        this.tps = tps;
     }
 
     public String getBukkitVersion() {
