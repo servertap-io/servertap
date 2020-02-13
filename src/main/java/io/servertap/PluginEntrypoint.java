@@ -1,6 +1,7 @@
 package io.servertap;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,12 +12,11 @@ import static spark.Spark.*;
 
 public class PluginEntrypoint extends JavaPlugin {
 
-    private final String CTYPE = "application/json";
     private final Logger log = getLogger();
 
     @Override
     public void onEnable() {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
         // Standard request logger
         before("/*", (req, res) -> log.info("Request to " + req.pathInfo()));
@@ -36,7 +36,7 @@ public class PluginEntrypoint extends JavaPlugin {
             post("/broadcast", ServerApi::broadcast, gson::toJson);
 
             // Player routes
-            get("/players", PlayerApi::players, gson::toJson);
+            get("/players", PlayerApi::playersGet, gson::toJson);
         });
 
         // Default fallthrough. Just give them a 404.

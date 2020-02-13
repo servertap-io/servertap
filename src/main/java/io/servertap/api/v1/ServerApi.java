@@ -2,14 +2,20 @@ package io.servertap.api.v1;
 
 import com.google.gson.Gson;
 import io.servertap.api.v1.models.Server;
+import io.servertap.api.v1.models.ServerBan;
+import io.servertap.api.v1.models.ServerHealth;
 import io.servertap.api.v1.models.World;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import spark.Request;
 import spark.Response;
 
+import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static spark.Spark.halt;
@@ -29,9 +35,58 @@ public class ServerApi {
 
         Server server = new Server();
         org.bukkit.Server bukkitServer = Bukkit.getServer();
-
         server.setName(bukkitServer.getName());
+        server.setMotd(bukkitServer.getMotd());
+        server.setVersion(bukkitServer.getVersion());
+        server.setBukkitVersion(bukkitServer.getBukkitVersion());
 
+        // Get the list of IP bans
+        Set<ServerBan> bannedIps = new HashSet<>();
+        bukkitServer.getBanList(BanList.Type.IP).getBanEntries().forEach(banEntry -> {
+            ServerBan ban = new ServerBan();
+
+            ban.setSource(banEntry.getSource());
+            ban.setExpiration(banEntry.getExpiration());
+            ban.setReason(ban.getReason());
+            ban.setTarget(banEntry.getTarget());
+
+            bannedIps.add(ban);
+        });
+        server.setBannedIps(bannedIps);
+
+        // Get the list of player bans
+        Set<ServerBan> bannedPlayers = new HashSet<>();
+        bukkitServer.getBanList(BanList.Type.NAME).getBanEntries().forEach(banEntry -> {
+            ServerBan ban = new ServerBan();
+
+            ban.setSource(banEntry.getSource());
+            ban.setExpiration(banEntry.getExpiration());
+            ban.setReason(ban.getReason());
+            ban.setTarget(banEntry.getTarget());
+
+            bannedPlayers.add(ban);
+        });
+        server.setBannedPlayers(bannedPlayers);
+
+        ServerHealth health = new ServerHealth();
+
+        // Logical CPU count
+        int cpus = Runtime.getRuntime().availableProcessors();
+        health.setCpus(cpus);
+
+        // Uptime
+        long uptime = ManagementFactory.getRuntimeMXBean().getUptime() / 1000L;
+        health.setUptime(uptime);
+
+        // Memory stats from the runtime
+        long memMax = Runtime.getRuntime().maxMemory();
+        long memTotal = Runtime.getRuntime().totalMemory();
+        long memFree = Runtime.getRuntime().freeMemory();
+        health.setMaxMemory(memMax);
+        health.setTotalMemory(memTotal);
+        health.setFreeMemory(memFree);
+
+        server.setHealth(health);
         return server;
     }
 

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class PlayerApi {
 
-    public static Object players(Request request, Response response) {
+    public static Object playersGet(Request request, Response response) {
         response.type("application/json");
 
         ArrayList<Player> players = new ArrayList<>();
