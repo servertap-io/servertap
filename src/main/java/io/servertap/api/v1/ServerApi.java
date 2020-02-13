@@ -1,14 +1,14 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
+import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import io.servertap.api.v1.models.Server;
 import io.servertap.api.v1.models.ServerBan;
 import io.servertap.api.v1.models.ServerHealth;
 import io.servertap.api.v1.models.World;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import spark.Request;
-import spark.Response;
 
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
@@ -19,21 +19,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static spark.Spark.halt;
-
 public class ServerApi {
 
-    private final Gson gson = new Gson();
     private static final Logger log = Bukkit.getLogger();
 
-    public static Object ping(Request req, Response res) {
-        res.type("application/json");
-        return "pong";
+    public static void ping(Context ctx) {
+        ctx.json("pong");
     }
 
-    public static Object base(Request request, Response response) {
-        response.type("application/json");
-
+    public static void serverGet(Context ctx) {
         Server server = new Server();
         org.bukkit.Server bukkitServer = Bukkit.getServer();
         server.setName(bukkitServer.getName());
@@ -93,34 +87,28 @@ public class ServerApi {
         health.setFreeMemory(memFree);
 
         server.setHealth(health);
-        return server;
+
+        ctx.json(server);
     }
 
-    public static Object broadcast(Request request, Response response) {
-        response.type("application/json");
-
-        Bukkit.broadcastMessage(request.queryParams("message"));
-        return null;
+    public static void broadcastPost(Context ctx) {
+        Bukkit.broadcastMessage(ctx.formParam("message"));
     }
 
-    public static Object worlds(Request request, Response response) {
-        response.type("application/json");
-
+    public static void worldsGet(Context ctx) {
         List<World> worlds = new ArrayList<>();
         Bukkit.getServer().getWorlds().forEach(world -> worlds.add(fromBukkitWorld(world)));
 
-        return worlds;
+        ctx.json(worlds);
     }
 
-    public static Object world(Request request, Response response) {
-        response.type("application/json");
-
-        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(request.params(":world"));
+    public static void worldGet(Context ctx) {
+        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(ctx.pathParam("world"));
 
         // 404 if no world found
-        if (bukkitWorld == null) halt(404, "World not found");
+        if (bukkitWorld == null) throw new NotFoundResponse();
 
-        return fromBukkitWorld(bukkitWorld);
+        ctx.json(fromBukkitWorld(bukkitWorld));
     }
 
     private static World fromBukkitWorld(org.bukkit.World bukkitWorld) {
