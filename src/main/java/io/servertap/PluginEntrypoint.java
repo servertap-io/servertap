@@ -1,18 +1,14 @@
 package io.servertap;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
-
 
 public class PluginEntrypoint extends JavaPlugin {
 
@@ -29,7 +25,9 @@ public class PluginEntrypoint extends JavaPlugin {
         Thread.currentThread().setContextClassLoader(PluginEntrypoint.class.getClassLoader());
 
         // Instantiate the web server (which will now load using the plugin's class loader).
-        Javalin app = Javalin.create().start(4567);
+        Javalin app = Javalin.create(config -> {
+            config.defaultContentType = "application/json";
+        }).start(4567);
 
         app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
