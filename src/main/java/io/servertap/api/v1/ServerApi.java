@@ -12,6 +12,7 @@ import spark.Response;
 
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +40,11 @@ public class ServerApi {
         server.setMotd(bukkitServer.getMotd());
         server.setVersion(bukkitServer.getVersion());
         server.setBukkitVersion(bukkitServer.getBukkitVersion());
-        server.setTps(String.valueOf(bukkitServer.getTPS()[0]));
+
+        // Probably a better way to do this
+        DecimalFormat df = new DecimalFormat("#.##");
+        // Possibly add 5m and 15m in the future?
+        server.setTps(df.format(String.valueOf(bukkitServer.getTPS()[0])));
 
         // Get the list of IP bans
         Set<ServerBan> bannedIps = new HashSet<>();
