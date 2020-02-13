@@ -1,17 +1,14 @@
 package io.servertap.api.v1;
 
+import io.javalin.http.Context;
 import io.servertap.api.v1.models.Player;
 import org.bukkit.Bukkit;
-import spark.Request;
-import spark.Response;
 
 import java.util.ArrayList;
 
 public class PlayerApi {
 
-    public static Object playersGet(Request request, Response response) {
-        response.type("application/json");
-
+    public static void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
 
         Bukkit.getOnlinePlayers().forEach((player -> {
@@ -32,7 +29,7 @@ public class PlayerApi {
             players.add(p);
         }));
 
-        return players;
+        ctx.json(players);
     }
 
 }

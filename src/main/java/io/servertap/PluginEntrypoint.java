@@ -2,13 +2,17 @@ package io.servertap;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.javalin.Javalin;
+import io.javalin.http.NotFoundResponse;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-import static spark.Spark.*;
+import static io.javalin.apibuilder.ApiBuilder.*;
+
 
 public class PluginEntrypoint extends JavaPlugin {
 
@@ -16,31 +20,46 @@ public class PluginEntrypoint extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-        // Standard request logger
-        before("/*", (req, res) -> log.info("Request to " + req.pathInfo()));
+        // Get the current class loader.
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        //Routes for v1 of the API
-        path(Constants.API_VERSION, () -> {
-            // Pings
-            get("/ping", ServerApi::ping, gson::toJson);
-            post("/ping", ServerApi::ping, gson::toJson);
+        // Temporarily set this thread's class loader to the plugin's class loader.
+        // Replace JavalinTestPlugin.class with your own plugin's class.
+        Thread.currentThread().setContextClassLoader(PluginEntrypoint.class.getClassLoader());
 
-            // Server routes
-            get("/server", ServerApi::base, gson::toJson);
-            get("/worlds", ServerApi::worlds, gson::toJson);
-            get("/worlds/:world", ServerApi::world, gson::toJson);
+        // Instantiate the web server (which will now load using the plugin's class loader).
+        Javalin app = Javalin.create().start(4567);
 
-            // Communication
-            post("/broadcast", ServerApi::broadcast, gson::toJson);
+        app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
-            // Player routes
-            get("/players", PlayerApi::playersGet, gson::toJson);
+        app.routes(() -> {
+            //Routes for v1 of the API
+            path(Constants.API_V1, () -> {
+                // Pings
+                get("ping", ServerApi::ping);
+                post("ping", ServerApi::ping);
+
+                // Server routes
+                get("server", ServerApi::serverGet);
+                get("worlds", ServerApi::worldsGet);
+                get("worlds/:world", ServerApi::worldGet);
+
+                // Communication
+                post("broadcast", ServerApi::broadcastPost);
+
+                // Player routes
+                get("players", PlayerApi::playersGet);
+            });
         });
 
         // Default fallthrough. Just give them a 404.
-        get("/*", (req, res) -> halt(404, "Nothing here"));
-    }
+        app.get("*", ctx -> {
+            throw new NotFoundResponse();
+        });
 
+        // Put the original class loader back where it was.
+        Thread.currentThread().setContextClassLoader(classLoader);
+
+    }
 }
