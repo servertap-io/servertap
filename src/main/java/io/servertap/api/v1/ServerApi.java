@@ -38,7 +38,12 @@ public class ServerApi {
         // Probably a better way to do this
         DecimalFormat df = new DecimalFormat("#.##");
         // Possibly add 5m and 15m in the future?
-        server.setTps(df.format(String.valueOf(bukkitServer.getTPS()[0])));
+        if (bukkitServer.getTPS().length > 0) {
+            server.setTps(df.format(bukkitServer.getTPS()[0]));
+        } else {
+            server.setTps("0.0");
+        }
+
 
         // Get the list of IP bans
         Set<ServerBan> bannedIps = new HashSet<>();
