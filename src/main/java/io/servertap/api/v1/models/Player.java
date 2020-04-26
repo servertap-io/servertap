@@ -2,6 +2,8 @@ package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
 
+import org.bukkit.OfflinePlayer;
+
 /**
  * An online player
  */
@@ -194,5 +196,9 @@ public class Player {
 
     public void setOp(Boolean op) {
         this.op = op;
+    }
+
+    public Whitelist toWhitelist(){
+        return new Whitelist().uuid(uuid).name(displayName);
     }
 }
