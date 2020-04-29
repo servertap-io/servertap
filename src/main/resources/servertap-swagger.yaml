@@ -12,6 +12,7 @@ servers:
 # Response types
 components:
   schemas:
+          description: The Player's display name
     Whitelist:
       type: object
       properties:
@@ -96,6 +97,9 @@ components:
         op:
           type: boolean
           description: True if this Player is OP
+        balance:
+          type: number
+          description: The Player's balance
         
       required:  
         - uuid
@@ -120,6 +124,28 @@ paths:
       responses:
         '200':
           description: OK
+  /player/pay:
+    post:
+      description: Increase the players balance 
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfflinePlayer'
+  /allPlayers:
+    get:
+      description: Gets all players that have ever joined the server 
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfflinePlayer'
   /players:
     get:
       summary: Gets all currently online Players
