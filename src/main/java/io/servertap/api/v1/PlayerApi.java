@@ -105,13 +105,11 @@ public class PlayerApi {
 
 
         io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("uuid")));
+        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("uuid")));
 
-        double curbalance = PluginEntrypoint.getEconomy().getBalance(player);
+        PluginEntrypoint.getEconomy().depositPlayer(player, Double.parseDouble(ctx.formParam("amount")));
 
-        PluginEntrypoint.getEconomy().depositPlayer(player, Double.parseDouble(ctx.pathParam("value")));
-
-        p.setBalance(curbalance+Double.parseDouble(ctx.pathParam("value")));
+        p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
         p.setUuid(player.getUniqueId().toString());
         p.setDisplayName(player.getName());
         p.setWhitelisted(player.isWhitelisted());
