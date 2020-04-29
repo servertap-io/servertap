@@ -107,29 +107,6 @@ public class PluginEntrypoint extends JavaPlugin {
         return econ != null;
     }
 
-    public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        if(!(sender instanceof Player)) {
-            log.info("Only players are supported for this Example Plugin, but you should not do this!!!");
-            return true;
-        }
-
-        Player player = (Player) sender;
-
-        if(command.getLabel().equals("test-economy")) {
-            // Lets give the player 1.05 currency (note that SOME economic plugins require rounding!)
-            sender.sendMessage(String.format("You have %s", econ.format(econ.getBalance(player.getName()))));
-            EconomyResponse r = econ.depositPlayer(player, 1.05);
-            if(r.transactionSuccess()) {
-                sender.sendMessage(String.format("You were given %s and now have %s", econ.format(r.amount), econ.format(r.balance)));
-            } else {
-                sender.sendMessage(String.format("An error occured: %s", r.errorMessage));
-            }
-            return true;
-        }else {
-            return false;
-        }
-    }
-
     public static Economy getEconomy() {
         return econ;
     }
