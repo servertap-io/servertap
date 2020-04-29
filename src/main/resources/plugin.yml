@@ -7,5 +7,6 @@ loadbefore:
   - Vault
 depend:
   - Essentials
+softdepend:
   - Vault
 commands:
