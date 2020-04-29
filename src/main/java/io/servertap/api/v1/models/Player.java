@@ -218,4 +218,8 @@ public class Player {
     public void setOp(Boolean op) {
         this.op = op;
     }
+
+    public OfflinePlayer toOfflinePlayer(){
+        return new OfflinePlayer().uuid(this.uuid).name(this.displayName);
+    }
 }
