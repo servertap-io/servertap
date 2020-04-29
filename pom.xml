@@ -46,6 +46,7 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.10.1</version>
         </dependency>
+        <!-- for Vault integration-->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
