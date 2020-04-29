@@ -75,7 +75,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players", PlayerApi::playersGet);
                 get("players/:player", PlayerApi::playerGet);
                 get("allPlayers", PlayerApi::offlinePlayersGet);
-                get("players/:uuid/pay/:value", PlayerApi::playerPay);
+        
+                post("player/pay", PlayerApi::playerPay);
             });
         });
 
