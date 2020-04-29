@@ -3,7 +3,7 @@ package io.servertap.api.v1.models;
 import com.google.gson.annotations.Expose;
 
 /**
- * An online player
+ * An offline player
  */
 public class OfflinePlayer {
     @Expose
@@ -34,9 +34,9 @@ public class OfflinePlayer {
 
 
     /**
-     * Current exhaustion level
+     * The players balance
      *
-     * @return exhaustion
+     * @return balance
      **/
     public Double getBalance() {
         return balance;
