@@ -24,7 +24,7 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class PluginEntrypoint extends JavaPlugin {
 
-    private static final Logger log = Logger.getLogger("Minecraft");
+    private static final Logger log = Bukkit.getLogger();
 
 
     private static Economy econ = null;
