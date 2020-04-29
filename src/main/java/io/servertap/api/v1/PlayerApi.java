@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 
@@ -33,7 +34,9 @@ public class PlayerApi {
             p.setWhitelisted(player.isWhitelisted());
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
-            double curbalance = PluginEntrypoint.getEconomy().getBalance(player.getName());
+            //getBalance(String) is deprecated it is now encouraged to use getBalance(Offline player)
+
+            double curbalance = PluginEntrypoint.getEconomy().getBalance(player);
             p.setBalance(curbalance);
             players.add(p);
         }));
@@ -47,7 +50,7 @@ public class PlayerApi {
         org.bukkit.entity.Player player= Bukkit.getPlayer(ctx.pathParam("player"));
 
 
-        double curbalance = PluginEntrypoint.getEconomy().getBalance(player.getName());
+        double curbalance = PluginEntrypoint.getEconomy().getBalance(player);
         p.setBalance(curbalance);
         p.setUuid(player.getUniqueId().toString());
         p.setDisplayName(player.getDisplayName());
@@ -85,7 +88,7 @@ public class PlayerApi {
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
 
-            double curbalance = PluginEntrypoint.getEconomy().getBalance(player.getName());
+            double curbalance = PluginEntrypoint.getEconomy().getBalance(offlinePlayers[i]);
 
             p.setBalance(curbalance);
             players.add(p);
@@ -102,9 +105,9 @@ public class PlayerApi {
 
 
         io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-        OfflinePlayer player = Bukkit.getOfflinePlayer(ctx.pathParam("uuid"));
+        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("uuid")));
 
-        double curbalance = PluginEntrypoint.getEconomy().getBalance(player.getName());
+        double curbalance = PluginEntrypoint.getEconomy().getBalance(player);
 
         PluginEntrypoint.getEconomy().depositPlayer(player, Double.parseDouble(ctx.pathParam("value")));
 
