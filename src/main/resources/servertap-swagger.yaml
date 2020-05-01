@@ -24,6 +24,29 @@ components:
           description: The player's name as set in the whitelist
       required:
         - uuid
+    OfflinePlayer:
+      description: An offline Player
+      properties:
+        uuid:
+          type: string
+          description: The Player's UUID
+        displayName:
+          type: string
+          description: The Player's display name
+        whitelisted:
+          type: boolean
+          description: True if this Player is on the server's whitelist
+        banned:
+          type: boolean
+          description: True if this Player is banned
+        op:
+          type: boolean
+          description: True if this Player is OP
+        balance:
+          type: number
+          description: The Player's balance
+      required:  
+        - uuid
     World:
       description: A Minecraft world
       properties:
@@ -124,6 +147,28 @@ paths:
       responses:
         '200':
           description: OK
+  /player/pay:
+    post:
+      description: Increase the players balance 
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfflinePlayer'
+  /allPlayers:
+    get:
+      description: Gets all players that have ever joined the server 
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfflinePlayer'
   /player/pay:
     post:
       description: Increase the players balance 
