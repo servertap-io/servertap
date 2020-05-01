@@ -32,6 +32,9 @@ public class Server {
     @Expose
     private Set<ServerBan> bannedPlayers = null;
 
+    @Expose
+    private Set<Whitelist> whitelistedPlayers = null;
+
     public Server name(String name) {
         this.name = name;
         return this;
@@ -104,5 +107,13 @@ public class Server {
 
     public void setBannedPlayers(Set<ServerBan> bannedPlayers) {
         this.bannedPlayers = bannedPlayers;
+    }
+
+    public Set<Whitelist> getWhitelistedPlayers() {
+        return whitelistedPlayers;
+    }
+
+    public void setWhitelistedPlayers(Set<Whitelist> whitelistPlayers) {
+        this.whitelistedPlayers = whitelistPlayers;
     }
 }
