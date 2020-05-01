@@ -48,6 +48,10 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Player routes
                 get("players", PlayerApi::playersGet);
+
+                // Whitelist routes
+                get("whitelist", ServerApi::whitelistGet);
+                post("whitelist", ServerApi::whitelistPost);
             });
         });
 

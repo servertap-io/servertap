@@ -6,12 +6,18 @@ import io.javalin.http.NotFoundResponse;
 import io.servertap.api.v1.models.Server;
 import io.servertap.api.v1.models.ServerBan;
 import io.servertap.api.v1.models.ServerHealth;
+import io.servertap.api.v1.models.Whitelist;
 import io.servertap.api.v1.models.World;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,7 +40,7 @@ public class ServerApi {
         server.setMotd(bukkitServer.getMotd());
         server.setVersion(bukkitServer.getVersion());
         server.setBukkitVersion(bukkitServer.getBukkitVersion());
-
+        server.setWhitelistedPlayers(getWhitelist());
         // Probably a better way to do this
         DecimalFormat df = new DecimalFormat("#.##");
         // Possibly add 5m and 15m in the future?
@@ -164,5 +170,56 @@ public class ServerApi {
         world.setThundering(bukkitWorld.isThundering());
 
         return world;
+    }
+
+    private static Set<Whitelist> getWhitelist(){
+        Set<Whitelist> whitelist = new HashSet<Whitelist>();
+        Bukkit.getServer().getWhitelistedPlayers().forEach( (OfflinePlayer player) -> {
+            whitelist.add(new Whitelist().offlinePlayer(player));
+        });
+        return whitelist;
+    }
+
+    public static void whitelistGet(Context ctx){
+        if(!Bukkit.getServer().hasWhitelist()){
+            // TODO: Handle Errors better
+            ctx.json("error: The server has whitelist disabled");
+            return;
+        }
+        ctx.json(getWhitelist());
+    }
+
+    public static void whitelistPost(Context ctx){
+        //TODO: handle the event that no uuid is passed by ctx
+        final org.bukkit.Server bukkitServer = Bukkit.getServer();
+        if(!bukkitServer.hasWhitelist()){
+            ctx.json("No whitelist");
+            return;
+        }
+        final File directory = new File("./");
+        
+        final Whitelist newEntry = new Whitelist().uuid(ctx.formParam("uuid")).name(ctx.formParam("name"));
+        Set<Whitelist> whitelist = getWhitelist();
+        for( Whitelist player: whitelist){
+            if(player.equals(newEntry)){
+                ctx.json("Error: duplicate entry");
+                return;
+            }
+        }
+        whitelist.add(newEntry);
+        final String json = new Gson().toJson(whitelist);
+        try {
+            final String path = Paths.get(directory.getAbsolutePath(), "whitelist.json").toString();
+            final File myObj = new File(path);
+            final FileWriter whitelistFile = new FileWriter(myObj);
+            whitelistFile.write(json);
+            whitelistFile.close();
+            bukkitServer.reloadWhitelist();
+            ctx.json("success");
+          } catch (final IOException e) {
+            log.warning("An error occurred updating whitelist.");
+            e.printStackTrace();
+            ctx.json("failed");
+          }
     }
 }
