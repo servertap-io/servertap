@@ -16,8 +16,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Clean up artifacts
-      run: mkdir artifacts && rm target/original-*.jar && cp target/*.jar artifacts/
+      run: rm target/original-*.jar
     - uses: actions/upload-artifact@v2
       with:
         name: Release
-        path: artifacts/*.jar
+        path: target/*.jar
