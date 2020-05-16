@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <scm>
-        <developerConnection>scm:git:ssh://github.com/phybros/servertap</developerConnection>
+        <developerConnection>scm:git:ssh://github.com/phybros/servertap.git</developerConnection>
     </scm>
 
     <properties>
@@ -66,6 +66,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>3.0.0-M1</version>
+
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
             </plugin>
 
             <plugin>
