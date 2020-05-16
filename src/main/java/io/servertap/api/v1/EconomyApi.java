@@ -45,9 +45,9 @@ public class EconomyApi {
 
         EconomyResponse response;
 
-        if(action == TransactionType.PAY){
+        if (action == TransactionType.PAY) {
             response = PluginEntrypoint.getEconomy().depositPlayer(player, amount);
-        }else{
+        } else {
             response = PluginEntrypoint.getEconomy().withdrawPlayer(player, amount);
         }
 
