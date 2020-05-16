@@ -33,10 +33,33 @@ public class Player {
     @Expose
     private Boolean op = null;
 
+    @Expose
+    private Double balance =null;
+
+
+
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
     }
+
+
+
+    /**
+     * Current exhaustion level
+     *
+     * @return exhaustion
+     **/
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
+
+
 
     /**
      * The Player's UUID

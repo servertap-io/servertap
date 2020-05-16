@@ -23,6 +23,29 @@ components:
           description: The player's name as set in the whitelist
       required:
         - uuid
+    OfflinePlayer:
+      description: An offline Player
+      properties:
+        uuid:
+          type: string
+          description: The Player's UUID
+        displayName:
+          type: string
+          description: The Player's display name
+        whitelisted:
+          type: boolean
+          description: True if this Player is on the server's whitelist
+        banned:
+          type: boolean
+          description: True if this Player is banned
+        op:
+          type: boolean
+          description: True if this Player is OP
+        balance:
+          type: number
+          description: The Player's balance
+      required:  
+        - uuid
     World:
       description: A Minecraft world
       properties:
@@ -96,6 +119,9 @@ components:
         op:
           type: boolean
           description: True if this Player is OP
+        balance:
+          type: number
+          description: The Player's balance
         
       required:  
         - uuid
@@ -103,6 +129,37 @@ components:
 
 # Resource endpoints
 paths:
+  /economy/pay:
+    post:
+      description: "Give a player an amount of money"
+      parameters:
+        - in: formData
+          name: uuid
+          type: string
+          description: the uuid of the player
+        - in: formData
+          name: amount
+          type: string
+          description: the amount of money you want to pay
+      responses:
+        '200':
+          description: OK
+  /economy/debit:
+    post:
+      description: "Takes away from a player n amount of money"
+      parameters:
+        - in: formData
+          name: uuid
+          type: string
+          description: the uuid of the player
+        - in: formData
+          name: amount
+          type: string
+          description: the amount of money you want to debit
+      responses:
+        '200':
+          description: OK
+
   /whitelist:
     get:
       description: Get a list of all whitelisted Players
@@ -120,6 +177,18 @@ paths:
       responses:
         '200':
           description: OK
+  /allPlayers:
+    get:
+      description: Gets all players that have ever joined the server 
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfflinePlayer'
   /players:
     get:
       summary: Gets all currently online Players
