@@ -12,7 +12,6 @@ servers:
 # Response types
 components:
   schemas:
-          description: The Player's display name
     Whitelist:
       type: object
       properties:
@@ -130,6 +129,37 @@ components:
 
 # Resource endpoints
 paths:
+  /economy/pay:
+    post:
+      description: "Give a player an amount of money"
+      parameters:
+        - in: formData
+          name: uuid
+          type: string
+          description: the uuid of the player
+        - in: formData
+          name: amount
+          type: string
+          description: the amount of money you want to pay
+      responses:
+        '200':
+          description: OK
+  /economy/debit:
+    post:
+      description: "Takes away from a player n amount of money"
+      parameters:
+        - in: formData
+          name: uuid
+          type: string
+          description: the uuid of the player
+        - in: formData
+          name: amount
+          type: string
+          description: the amount of money you want to debit
+      responses:
+        '200':
+          description: OK
+
   /whitelist:
     get:
       description: Get a list of all whitelisted Players
@@ -147,38 +177,6 @@ paths:
       responses:
         '200':
           description: OK
-  /player/pay:
-    post:
-      description: Increase the players balance 
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfflinePlayer'
-  /allPlayers:
-    get:
-      description: Gets all players that have ever joined the server 
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OfflinePlayer'
-  /player/pay:
-    post:
-      description: Increase the players balance 
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfflinePlayer'
   /allPlayers:
     get:
       description: Gets all players that have ever joined the server 
