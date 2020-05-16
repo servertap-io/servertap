@@ -2,6 +2,7 @@ package io.servertap;
 
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
+import io.servertap.api.v1.EconomyApi;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,11 +28,7 @@ public class PluginEntrypoint extends JavaPlugin {
 
     private static final Logger log = Bukkit.getLogger();
 
-
     private static Economy econ = null;
-
-
-
 
     @Override
     public void onEnable() {
@@ -45,7 +42,8 @@ public class PluginEntrypoint extends JavaPlugin {
         // Replace JavalinTestPlugin.class with your own plugin's class.
         Thread.currentThread().setContextClassLoader(PluginEntrypoint.class.getClassLoader());
 
-        // Instantiate the web server (which will now load using the plugin's class loader).
+        // Instantiate the web server (which will now load using the plugin's class
+        // loader).
         Javalin app = Javalin.create(config -> {
             config.defaultContentType = "application/json";
         }).start(4567);
@@ -53,7 +51,7 @@ public class PluginEntrypoint extends JavaPlugin {
         app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
         app.routes(() -> {
-            //Routes for v1 of the API
+            // Routes for v1 of the API
             path(Constants.API_V1, () -> {
                 // Pings
                 get("ping", ServerApi::ping);
@@ -69,13 +67,16 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Player routes
                 get("players", PlayerApi::playersGet);
+                get("players/:player", PlayerApi::playerGet);
+                get("allPlayers", PlayerApi::offlinePlayersGet);
 
                 // Whitelist routes
                 get("whitelist", ServerApi::whitelistGet);
                 post("whitelist", ServerApi::whitelistPost);
-                get("players/:player",PlayerApi::playerGet);
-                get("allPlayers",PlayerApi::offlinePlayersGet);
-                get("players/:uuid/pay/:value",PlayerApi::playerPay);
+                
+                // Economy routes
+                post("economy/pay", EconomyApi::playerPay);
+                post("economy/debit", EconomyApi::playerDebit);
             });
         });
 
@@ -86,8 +87,6 @@ public class PluginEntrypoint extends JavaPlugin {
 
         // Put the original class loader back where it was.
         Thread.currentThread().setContextClassLoader(classLoader);
-
-
 
     }
 
@@ -110,6 +109,5 @@ public class PluginEntrypoint extends JavaPlugin {
     public static Economy getEconomy() {
         return econ;
     }
-
 
 }
