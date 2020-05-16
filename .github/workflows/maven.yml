@@ -17,7 +17,7 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Clean up artifacts
       run: mkdir artifacts && rm target/original-*.jar && cp target/*.jar artifacts/
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v2
       with:
         name: Release
         path: artifacts/*.jar
