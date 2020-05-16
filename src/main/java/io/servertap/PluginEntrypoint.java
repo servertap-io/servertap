@@ -36,11 +36,7 @@ public class PluginEntrypoint extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        if (!setupEconomy() ) {
-            log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        setupEconomy();
 
         // Get the current class loader.
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -100,16 +96,15 @@ public class PluginEntrypoint extends JavaPlugin {
         log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
 
-    private boolean setupEconomy() {
+    private void setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
+            return;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            return false;
+            return;
         }
         econ = rsp.getProvider();
-        return econ != null;
     }
 
     public static Economy getEconomy() {
