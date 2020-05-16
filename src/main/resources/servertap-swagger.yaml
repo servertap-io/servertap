@@ -12,6 +12,17 @@ servers:
 # Response types
 components:
   schemas:
+    Whitelist:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: The player's UUID
+        name:
+          type: string
+          description: The player's name as set in the whitelist
+      required:
+        - uuid
     World:
       description: A Minecraft world
       properties:
@@ -92,6 +103,23 @@ components:
 
 # Resource endpoints
 paths:
+  /whitelist:
+    get:
+      description: Get a list of all whitelisted Players
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Whitelist'
+    post:
+      description: Add a player to the whitelist
+      responses:
+        '200':
+          description: OK
   /players:
     get:
       summary: Gets all currently online Players

@@ -6,6 +6,10 @@ simple REST semantics.
 
 This plugin is under development and is **not ready for real usage yet**.
 
+# Discord
+
+Join the Discord to talk about this plugin https://discord.gg/tG4AEt7
+
 # Usage
 
 Install this plugin by dropping the jar into the `plugins/` directory on your
