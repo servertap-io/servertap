@@ -2,11 +2,5 @@ name: ServerTap
 main: io.servertap.PluginEntrypoint
 version: 1.0-SNAPSHOT
 api-version: 1.14
-loadbefore:
-  - Essentials
-  - Vault
-depend:
-  - Essentials
 softdepend:
   - Vault
-commands:
