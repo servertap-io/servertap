@@ -7,7 +7,6 @@ import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
