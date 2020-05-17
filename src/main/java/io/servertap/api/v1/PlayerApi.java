@@ -9,6 +9,7 @@ import io.servertap.api.v1.models.Player;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.InventoryHolder;
 
 import de.tr7zw.nbtapi.NBTEntity;
 import de.tr7zw.nbtapi.NBTFile;
@@ -111,6 +112,7 @@ public class PlayerApi {
         ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
         org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
         if (player != null) {
+            player.updateInventory();
             Integer location = -1;
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
                 location++;
