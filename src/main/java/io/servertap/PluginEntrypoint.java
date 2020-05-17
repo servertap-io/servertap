@@ -20,6 +20,8 @@ public class PluginEntrypoint extends JavaPlugin {
 
     private static Economy econ = null;
 
+    private static Javalin app = null;
+
     @Override
     public void onEnable() {
 
@@ -34,9 +36,14 @@ public class PluginEntrypoint extends JavaPlugin {
 
         // Instantiate the web server (which will now load using the plugin's class
         // loader).
-        Javalin app = Javalin.create(config -> {
-            config.defaultContentType = "application/json";
-        }).start(4567);
+        if(app == null) {
+            app = Javalin.create(config -> {
+                config.defaultContentType = "application/json";
+            });
+        }
+        // Don't create a new instance if the plugin is reloaded
+        app.start(4567);
+
 
         app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
@@ -83,6 +90,8 @@ public class PluginEntrypoint extends JavaPlugin {
     @Override
     public void onDisable() {
         log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
+        // Release port so that /reload will work
+        app.stop();
     }
 
     private void setupEconomy() {
