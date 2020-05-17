@@ -2,6 +2,7 @@ package io.servertap.api.v1;
 
 import java.util.UUID;
 
+import io.javalin.plugin.openapi.annotations.*;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -18,10 +19,40 @@ public class EconomyApi {
         PAY, DEBIT
     }
 
+    @OpenApi(
+        path = "/v1/economy/pay",
+        method = HttpMethod.POST,
+        summary = "Pay a player",
+        description = "Deposits the provided amount into the player's Vault",
+        tags = {"Economy"},
+        formParams = {
+            @OpenApiFormParam(name = "uuid"),
+            @OpenApiFormParam(name = "amount", type = Double.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
+            @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
+        }
+    )
     public static void playerPay(Context ctx) {
         accountManager(ctx, TransactionType.PAY);
     }
 
+    @OpenApi(
+        path = "/v1/economy/debit",
+        method = HttpMethod.POST,
+        summary = "Debit a player",
+        description = "Withdraws the provided amount out of the player's Vault",
+        tags = {"Economy"},
+        formParams = {
+            @OpenApiFormParam(name = "uuid"),
+            @OpenApiFormParam(name = "amount", type = Double.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
+            @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
+        }
+    )
     public static void playerDebit(Context ctx) {
         accountManager(ctx, TransactionType.DEBIT);
     }

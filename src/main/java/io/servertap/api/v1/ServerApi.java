@@ -3,6 +3,7 @@ package io.servertap.api.v1;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.api.v1.models.Server;
 import io.servertap.api.v1.models.ServerBan;
 import io.servertap.api.v1.models.ServerHealth;
@@ -29,10 +30,26 @@ public class ServerApi {
 
     private static final Logger log = Bukkit.getLogger();
 
+    @OpenApi(
+        path = "/v1/ping",
+        summary = "pong!",
+        tags = {"Server"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+        }
+    )
     public static void ping(Context ctx) {
         ctx.json("pong");
     }
 
+    @OpenApi(
+        path = "/v1/server",
+        summary = "Get information about the server",
+        tags = {"Server"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class))
+        }
+    )
     public static void serverGet(Context ctx) {
         Server server = new Server();
         org.bukkit.Server bukkitServer = Bukkit.getServer();
@@ -102,10 +119,31 @@ public class ServerApi {
         ctx.json(server);
     }
 
+    @OpenApi(
+        path = "/v1/broadcast",
+        method = HttpMethod.POST,
+        summary = "Send broadcast visible to those currently online.",
+        tags = {"Server"},
+        formParams = {
+            @OpenApiFormParam(name = "message", type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+        }
+    )
     public static void broadcastPost(Context ctx) {
         Bukkit.broadcastMessage(ctx.formParam("message"));
+        ctx.json("true");
     }
 
+    @OpenApi(
+        path = "/v1/worlds",
+        summary = "Get information about all worlds",
+        tags = {"Server"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
+        }
+    )
     public static void worldsGet(Context ctx) {
         List<World> worlds = new ArrayList<>();
         Bukkit.getServer().getWorlds().forEach(world -> worlds.add(fromBukkitWorld(world)));
@@ -113,6 +151,17 @@ public class ServerApi {
         ctx.json(worlds);
     }
 
+    @OpenApi(
+        path = "/v1/worlds/:world",
+        summary = "Get information about a specific world",
+        tags = {"Server"},
+        pathParams = {
+            @OpenApiParam(name = "world", description = "The name of the world")
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
+        }
+    )
     public static void worldGet(Context ctx) {
         org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(ctx.pathParam("world"));
 
@@ -180,6 +229,15 @@ public class ServerApi {
         return whitelist;
     }
 
+    @OpenApi(
+        path = "/v1/whitelist",
+        method = HttpMethod.GET,
+        summary = "Get the whitelist",
+        tags = {"Server"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
+        }
+    )
     public static void whitelistGet(Context ctx){
         if(!Bukkit.getServer().hasWhitelist()){
             // TODO: Handle Errors better
@@ -189,6 +247,20 @@ public class ServerApi {
         ctx.json(getWhitelist());
     }
 
+    @OpenApi(
+        path = "/v1/whitelist",
+        method = HttpMethod.POST,
+        summary = "Update the whitelist",
+        description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
+        tags = {"Server"},
+        formParams = {
+                @OpenApiFormParam(name = "uuid", type = String.class),
+                @OpenApiFormParam(name = "name", type = String.class)
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+        }
+    )
     public static void whitelistPost(Context ctx){
         //TODO: handle the event that no uuid is passed by ctx
         final org.bukkit.Server bukkitServer = Bukkit.getServer();

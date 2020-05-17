@@ -1,10 +1,13 @@
 package io.servertap;
 
 import io.javalin.Javalin;
-import io.javalin.http.NotFoundResponse;
+import io.javalin.plugin.openapi.OpenApiOptions;
+import io.javalin.plugin.openapi.OpenApiPlugin;
+import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.servertap.api.v1.EconomyApi;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
+import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -17,11 +20,8 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 public class PluginEntrypoint extends JavaPlugin {
 
     private static final Logger log = Bukkit.getLogger();
-
     private static Economy econ = null;
-
     private static Javalin app = null;
-
     @Override
     public void onEnable() {
 
@@ -39,11 +39,11 @@ public class PluginEntrypoint extends JavaPlugin {
         if(app == null) {
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
+                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
             });
         }
         // Don't create a new instance if the plugin is reloaded
         app.start(4567);
-
 
         app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
@@ -52,7 +52,6 @@ public class PluginEntrypoint extends JavaPlugin {
             path(Constants.API_V1, () -> {
                 // Pings
                 get("ping", ServerApi::ping);
-                post("ping", ServerApi::ping);
 
                 // Server routes
                 get("server", ServerApi::serverGet);
@@ -77,11 +76,6 @@ public class PluginEntrypoint extends JavaPlugin {
             });
         });
 
-        // Default fallthrough. Just give them a 404.
-        app.get("*", ctx -> {
-            throw new NotFoundResponse();
-        });
-
         // Put the original class loader back where it was.
         Thread.currentThread().setContextClassLoader(classLoader);
 
@@ -91,7 +85,9 @@ public class PluginEntrypoint extends JavaPlugin {
     public void onDisable() {
         log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
         // Release port so that /reload will work
-        app.stop();
+        if(app != null) {
+            app.stop();
+        }
     }
 
     private void setupEconomy() {
@@ -107,6 +103,17 @@ public class PluginEntrypoint extends JavaPlugin {
 
     public static Economy getEconomy() {
         return econ;
+    }
+
+    private OpenApiOptions getOpenApiOptions() {
+        Info applicationInfo = new Info()
+            .title(this.getDescription().getName())
+            .version(this.getDescription().getVersion())
+            .description(this.getDescription().getDescription());
+        return new OpenApiOptions(applicationInfo)
+            .path("/swagger-docs")
+            .activateAnnotationScanningFor("io.servertap")
+            .swagger(new SwaggerOptions("/swagger"));
     }
 
 }
