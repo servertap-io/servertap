@@ -2,6 +2,7 @@ package io.servertap.api.v1;
 
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
+import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
@@ -103,12 +104,12 @@ public class PlayerApi {
     }
 
     public static void getPlayerInv(Context ctx) {
-        if (ctx.formParam("uuid") == null || ctx.formParam("world") == null) {
+        if (ctx.pathParam("uuid") == null || ctx.pathParam("world") == null) {
             // TODO: Move to Constants
-            throw new InternalServerErrorResponse("Missing uuid and/or world");
+            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
         ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.formParam("uuid")));
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
         if (player != null) {
             Integer location = -1;
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
@@ -128,7 +129,7 @@ public class PlayerApi {
                 String playerDatPath = Paths.get(new File("./").getAbsolutePath(), ctx.formParam("world"), "playerdata", ctx.formParam("uuid") + ".dat").toString();
                 File playerfile = new File(playerDatPath);
                 if(!playerfile.exists()){
-                    throw new InternalServerErrorResponse("Player file cannot be found");
+                    throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
                 }
                 NBTFile playerFile = new NBTFile(playerfile);
 
@@ -143,7 +144,7 @@ public class PlayerApi {
                 ctx.json(inv);
             } catch (Exception e) {
                 Bukkit.getLogger().warning(e.getMessage());
-                throw new InternalServerErrorResponse("A problem occured when attempting to parse the user file");
+                throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
             }
         }
 
