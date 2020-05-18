@@ -39,6 +39,7 @@ public class PluginEntrypoint extends JavaPlugin {
         if(app == null) {
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
+                config.showJavalinBanner = false;
             });
         }
         // Don't create a new instance if the plugin is reloaded
