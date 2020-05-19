@@ -74,9 +74,3 @@ You need a few things to get started
 - Maven
 
 Then, you can build the plugin `jar` by using the `mvn package` command.
-
-## TODO
-
-- [ ] Feature parity with SwiftApi
-- [ ] Authentication using JWT
-- [ ] Examples/Docs

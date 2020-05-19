@@ -1,7 +1,10 @@
 package io.servertap.api.v1;
 
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
+import io.javalin.plugin.openapi.annotations.*;
 import io.javalin.http.InternalServerErrorResponse;
+import io.javalin.http.NotFoundResponse;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
@@ -24,6 +27,14 @@ import java.util.UUID;
 
 public class PlayerApi {
 
+    @OpenApi(
+        path = "/v1/players",
+        summary = "Gets all currently online players",
+        tags = {"Player"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+        }
+    )
     public static void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
 
@@ -52,10 +63,30 @@ public class PlayerApi {
         ctx.json(players);
     }
 
+    @OpenApi(
+        path = "/v1/players/:uuid",
+        method = HttpMethod.GET,
+        summary = "Gets a specific online player by their UUID",
+        tags = {"Player"},
+        pathParams = {
+            @OpenApiParam(name = "uuid", description = "UUID of the player")
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
+        }
+    )
     public static void playerGet(Context ctx) {
         Player p = new Player();
 
-        org.bukkit.entity.Player player = Bukkit.getPlayer(ctx.pathParam("player"));
+        if (ctx.pathParam("uuid").isEmpty()) {
+            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
+        }
+
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
+
+        if (player == null) {
+            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+        }
 
         if (PluginEntrypoint.getEconomy() != null) {
             p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
@@ -77,6 +108,14 @@ public class PlayerApi {
         ctx.json(p);
     }
 
+    @OpenApi(
+        path = "/v1/players/all",
+        summary = "Gets all players that have ever joined the server ",
+        tags = {"Player"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+        }
+    )
     public static void offlinePlayersGet(Context ctx) {
 
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
