@@ -113,6 +113,15 @@ public class ServerApi {
         ctx.json(server);
     }
 
+    @OpenApi(
+            path = "/v1/worlds/save",
+            summary = "Triggers a world save of all worlds",
+            method = HttpMethod.POST,
+            tags = {"Server"},
+            responses = {
+                    @OpenApiResponse(status = "200")
+            }
+    )
     public static void saveAllWorlds(Context ctx) {
         org.bukkit.Server bukkitServer = Bukkit.getServer();
 
@@ -132,8 +141,18 @@ public class ServerApi {
             });
         }
 
+        ctx.json("success");
     }
 
+    @OpenApi(
+            path = "/v1/worlds/:uuid/save",
+            summary = "Triggers a world save",
+            method = HttpMethod.POST,
+            tags = {"Server"},
+            responses = {
+                    @OpenApiResponse(status = "200")
+            }
+    )
     public static void saveWorld(Context ctx) {
         org.bukkit.Server bukkitServer = Bukkit.getServer();
         org.bukkit.World world = bukkitServer.getWorld(UUID.fromString(ctx.pathParam(":uuid")));
@@ -154,6 +173,8 @@ public class ServerApi {
                 });
             }
         }
+
+        ctx.json("success");
     }
 
     @OpenApi(
