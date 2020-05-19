@@ -64,12 +64,12 @@ public class PlayerApi {
     }
 
     @OpenApi(
-        path = "/v1/players/:player",
+        path = "/v1/players/:uuid",
         method = HttpMethod.GET,
-        summary = "Gets a specific online player by their username",
+        summary = "Gets a specific online player by their UUID",
         tags = {"Player"},
         pathParams = {
-            @OpenApiParam(name = "player", description = "Username of the player")
+            @OpenApiParam(name = "uuid", description = "UUID of the player")
         },
         responses = {
             @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
@@ -109,7 +109,7 @@ public class PlayerApi {
     }
 
     @OpenApi(
-        path = "/v1/allPlayers",
+        path = "/v1/players/all",
         summary = "Gets all players that have ever joined the server ",
         tags = {"Player"},
         responses = {
