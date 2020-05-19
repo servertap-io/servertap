@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -353,5 +354,22 @@ public class ServerApi {
             e.printStackTrace();
             ctx.json("failed");
         }
+    }
+    @OpenApi(
+        path = "/v1/plugins",
+        method = HttpMethod.GET,
+        summary = "Get a list of installed plugins",
+        description = "Responds with an array of objects containing keys name and enabled.",
+        tags = {"Plugins"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+        }
+    )
+    public static void listPlugins(Context ctx){
+        ArrayList<Plugin> pluginList = new ArrayList<Plugin>();
+        for(org.bukkit.plugin.Plugin plugin: Bukkit.getPluginManager().getPlugins()){
+            pluginList.add(new Plugin().name(plugin.getName()).enabled(plugin.isEnabled()));
+        }
+        ctx.json(pluginList);
     }
 }

@@ -10,6 +10,7 @@ import io.servertap.api.v1.ServerApi;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,7 +25,8 @@ public class PluginEntrypoint extends JavaPlugin {
     private static Javalin app = null;
     @Override
     public void onEnable() {
-
+        saveDefaultConfig();
+        FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
         // Get the current class loader.
@@ -44,7 +46,7 @@ public class PluginEntrypoint extends JavaPlugin {
             });
         }
         // Don't create a new instance if the plugin is reloaded
-        app.start(4567);
+        app.start(bukkitConfig.getInt("port"));
 
         app.before(ctx -> log.info(ctx.req.getPathInfo()));
 
@@ -78,7 +80,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 post("economy/pay", EconomyApi::playerPay);
                 post("economy/debit", EconomyApi::playerDebit);
 
-
+                // Plugin routes
+                get("plugins", ServerApi::listPlugins);
             });
         });
 
