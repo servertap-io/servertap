@@ -2,10 +2,7 @@ package io.servertap.api.v1;
 
 import de.tr7zw.nbtapi.NBTFile;
 import de.tr7zw.nbtapi.NBTListCompound;
-import io.javalin.http.BadRequestResponse;
-import io.javalin.http.Context;
-import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.http.NotFoundResponse;
+import io.javalin.http.*;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
@@ -180,8 +177,13 @@ public class PlayerApi {
                     throw new BadRequestResponse(Constants.WORLD_NOT_FOUND);
                 }
 
-                String playerDatPath = Paths.get(new File("./").getAbsolutePath(), bukWorld.getName(), "playerdata", ctx.formParam("playerUuid") + ".dat").toString();
-                File playerfile = new File(playerDatPath);
+                String dataPath = String.format(
+                        "%s/%s/playerdata/%s.dat",
+                        new File("./").getAbsolutePath(),
+                        bukWorld.getName(),
+                        ctx.pathParam("playerUuid")
+                );
+                File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
                     throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
                 }
@@ -196,6 +198,10 @@ public class PlayerApi {
                 }
 
                 ctx.json(inv);
+
+            } catch (HttpResponseException e) {
+                // Pass any javalin exceptions up the chain
+                throw e;
             } catch (Exception e) {
                 Bukkit.getLogger().warning(e.getMessage());
                 throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
