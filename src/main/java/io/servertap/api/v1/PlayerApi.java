@@ -2,13 +2,26 @@ package io.servertap.api.v1;
 
 import io.javalin.http.Context;
 import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.http.InternalServerErrorResponse;
+import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
+import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.InventoryHolder;
 
+import de.tr7zw.nbtapi.NBTEntity;
+import de.tr7zw.nbtapi.NBTFile;
+import de.tr7zw.nbtapi.NBTListCompound;
+import de.tr7zw.nbtapi.data.PlayerData;
+import de.tr7zw.nbtapi.plugin.NBTAPI;
+
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class PlayerApi {
 
@@ -109,7 +122,7 @@ public class PlayerApi {
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
 
-            if(PluginEntrypoint.getEconomy() != null){
+            if (PluginEntrypoint.getEconomy() != null) {
                 p.setBalance(PluginEntrypoint.getEconomy().getBalance(offlinePlayers[i]));
             }
 
@@ -120,4 +133,51 @@ public class PlayerApi {
         ctx.json(players);
     }
 
+    public static void getPlayerInv(Context ctx) {
+        if (ctx.pathParam("uuid") == null || ctx.pathParam("world") == null) {
+            // TODO: Move to Constants
+            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+        }
+        ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
+        if (player != null) {
+            player.updateInventory();
+            Integer location = -1;
+            for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
+                location++;
+                if (itemStack != null) {
+                    ItemStack itemObj = new ItemStack();
+                    // TODO: handle item namespaces other than minecraft: It's fine right now as there seem to be no forge + Paper servers
+                    itemObj.setId("minecraft:" + itemStack.getType().toString().toLowerCase());
+                    itemObj.setCount(Integer.valueOf(itemStack.getAmount()));
+                    itemObj.setSlot(location);
+                    inv.add(itemObj);
+                }
+            }
+            ctx.json(inv);
+        } else {
+            try {
+                String playerDatPath = Paths.get(new File("./").getAbsolutePath(), ctx.formParam("world"), "playerdata", ctx.formParam("uuid") + ".dat").toString();
+                File playerfile = new File(playerDatPath);
+                if(!playerfile.exists()){
+                    throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+                }
+                NBTFile playerFile = new NBTFile(playerfile);
+
+                for (NBTListCompound item : playerFile.getCompoundList("Inventory")) {
+                    ItemStack itemObj = new ItemStack();
+                    itemObj.setId(item.getString("id"));
+                    itemObj.setCount(item.getInteger("Count"));
+                    itemObj.setSlot(item.getInteger("Slot"));
+                    inv.add(itemObj);
+                }
+
+                ctx.json(inv);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(e.getMessage());
+                throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
+            }
+        }
+
+    }
 }

@@ -27,6 +27,11 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.org/repository/maven-public/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -76,6 +81,12 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
+        </dependency>
+        <!-- NBT API integration -->
+        <dependency>
+          <groupId>de.tr7zw</groupId>
+          <artifactId>item-nbt-api-plugin</artifactId>
+          <version>2.3.1</version>
         </dependency>
     </dependencies>
 

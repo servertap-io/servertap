@@ -40,6 +40,7 @@ public class PluginEntrypoint extends JavaPlugin {
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
+                config.showJavalinBanner = false;
             });
         }
         // Don't create a new instance if the plugin is reloaded
@@ -65,7 +66,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players", PlayerApi::playersGet);
                 get("players/:player", PlayerApi::playerGet);
                 get("allPlayers", PlayerApi::offlinePlayersGet);
-
+                get("players/:uuid/:world/inventory", PlayerApi::getPlayerInv);
                 // Whitelist routes
                 get("whitelist", ServerApi::whitelistGet);
                 post("whitelist", ServerApi::whitelistPost);
@@ -73,6 +74,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 // Economy routes
                 post("economy/pay", EconomyApi::playerPay);
                 post("economy/debit", EconomyApi::playerDebit);
+
+
             });
         });
 
