@@ -12,6 +12,9 @@ public class World {
     private String name = null;
 
     @Expose
+    private String uuid = null;
+
+    @Expose
     private BigDecimal time = null;
 
     @Expose
@@ -59,6 +62,14 @@ public class World {
     public World time(BigDecimal time) {
         this.time = time;
         return this;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     /**
