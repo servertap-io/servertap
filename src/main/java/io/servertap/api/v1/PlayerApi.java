@@ -1,7 +1,9 @@
 package io.servertap.api.v1;
 
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
+import io.javalin.http.NotFoundResponse;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
@@ -55,7 +57,15 @@ public class PlayerApi {
     public static void playerGet(Context ctx) {
         Player p = new Player();
 
-        org.bukkit.entity.Player player = Bukkit.getPlayer(ctx.pathParam("player"));
+        if (ctx.pathParam("uuid").isEmpty()) {
+            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
+        }
+
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
+
+        if (player == null) {
+            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+        }
 
         if (PluginEntrypoint.getEconomy() != null) {
             p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));

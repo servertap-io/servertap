@@ -11,6 +11,7 @@ public class Constants {
 
     //Player Related Messages
     public static final String PLAYER_MISSING_PARAMS = "Missing uuid and/or world";
+    public static final String PLAYER_UUID_MISSING = "Player UUID is required";
     public static final String PLAYER_INV_PARSE_FAIL = "A problem occured when attempting to parse the user file";
     public static final String PLAYER_NOT_FOUND = "Player cannot be found";
 }
