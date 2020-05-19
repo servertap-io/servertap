@@ -1,24 +1,19 @@
 package io.servertap.api.v1;
 
+import de.tr7zw.nbtapi.NBTFile;
+import de.tr7zw.nbtapi.NBTListCompound;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
-import io.javalin.plugin.openapi.annotations.*;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
-
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.inventory.InventoryHolder;
-
-import de.tr7zw.nbtapi.NBTEntity;
-import de.tr7zw.nbtapi.NBTFile;
-import de.tr7zw.nbtapi.NBTListCompound;
-import de.tr7zw.nbtapi.data.PlayerData;
-import de.tr7zw.nbtapi.plugin.NBTAPI;
+import org.bukkit.World;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -28,12 +23,12 @@ import java.util.UUID;
 public class PlayerApi {
 
     @OpenApi(
-        path = "/v1/players",
-        summary = "Gets all currently online players",
-        tags = {"Player"},
-        responses = {
-            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
-        }
+            path = "/v1/players",
+            summary = "Gets all currently online players",
+            tags = {"Player"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+            }
     )
     public static void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
@@ -64,16 +59,16 @@ public class PlayerApi {
     }
 
     @OpenApi(
-        path = "/v1/players/:uuid",
-        method = HttpMethod.GET,
-        summary = "Gets a specific online player by their UUID",
-        tags = {"Player"},
-        pathParams = {
-            @OpenApiParam(name = "uuid", description = "UUID of the player")
-        },
-        responses = {
-            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
-        }
+            path = "/v1/players/:uuid",
+            method = HttpMethod.GET,
+            summary = "Gets a specific online player by their UUID",
+            tags = {"Player"},
+            pathParams = {
+                    @OpenApiParam(name = "uuid", description = "UUID of the player")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
+            }
     )
     public static void playerGet(Context ctx) {
         Player p = new Player();
@@ -109,12 +104,12 @@ public class PlayerApi {
     }
 
     @OpenApi(
-        path = "/v1/players/all",
-        summary = "Gets all players that have ever joined the server ",
-        tags = {"Player"},
-        responses = {
-            @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
-        }
+            path = "/v1/players/all",
+            summary = "Gets all players that have ever joined the server ",
+            tags = {"Player"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+            }
     )
     public static void offlinePlayersGet(Context ctx) {
 
@@ -143,13 +138,25 @@ public class PlayerApi {
         ctx.json(players);
     }
 
+    @OpenApi(
+            path = "/v1/players/:playerUuid/:worldUuid/inventory",
+            method = HttpMethod.GET,
+            summary = "Gets a specific online player's Inventory in the specified world",
+            tags = {"Player"},
+            pathParams = {
+                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
+                    @OpenApiParam(name = "worldUuid", description = "UUID of the world")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true))
+            }
+    )
     public static void getPlayerInv(Context ctx) {
-        if (ctx.pathParam("uuid") == null || ctx.pathParam("world") == null) {
-            // TODO: Move to Constants
+        if (ctx.pathParam("playerUuid").isEmpty() || ctx.pathParam("worldUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
         ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
         if (player != null) {
             player.updateInventory();
             Integer location = -1;
@@ -167,9 +174,15 @@ public class PlayerApi {
             ctx.json(inv);
         } else {
             try {
-                String playerDatPath = Paths.get(new File("./").getAbsolutePath(), ctx.formParam("world"), "playerdata", ctx.formParam("uuid") + ".dat").toString();
+                World bukWorld = Bukkit.getWorld(UUID.fromString(ctx.pathParam("worldUuid")));
+
+                if (bukWorld == null) {
+                    throw new BadRequestResponse(Constants.WORLD_NOT_FOUND);
+                }
+
+                String playerDatPath = Paths.get(new File("./").getAbsolutePath(), bukWorld.getName(), "playerdata", ctx.formParam("playerUuid") + ".dat").toString();
                 File playerfile = new File(playerDatPath);
-                if(!playerfile.exists()){
+                if (!playerfile.exists()) {
                     throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
                 }
                 NBTFile playerFile = new NBTFile(playerfile);
