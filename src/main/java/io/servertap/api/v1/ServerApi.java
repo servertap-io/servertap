@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.plugin.openapi.annotations.*;
+import io.servertap.api.v1.models.Plugin;
 import io.servertap.api.v1.models.Server;
 import io.servertap.api.v1.models.ServerBan;
 import io.servertap.api.v1.models.ServerHealth;
@@ -12,6 +13,7 @@ import io.servertap.api.v1.models.World;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+
 
 import java.io.File;
 import java.io.FileWriter;
@@ -293,5 +295,13 @@ public class ServerApi {
             e.printStackTrace();
             ctx.json("failed");
           }
+    }
+
+    public static void listPlugins(Context ctx){
+        ArrayList<Plugin> pluginList = new ArrayList<Plugin>();
+        for(org.bukkit.plugin.Plugin plugin: Bukkit.getPluginManager().getPlugins()){
+            pluginList.add(new Plugin().name(plugin.getName()).enabled(plugin.isEnabled()));
+        }
+        ctx.json(pluginList);
     }
 }
