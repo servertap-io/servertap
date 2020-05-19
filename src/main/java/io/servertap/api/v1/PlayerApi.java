@@ -1,6 +1,7 @@
 package io.servertap.api.v1;
 
 import io.javalin.http.Context;
+import io.javalin.plugin.openapi.annotations.*;
 import io.javalin.http.InternalServerErrorResponse;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
@@ -24,6 +25,14 @@ import java.util.UUID;
 
 public class PlayerApi {
 
+    @OpenApi(
+        path = "/v1/players",
+        summary = "Gets all currently online players",
+        tags = {"Player"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+        }
+    )
     public static void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
 
@@ -52,6 +61,18 @@ public class PlayerApi {
         ctx.json(players);
     }
 
+    @OpenApi(
+        path = "/v1/players/:player",
+        method = HttpMethod.GET,
+        summary = "Gets a specific online player by their username",
+        tags = {"Player"},
+        pathParams = {
+            @OpenApiParam(name = "player", description = "Username of the player")
+        },
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
+        }
+    )
     public static void playerGet(Context ctx) {
         Player p = new Player();
 
@@ -77,6 +98,14 @@ public class PlayerApi {
         ctx.json(p);
     }
 
+    @OpenApi(
+        path = "/v1/allPlayers",
+        summary = "Gets all players that have ever joined the server ",
+        tags = {"Player"},
+        responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+        }
+    )
     public static void offlinePlayersGet(Context ctx) {
 
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
