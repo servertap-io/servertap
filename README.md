@@ -6,6 +6,8 @@ simple REST semantics.
 
 This plugin is under development and is **not ready for real usage yet**.
 
+**But** if you're feeling brave, head over to https://github.com/phybros/servertap/releases to grab the latest and greatest plugin JAR.
+
 # Discord
 
 Join the Discord to talk about this plugin https://discord.gg/tG4AEt7
