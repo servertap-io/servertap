@@ -368,8 +368,15 @@ public class ServerApi {
     public static void listPlugins(Context ctx) {
         ArrayList<io.servertap.api.v1.models.Plugin> pluginList = new ArrayList<>();
         for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-            pluginList.add(new io.servertap.api.v1.models.Plugin().name(plugin.getName()).enabled(plugin.isEnabled()));
+
+            io.servertap.api.v1.models.Plugin pl = new io.servertap.api.v1.models.Plugin();
+            pl.setName(plugin.getName());
+            pl.setEnabled(plugin.isEnabled());
+            pl.setVersion(plugin.getDescription().getVersion());
+
+            pluginList.add(pl);
         }
+
         ctx.json(pluginList);
     }
 }

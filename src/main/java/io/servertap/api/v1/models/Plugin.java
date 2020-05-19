@@ -10,6 +10,9 @@ public class Plugin {
     @Expose
     private Boolean enabled = null;
 
+    @Expose
+    private String version = null;
+
     public Plugin name(String name) {
         this.name = name;
         return this;
@@ -36,4 +39,16 @@ public class Plugin {
         this.enabled = enabled;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Plugin version(String version) {
+        this.version = version;
+        return this;
+    }
 }
