@@ -19,14 +19,8 @@ import java.util.UUID;
 
 public class PlayerApi {
 
-    @OpenApi(
-            path = "/v1/players",
-            summary = "Gets all currently online players",
-            tags = {"Player"},
-            responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
-            }
-    )
+    @OpenApi(path = "/v1/players", summary = "Gets all currently online players", tags = { "Player" }, responses = {
+            @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true)) })
     public static void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
 
@@ -55,18 +49,9 @@ public class PlayerApi {
         ctx.json(players);
     }
 
-    @OpenApi(
-            path = "/v1/players/:uuid",
-            method = HttpMethod.GET,
-            summary = "Gets a specific online player by their UUID",
-            tags = {"Player"},
-            pathParams = {
-                    @OpenApiParam(name = "uuid", description = "UUID of the player")
-            },
-            responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
-            }
-    )
+    @OpenApi(path = "/v1/players/:uuid", method = HttpMethod.GET, summary = "Gets a specific online player by their UUID", tags = {
+            "Player" }, pathParams = { @OpenApiParam(name = "uuid", description = "UUID of the player") }, responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class)) })
     public static void playerGet(Context ctx) {
         Player p = new Player();
 
@@ -100,14 +85,9 @@ public class PlayerApi {
         ctx.json(p);
     }
 
-    @OpenApi(
-            path = "/v1/players/all",
-            summary = "Gets all players that have ever joined the server ",
-            tags = {"Player"},
-            responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
-            }
-    )
+    @OpenApi(path = "/v1/players/all", summary = "Gets all players that have ever joined the server ", tags = {
+            "Player" }, responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true)) })
     public static void offlinePlayersGet(Context ctx) {
 
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
@@ -135,19 +115,10 @@ public class PlayerApi {
         ctx.json(players);
     }
 
-    @OpenApi(
-            path = "/v1/players/:playerUuid/:worldUuid/inventory",
-            method = HttpMethod.GET,
-            summary = "Gets a specific online player's Inventory in the specified world",
-            tags = {"Player"},
-            pathParams = {
-                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
-                    @OpenApiParam(name = "worldUuid", description = "UUID of the world")
-            },
-            responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true))
-            }
-    )
+    @OpenApi(path = "/v1/players/:playerUuid/:worldUuid/inventory", method = HttpMethod.GET, summary = "Gets a specific online player's Inventory in the specified world", tags = {
+            "Player" }, pathParams = { @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
+                    @OpenApiParam(name = "worldUuid", description = "UUID of the world") }, responses = {
+                            @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true)) })
     public static void getPlayerInv(Context ctx) {
         if (ctx.pathParam("playerUuid").isEmpty() || ctx.pathParam("worldUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
@@ -161,7 +132,8 @@ public class PlayerApi {
                 location++;
                 if (itemStack != null) {
                     ItemStack itemObj = new ItemStack();
-                    // TODO: handle item namespaces other than minecraft: It's fine right now as there seem to be no forge + Paper servers
+                    // TODO: handle item namespaces other than minecraft: It's fine right now as
+                    // there seem to be no forge + Paper servers
                     itemObj.setId("minecraft:" + itemStack.getType().toString().toLowerCase());
                     itemObj.setCount(Integer.valueOf(itemStack.getAmount()));
                     itemObj.setSlot(location);
@@ -177,12 +149,8 @@ public class PlayerApi {
                     throw new BadRequestResponse(Constants.WORLD_NOT_FOUND);
                 }
 
-                String dataPath = String.format(
-                        "%s/%s/playerdata/%s.dat",
-                        new File("./").getAbsolutePath(),
-                        bukWorld.getName(),
-                        ctx.pathParam("playerUuid")
-                );
+                String dataPath = String.format("%s/%s/playerdata/%s.dat", new File("./").getAbsolutePath(),
+                        bukWorld.getName(), ctx.pathParam("playerUuid"));
                 File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
                     throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
@@ -207,6 +175,37 @@ public class PlayerApi {
                 throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
             }
         }
+    }
 
+    @OpenApi(path = "/v1/players/:playerUuid/op", method = HttpMethod.POST, summary = "Sets a specific player to Op", tags = {
+            "Player" }, pathParams = {
+                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"), }, responses = {
+                            @OpenApiResponse(status = "200") })
+    public static void opPlayer(Context ctx) {
+        if (ctx.pathParam("playerUuid").isEmpty()) {
+            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+        }
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        if (player == null) {
+            throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+        }
+        player.setOp(true);
+        ctx.json("success");
+    }
+
+    @OpenApi(path = "/v1/players/:playerUuid/deop", method = HttpMethod.POST, summary = "Removes Op from a specific player", tags = {
+            "Player" }, pathParams = {
+                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"), }, responses = {
+                            @OpenApiResponse(status = "200") })
+    public static void deopPlayer(Context ctx) {
+        if (ctx.pathParam("playerUuid").isEmpty()) {
+            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+        }
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        if (player == null) {
+            throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+        }
+        player.setOp(false);
+        ctx.json("success");
     }
 }

@@ -73,6 +73,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players/all", PlayerApi::offlinePlayersGet);
                 get("players/:uuid", PlayerApi::playerGet);
                 get("players/:playerUuid/:worldUuid/inventory", PlayerApi::getPlayerInv);
+                post("players/:playerUuid/op", PlayerApi::opPlayer);
+                post("players/:playerUuid/deop", PlayerApi::deopPlayer);
 
                 // Whitelist routes
                 get("whitelist", ServerApi::whitelistGet);
