@@ -185,7 +185,7 @@ public class PlayerApi {
         if (ctx.pathParam("playerUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("playerUuid")));
         if (player == null) {
             throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
         }
@@ -201,7 +201,8 @@ public class PlayerApi {
         if (ctx.pathParam("playerUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        //org.bukkit.entity.Player player = Bukkit.getPlayer());
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("playerUuid")));
         if (player == null) {
             throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
         }
