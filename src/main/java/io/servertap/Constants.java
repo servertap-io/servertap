@@ -8,6 +8,7 @@ public class Constants {
     public static final String VAULT_MISSING = "Vault not found. Related functionality disabled";
     public static final String VAULT_MISSING_PAY_PARAMS = "Missing uuid and/or amount";
     public static final String VAULT_GREATER_THAN_ZERO = "You must use a value greater than zero";
+    public static final String ECONOMY_PLUGIN_MISSING = "Missing economy plugin";
 
     // Player Related Messages
     public static final String PLAYER_MISSING_PARAMS = "Missing uuid and/or world";
