@@ -201,12 +201,40 @@ public class PlayerApi {
         if (ctx.pathParam("playerUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        //org.bukkit.entity.Player player = Bukkit.getPlayer());
+        // org.bukkit.entity.Player player = Bukkit.getPlayer());
         org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("playerUuid")));
         if (player == null) {
             throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.setOp(false);
         ctx.json("success");
+    }
+
+    @OpenApi(path = "/v1/players/op", method = HttpMethod.GET, summary = "Get all op players", tags = {
+            "Player" }, responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true)) })
+    public static void getOps(Context ctx) {
+        org.bukkit.OfflinePlayer players[] = Bukkit.getOfflinePlayers();
+        ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<io.servertap.api.v1.models.OfflinePlayer>();
+        for (org.bukkit.OfflinePlayer player : players) {
+            if (!player.isOp()) {
+                return;
+            }
+            io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
+            p.setDisplayName(player.getName());
+            p.setUuid(player.getUniqueId().toString());
+            p.setWhitelisted(player.isWhitelisted());
+            p.setBanned(player.isBanned());
+            p.setOp(player.isOp());
+
+            if (PluginEntrypoint.getEconomy() != null) {
+                p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
+            }
+
+            opedPlayers.add(p);
+
+        }
+        ctx.json(opedPlayers);
+
     }
 }
