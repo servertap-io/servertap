@@ -177,15 +177,15 @@ public class PlayerApi {
         }
     }
 
-    @OpenApi(path = "/v1/players/:playerUuid/op", method = HttpMethod.POST, summary = "Sets a specific player to Op", tags = {
-            "Player" }, pathParams = {
-                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"), }, responses = {
+    @OpenApi(path = "/v1/server/ops", method = HttpMethod.POST, summary = "Sets a specific player to Op", tags = {
+            "Player" }, formParams = {
+                    @OpenApiFormParam(name = "playerUuid"), }, responses = {
                             @OpenApiResponse(status = "200") })
     public static void opPlayer(Context ctx) {
-        if (ctx.pathParam("playerUuid").isEmpty()) {
+        if (ctx.formParam("playerUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
         if (player == null) {
             throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
         }
@@ -193,16 +193,15 @@ public class PlayerApi {
         ctx.json("success");
     }
 
-    @OpenApi(path = "/v1/players/:playerUuid/deop", method = HttpMethod.POST, summary = "Removes Op from a specific player", tags = {
-            "Player" }, pathParams = {
-                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"), }, responses = {
+    @OpenApi(path = "/v1/server/ops", method = HttpMethod.DELETE, summary = "Removes Op from a specific player", tags = {
+            "Player" }, formParams = {
+                    @OpenApiFormParam(name = "playerUuid"), }, responses = {
                             @OpenApiResponse(status = "200") })
     public static void deopPlayer(Context ctx) {
-        if (ctx.pathParam("playerUuid").isEmpty()) {
+        if (ctx.formParam("playerUuid").isEmpty()) {
             throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        // org.bukkit.entity.Player player = Bukkit.getPlayer());
-        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
         if (player == null) {
             throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
         }
