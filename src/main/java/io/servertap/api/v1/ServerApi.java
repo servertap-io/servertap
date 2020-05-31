@@ -346,7 +346,7 @@ public class ServerApi {
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<io.servertap.api.v1.models.OfflinePlayer>();
         for (org.bukkit.OfflinePlayer player : players) {
             if (!player.isOp()) {
-                return;
+                continue;
             }
             io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
             p.setDisplayName(player.getName());
