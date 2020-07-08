@@ -60,6 +60,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Server routes
                 get("server", ServerApi::serverGet);
+                get("server/ops", ServerApi::getOps);
+                post("server/ops", ServerApi::opPlayer);
+                delete("server/ops", ServerApi::deopPlayer);
                 get("worlds", ServerApi::worldsGet);
                 post("worlds/save", ServerApi::saveAllWorlds);
                 get("worlds/:uuid", ServerApi::worldGet);
