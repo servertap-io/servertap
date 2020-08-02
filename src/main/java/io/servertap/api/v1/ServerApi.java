@@ -13,6 +13,7 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -190,6 +191,83 @@ public class ServerApi {
     public static void broadcastPost(Context ctx) {
         Bukkit.broadcastMessage(ctx.formParam("message"));
         ctx.json("true");
+    }
+
+    @OpenApi(
+            path = "/v1/scoreboard",
+            summary = "Get information about the scoreboard objectives",
+            tags = {"Server"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Scoreboard.class))
+            }
+    )
+
+    public static void scoreboardGet(Context ctx) {
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+        Scoreboard scoreboardModel = new Scoreboard();
+        Set<String> objectives = new HashSet<>();
+
+        Set<String> entries = new HashSet<>(gameScoreboard.getEntries());
+
+        gameScoreboard.getObjectives().forEach(objective -> objectives.add(objective.getName()));
+
+        scoreboardModel.setEntries(entries);
+        scoreboardModel.setObjectives(objectives);
+
+        ctx.json(scoreboardModel);
+    }
+
+    @OpenApi(
+            path = "v1/scoreboard/:objective",
+            summary = "Get information about a specific objective",
+            tags = {"Server"},
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
+            }
+    )
+
+    public static void objectiveGet(Context ctx) {
+        String objectiveName = ctx.pathParam(":name");
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+        org.bukkit.scoreboard.Objective objective = gameScoreboard.getObjective(objectiveName);
+
+        if(objective == null) { throw new NotFoundResponse(); }
+
+        ctx.json(fromBukkitObjective(objective));
+    }
+
+    private static Objective fromBukkitObjective(org.bukkit.scoreboard.Objective objective) {
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+
+        Objective o = new Objective();
+        o.setCriterion(objective.getCriteria());
+        o.setDisplayName(objective.getDisplayName());
+        o.setName(objective.getName());
+
+        o.setDisplaySlot("");
+        if(objective.getDisplaySlot() != null)
+        {
+            o.setDisplaySlot(objective.getDisplaySlot().toString().toLowerCase());
+        }
+
+        Set<Score> scores = new HashSet<>();
+        gameScoreboard.getEntries().forEach(entry -> {
+            org.bukkit.scoreboard.Score score = objective.getScore(entry);
+
+            if(score.isScoreSet()) {
+                Score s = new Score();
+                s.setEntry(entry);
+                s.setValue(score.getScore());
+
+                scores.add(s);
+            }
+        });
+        o.setScores(scores);
+
+        return o;
     }
 
     @OpenApi(
