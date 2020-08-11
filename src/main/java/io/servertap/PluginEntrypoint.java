@@ -63,6 +63,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("server/ops", ServerApi::getOps);
                 post("server/ops", ServerApi::opPlayer);
                 delete("server/ops", ServerApi::deopPlayer);
+                get("server/whitelist", ServerApi::whitelistGet);
+                post("server/whitelist", ServerApi::whitelistPost);
                 get("worlds", ServerApi::worldsGet);
                 post("worlds/save", ServerApi::saveAllWorlds);
                 get("worlds/:uuid", ServerApi::worldGet);
@@ -78,10 +80,6 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players/all", PlayerApi::offlinePlayersGet);
                 get("players/:uuid", PlayerApi::playerGet);
                 get("players/:playerUuid/:worldUuid/inventory", PlayerApi::getPlayerInv);
-
-                // Whitelist routes
-                get("whitelist", ServerApi::whitelistGet);
-                post("whitelist", ServerApi::whitelistPost);
 
                 // Economy routes
                 post("economy/pay", EconomyApi::playerPay);
