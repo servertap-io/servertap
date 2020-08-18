@@ -9,6 +9,8 @@ import io.servertap.Constants;
 import io.servertap.Lag;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.*;
+import io.servertap.mojang.api.MojangApiService;
+import io.servertap.mojang.api.models.NameChange;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -21,7 +23,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -366,7 +367,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/whitelist",
+            path = "/v1/server/whitelist",
             method = HttpMethod.GET,
             summary = "Get the whitelist",
             tags = {"Server"},
@@ -384,7 +385,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/whitelist",
+            path = "/v1/server/whitelist",
             method = HttpMethod.POST,
             summary = "Update the whitelist",
             description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
@@ -398,15 +399,45 @@ public class ServerApi {
             }
     )
     public static void whitelistPost(Context ctx) {
-        //TODO: handle the event that no uuid is passed by ctx
         final org.bukkit.Server bukkitServer = Bukkit.getServer();
         if (!bukkitServer.hasWhitelist()) {
             ctx.json("No whitelist");
             return;
         }
+
+        String uuid = ctx.formParam("uuid");
+        String name = ctx.formParam("name");
+
+        if(uuid == null && name == null) {
+            throw new InternalServerErrorResponse(Constants.WHITELIST_MISSING_PARAMS);
+        }
+
+        //Check Mojang API for missing param
+        if(uuid == null) {
+            try {
+                uuid = MojangApiService.getUuid(name);
+            } catch(IllegalArgumentException ignored) {
+                throw new InternalServerErrorResponse(Constants.WHITELIST_NAME_NOT_FOUND);
+            } catch(IOException ignored) {
+                throw new InternalServerErrorResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+            }
+        } else if (name == null) {
+            try {
+                List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
+                name = nameHistory.get(nameHistory.size() - 1).getName();
+            } catch(IllegalArgumentException ignored) {
+                throw new InternalServerErrorResponse(Constants.WHITELIST_UUID_NOT_FOUND);
+            } catch(IOException ignored) {
+                throw new InternalServerErrorResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+            }
+        }
+
+        //Whitelist file doesn't accept UUIDs without dashes
+        uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
+
         final File directory = new File("./");
 
-        final Whitelist newEntry = new Whitelist().uuid(ctx.formParam("uuid")).name(ctx.formParam("name"));
+        final Whitelist newEntry = new Whitelist().uuid(uuid).name(name);
         Set<Whitelist> whitelist = getWhitelist();
         for (Whitelist player : whitelist) {
             if (player.equals(newEntry)) {

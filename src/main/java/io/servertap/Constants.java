@@ -16,6 +16,12 @@ public class Constants {
     public static final String PLAYER_INV_PARSE_FAIL = "A problem occured when attempting to parse the user file";
     public static final String PLAYER_NOT_FOUND = "Player cannot be found";
 
+    //Whitelist Related Messages
+    public static final String WHITELIST_MISSING_PARAMS = "Missing one of uuid or username";
+    public static final String WHITELIST_NAME_NOT_FOUND = "Player name doesn't exist";
+    public static final String WHITELIST_UUID_NOT_FOUND = "Player UUID doesn't exist";
+    public static final String WHITELIST_MOJANG_API_FAIL = "Failed to access Mojang API";
+
     // World messages
     public static final String WORLD_NOT_FOUND = "World cannot be found";
 }
