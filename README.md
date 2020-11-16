@@ -67,6 +67,19 @@ $ curl http://localhost:4567/v1/players
 ]
 ```
 
+# Current Endpoints
+
+- Ping
+- Server
+  - Get/Add/Remove Ops
+  - Get/Add Whitelist
+- Get/Save/List Worlds
+- List/Read Scoreboard(s) 
+- Broadcast
+- List/Find Players
+- Get/Pay/Debt Economy (W/ Plugin)
+- List Plugins 
+
 # Developing
 
 You need a few things to get started
