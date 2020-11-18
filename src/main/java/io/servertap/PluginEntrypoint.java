@@ -96,6 +96,7 @@ public class PluginEntrypoint extends JavaPlugin {
         // Put the original class loader back where it was.
         Thread.currentThread().setContextClassLoader(classLoader);
 
+        getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
     }
 
     @Override
