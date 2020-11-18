@@ -62,7 +62,6 @@ public class PluginEntrypoint extends JavaPlugin {
         if (bukkitConfig.getBoolean("debug")) {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
         }
- 
         app.routes(() -> {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
@@ -72,7 +71,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 // Server routes
                 get("server", ServerApi::serverGet);
                 get("server/ops", ServerApi::getOps);
-                post("server/ops", ServerApi::opPlayer);	
+                post("server/ops", ServerApi::opPlayer);
                 delete("server/ops", ServerApi::deopPlayer);
                 get("server/whitelist", ServerApi::whitelistGet);
                 post("server/whitelist", ServerApi::whitelistPost);
