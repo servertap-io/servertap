@@ -23,6 +23,7 @@ public class PluginEntrypoint extends JavaPlugin {
     private static final Logger log = Bukkit.getLogger();
     private static Economy econ = null;
     private static Javalin app = null;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -45,7 +46,15 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.defaultContentType = "application/json";
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
+                config.accessManager((handler, ctx, permittedRoles) -> {
+                if (!bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
+                handler.handle(ctx);
+                 } else {
+                ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                 }
+                });
             });
+
         }
         // Don't create a new instance if the plugin is reloaded
         app.start(bukkitConfig.getInt("port"));
@@ -53,7 +62,6 @@ public class PluginEntrypoint extends JavaPlugin {
         if (bukkitConfig.getBoolean("debug")) {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
         }
-
         app.routes(() -> {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
