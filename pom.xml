@@ -4,7 +4,7 @@
 
     <groupId>io.servertap</groupId>
     <artifactId>ServerTap</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
 
     <scm>
         <developerConnection>scm:git:ssh://github.com/phybros/servertap.git</developerConnection>
