@@ -47,7 +47,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
                 config.accessManager((handler, ctx, permittedRoles) -> {
-                if (!bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.formParam("key"))) {
+                if (!bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
                 handler.handle(ctx);
                  } else {
                 ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
