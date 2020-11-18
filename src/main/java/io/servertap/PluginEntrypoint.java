@@ -23,6 +23,7 @@ public class PluginEntrypoint extends JavaPlugin {
     private static final Logger log = Bukkit.getLogger();
     private static Economy econ = null;
     private static Javalin app = null;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -45,7 +46,15 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.defaultContentType = "application/json";
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
+                config.accessManager((handler, ctx, permittedRoles) -> {
+                if (!bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.formParam("key"))) {
+                handler.handle(ctx);
+                 } else {
+                ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                 }
+                });
             });
+
         }
         // Don't create a new instance if the plugin is reloaded
         app.start(bukkitConfig.getInt("port"));
@@ -54,28 +63,38 @@ public class PluginEntrypoint extends JavaPlugin {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
         }
 
+
+ 
+
+
         app.routes(() -> {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
                 // Pings
                 get("ping", ServerApi::ping);
 
+                post("server/ops", ServerApi::opPlayer);
+                delete("server/ops", ServerApi::deopPlayer);
+                post("worlds/save", ServerApi::saveAllWorlds);
+                post("worlds/:uuid/save", ServerApi::saveWorld);
+                post("broadcast", ServerApi::broadcastPost);
+                post("economy/pay", EconomyApi::playerPay);
+                post("economy/debit", EconomyApi::playerDebit);
                 // Server routes
                 get("server", ServerApi::serverGet);
                 get("server/ops", ServerApi::getOps);
-                post("server/ops", ServerApi::opPlayer);
-                delete("server/ops", ServerApi::deopPlayer);
+                
                 get("server/whitelist", ServerApi::whitelistGet);
                 post("server/whitelist", ServerApi::whitelistPost);
                 get("worlds", ServerApi::worldsGet);
-                post("worlds/save", ServerApi::saveAllWorlds);
+                
                 get("worlds/:uuid", ServerApi::worldGet);
-                post("worlds/:uuid/save", ServerApi::saveWorld);
+               
                 get("scoreboard", ServerApi::scoreboardGet);
                 get("scoreboard/:name", ServerApi::objectiveGet);
 
                 // Communication
-                post("broadcast", ServerApi::broadcastPost);
+                
 
                 // Player routes
                 get("players", PlayerApi::playersGet);
@@ -84,8 +103,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players/:playerUuid/:worldUuid/inventory", PlayerApi::getPlayerInv);
 
                 // Economy routes
-                post("economy/pay", EconomyApi::playerPay);
-                post("economy/debit", EconomyApi::playerDebit);
+             
                 get("economy", EconomyApi::getEconomyPluginInformation);
 
                 // Plugin routes
