@@ -6,11 +6,11 @@
     "\\src\\main\\java",
     "\\src\\main\\java\\io",
     "\\src\\main\\java\\io\\servertap",
-    "\\src\\main\\java\\io\\servertap\\api",
-    "\\src\\main\\java\\io\\servertap\\api\\v1",
-    "\\src\\main\\java\\io\\servertap\\api\\v1\\models",
+    "\\src\\main\\java\\io\\servertap\\mojang",
+    "\\src\\main\\java\\io\\servertap\\mojang\\api",
+    "\\src\\main\\java\\io\\servertap\\mojang\\api\\models",
     "\\src\\main\\resources"
   ],
-  "SelectedNode": "\\src\\main\\java\\io\\servertap\\api\\v1\\ServerApi.java",
+  "SelectedNode": "\\src\\main\\resources\\config.yml",
   "PreviewInSolutionExplorer": false
 }
