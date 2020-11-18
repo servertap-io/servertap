@@ -23,6 +23,9 @@ public class PlayerApi {
             path = "/v1/players",
             summary = "Gets all currently online players",
             tags = {"Player"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
             }
@@ -60,6 +63,9 @@ public class PlayerApi {
             method = HttpMethod.GET,
             summary = "Gets a specific online player by their UUID",
             tags = {"Player"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             pathParams = {
                     @OpenApiParam(name = "uuid", description = "UUID of the player")
             },
@@ -104,6 +110,9 @@ public class PlayerApi {
             path = "/v1/players/all",
             summary = "Gets all players that have ever joined the server ",
             tags = {"Player"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
             }
@@ -140,6 +149,9 @@ public class PlayerApi {
             method = HttpMethod.GET,
             summary = "Gets a specific online player's Inventory in the specified world",
             tags = {"Player"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             pathParams = {
                     @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
                     @OpenApiParam(name = "worldUuid", description = "UUID of the world")

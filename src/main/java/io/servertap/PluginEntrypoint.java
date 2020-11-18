@@ -15,6 +15,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -46,8 +48,13 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.defaultContentType = "application/json";
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
+
+                // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
-                if (!bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
+                String path = ctx.req.getPathInfo();
+                String[] swaggerPaths = new String[]{"/swagger", "/swagger-docs"};
+                List<String> swaggerPathsList = Arrays.asList(swaggerPaths);
+                if (swaggerPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
                 handler.handle(ctx);
                  } else {
                 ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
