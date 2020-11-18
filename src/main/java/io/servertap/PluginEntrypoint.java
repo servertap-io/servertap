@@ -62,39 +62,29 @@ public class PluginEntrypoint extends JavaPlugin {
         if (bukkitConfig.getBoolean("debug")) {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
         }
-
-
  
-
-
         app.routes(() -> {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
                 // Pings
                 get("ping", ServerApi::ping);
 
-                post("server/ops", ServerApi::opPlayer);
-                delete("server/ops", ServerApi::deopPlayer);
-                post("worlds/save", ServerApi::saveAllWorlds);
-                post("worlds/:uuid/save", ServerApi::saveWorld);
-                post("broadcast", ServerApi::broadcastPost);
-                post("economy/pay", EconomyApi::playerPay);
-                post("economy/debit", EconomyApi::playerDebit);
                 // Server routes
                 get("server", ServerApi::serverGet);
                 get("server/ops", ServerApi::getOps);
-                
+                post("server/ops", ServerApi::opPlayer);	
+                delete("server/ops", ServerApi::deopPlayer);
                 get("server/whitelist", ServerApi::whitelistGet);
                 post("server/whitelist", ServerApi::whitelistPost);
                 get("worlds", ServerApi::worldsGet);
-                
+                post("worlds/save", ServerApi::saveAllWorlds);
                 get("worlds/:uuid", ServerApi::worldGet);
-               
+                post("worlds/:uuid/save", ServerApi::saveWorld);
                 get("scoreboard", ServerApi::scoreboardGet);
                 get("scoreboard/:name", ServerApi::objectiveGet);
 
                 // Communication
-                
+                post("broadcast", ServerApi::broadcastPost);
 
                 // Player routes
                 get("players", PlayerApi::playersGet);
@@ -103,7 +93,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("players/:playerUuid/:worldUuid/inventory", PlayerApi::getPlayerInv);
 
                 // Economy routes
-             
+                post("economy/pay", EconomyApi::playerPay);
+                post("economy/debit", EconomyApi::playerDebit);
                 get("economy", EconomyApi::getEconomyPluginInformation);
 
                 // Plugin routes
