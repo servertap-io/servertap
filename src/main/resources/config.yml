@@ -1,1 +1,2 @@
 port: 4567
+debug: false

@@ -50,7 +50,9 @@ public class PluginEntrypoint extends JavaPlugin {
         // Don't create a new instance if the plugin is reloaded
         app.start(bukkitConfig.getInt("port"));
 
-        app.before(ctx -> log.info(ctx.req.getPathInfo()));
+        if (bukkitConfig.getBoolean("debug")) {
+            app.before(ctx -> log.info(ctx.req.getPathInfo()));
+        }
 
         app.routes(() -> {
             // Routes for v1 of the API
