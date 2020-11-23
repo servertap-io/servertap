@@ -34,6 +34,9 @@ public class ServerApi {
             path = "/v1/ping",
             summary = "pong!",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
@@ -46,6 +49,9 @@ public class ServerApi {
             path = "/v1/server",
             summary = "Get information about the server",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class))
             }
@@ -118,6 +124,9 @@ public class ServerApi {
             summary = "Triggers a world save of all worlds",
             method = HttpMethod.POST,
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200")
             }
@@ -149,6 +158,9 @@ public class ServerApi {
             summary = "Triggers a world save",
             method = HttpMethod.POST,
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200")
             }
@@ -182,6 +194,9 @@ public class ServerApi {
             method = HttpMethod.POST,
             summary = "Send broadcast visible to those currently online.",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             formParams = {
                     @OpenApiFormParam(name = "message", type = String.class)
             },
@@ -198,6 +213,9 @@ public class ServerApi {
             path = "/v1/scoreboard",
             summary = "Get information about the scoreboard objectives",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Scoreboard.class))
             }
@@ -223,6 +241,9 @@ public class ServerApi {
             path = "v1/scoreboard/:objective",
             summary = "Get information about a specific objective",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
             }
@@ -275,6 +296,9 @@ public class ServerApi {
             path = "/v1/worlds",
             summary = "Get information about all worlds",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
             }
@@ -290,6 +314,9 @@ public class ServerApi {
             path = "/v1/worlds/:world",
             summary = "Get information about a specific world",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             pathParams = {
                     @OpenApiParam(name = "world", description = "The name of the world")
             },
@@ -371,6 +398,9 @@ public class ServerApi {
             method = HttpMethod.GET,
             summary = "Get the whitelist",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
             }
@@ -390,6 +420,9 @@ public class ServerApi {
             summary = "Update the whitelist",
             description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
             tags = {"Server"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             formParams = {
                     @OpenApiFormParam(name = "uuid", type = String.class),
                     @OpenApiFormParam(name = "name", type = String.class)
@@ -468,6 +501,9 @@ public class ServerApi {
             summary = "Get a list of installed plugins",
             description = "Responds with an array of objects containing keys name and enabled.",
             tags = {"Plugins"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
@@ -492,6 +528,9 @@ public class ServerApi {
         method = HttpMethod.POST,
         summary = "Sets a specific player to Op",
         tags = {"Player"},
+        headers = {
+        @OpenApiParam(name = "key")
+        },
         formParams = {
             @OpenApiFormParam(name = "playerUuid"), 
         }, 
@@ -514,7 +553,10 @@ public class ServerApi {
         path = "/v1/server/ops", 
         method = HttpMethod.DELETE, 
         summary = "Removes Op from a specific player", 
-        tags = {"Player"}, 
+        tags = {"Player"},
+        headers = {
+        @OpenApiParam(name = "key")
+        },
         formParams = {
             @OpenApiFormParam(name = "playerUuid")
         }, 
@@ -537,6 +579,9 @@ public class ServerApi {
         method = HttpMethod.GET,
         summary = "Get all op players",
         tags = {"Player"},
+        headers = {
+        @OpenApiParam(name = "key")
+        },
         responses = {
             @OpenApiResponse(
                 status = "200",
