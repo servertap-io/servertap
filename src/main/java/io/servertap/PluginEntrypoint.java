@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bstats.bukkit.Metrics;
 
 import java.util.logging.Logger;
 
@@ -26,6 +27,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Tell bStats what plugin this is
+        Metrics metrics = new Metrics(this, 9492);
+
         saveDefaultConfig();
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
