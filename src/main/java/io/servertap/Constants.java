@@ -24,4 +24,7 @@ public class Constants {
 
     // World messages
     public static final String WORLD_NOT_FOUND = "World cannot be found";
+
+    // Chat messages
+    public static final String CHAT_MISSING_MESSAGE = "Missing Message";
 }
