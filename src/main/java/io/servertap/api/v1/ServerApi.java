@@ -670,6 +670,9 @@ public class ServerApi {
     )
 
     public static void postCommand(Context ctx) {
+        if(ctx.formParam("command").isEmpty()){
+            throw new InternalServerErrorResponse(Constants.COMMAND_PAYLOAD_MISSING);
+        }
         boolean success;
 		try {
 			success = Bukkit.getScheduler().callSyncMethod( Bukkit.getPluginManager().getPlugin("ServerTap"), () -> Bukkit.dispatchCommand( Bukkit.getConsoleSender(), ctx.formParam("command") ) ).get();
