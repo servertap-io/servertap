@@ -211,7 +211,7 @@ public class ServerApi {
             throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
         }
         Bukkit.broadcastMessage(ctx.formParam("message"));
-        ctx.json("true");
+        ctx.json("success");
     }
 
     @OpenApi(
@@ -243,7 +243,7 @@ public class ServerApi {
         }
         player.sendMessage(ctx.formParam("message"));
         
-        ctx.json("true");
+        ctx.json("success");
     }
 
     @OpenApi(
