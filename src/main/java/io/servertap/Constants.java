@@ -4,6 +4,7 @@ public class Constants {
 
     public static final String API_V1 = "v1";
 
+
     // Economy Related Messages
     public static final String VAULT_MISSING = "Vault not found. Related functionality disabled";
     public static final String VAULT_MISSING_PAY_PARAMS = "Missing uuid and/or amount";
@@ -24,4 +25,7 @@ public class Constants {
 
     // World messages
     public static final String WORLD_NOT_FOUND = "World cannot be found";
+
+    // Chat messages
+    public static final String CHAT_MISSING_MESSAGE = "Missing Message";
 }

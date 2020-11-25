@@ -89,8 +89,9 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("scoreboard", ServerApi::scoreboardGet);
                 get("scoreboard/:name", ServerApi::objectiveGet);
 
-                // Communication
-                post("broadcast", ServerApi::broadcastPost);
+                // Chat
+                post("chat/broadcast", ServerApi::broadcastPost);
+                post("chat/tell", ServerApi::tellPost);
 
                 // Player routes
                 get("players", PlayerApi::playersGet);

@@ -1,6 +1,8 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
+
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
@@ -190,10 +192,10 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/broadcast",
+            path = "/v1/chat/broadcast",
             method = HttpMethod.POST,
             summary = "Send broadcast visible to those currently online.",
-            tags = {"Server"},
+            tags = {"Chat"},
             headers = {
             @OpenApiParam(name = "key")
             },
@@ -205,8 +207,43 @@ public class ServerApi {
             }
     )
     public static void broadcastPost(Context ctx) {
+        if (ctx.formParam("message").isEmpty()) {
+            throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
+        }
         Bukkit.broadcastMessage(ctx.formParam("message"));
-        ctx.json("true");
+        ctx.json("success");
+    }
+
+    @OpenApi(
+            path = "/v1/chat/tell",
+            method = HttpMethod.POST,
+            summary = "Send a message to a specific player.",
+            tags = {"Chat"},
+            headers = {
+            @OpenApiParam(name = "key")
+            },
+            formParams = {
+                    @OpenApiFormParam(name = "message", type = String.class),
+                    @OpenApiFormParam(name = "playerUuid", type = String.class)
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+            }
+    )
+    public static void tellPost(Context ctx) {
+        if (ctx.formParam("message").isEmpty()) {
+            throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
+        }
+        if (ctx.formParam("playerUuid").isEmpty()) {
+            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
+        }
+        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.formParam("playerUuid")));
+        if (player == null) {
+            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+        }
+        player.sendMessage(ctx.formParam("message"));
+        
+        ctx.json("success");
     }
 
     @OpenApi(
