@@ -26,6 +26,7 @@ import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 public class ServerApi {
@@ -648,6 +649,41 @@ public class ServerApi {
         }
         ctx.json(opedPlayers);
     
+    }
+
+    @OpenApi(
+        path = "/v1/server/exec",
+        method = HttpMethod.POST,
+        summary = "Executes a command on the server from the console",
+        tags = {"Server"},
+        headers = {
+            @OpenApiParam(name = "key")
+        },
+        formParams = {
+            @OpenApiFormParam(name = "command", type = String.class)
+        }, 
+        responses = {
+            @OpenApiResponse(
+                status = "200"
+            )
+        }
+    )
+
+    public static void postCommand(Context ctx) {
+        boolean success;
+		try {
+			success = Bukkit.getScheduler().callSyncMethod( Bukkit.getPluginManager().getPlugin("ServerTap"), () -> Bukkit.dispatchCommand( Bukkit.getConsoleSender(), ctx.formParam("command") ) ).get();
+            ctx.json(success);
+        } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+            e.printStackTrace();
+            throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+            e.printStackTrace();
+            throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
+		}
+        
     }
 
 }
