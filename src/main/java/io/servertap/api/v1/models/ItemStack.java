@@ -1,5 +1,6 @@
 package io.servertap.api.v1.models;
 
+import java.util.Map;
 import com.google.gson.annotations.Expose;
 
 public class ItemStack {
@@ -13,7 +14,10 @@ public class ItemStack {
     @Expose
     private String id = null;
 
-    public ItemStack slot(Integer slot) {
+    @Expose
+    private Map<String,Object> itemMeta = null;
+    
+    public ItemStack slot(Integer slot){
         this.slot = slot;
         return this;
     }
@@ -38,6 +42,11 @@ public class ItemStack {
     public String getId(){
         return this.id;
     }
+
+    public void setItemMeta(Map<String,Object> itemMeta){
+        this.itemMeta = itemMeta;
+    }
+
 
     public ItemStack count(Integer count){
         this.count = count;

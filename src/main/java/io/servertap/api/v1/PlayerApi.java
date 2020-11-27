@@ -177,6 +177,7 @@ public class PlayerApi {
                     itemObj.setId("minecraft:" + itemStack.getType().toString().toLowerCase());
                     itemObj.setCount(Integer.valueOf(itemStack.getAmount()));
                     itemObj.setSlot(location);
+                    itemObj.setItemMeta(itemStack.getItemMeta().serialize());
                     inv.add(itemObj);
                 }
             }
@@ -206,6 +207,7 @@ public class PlayerApi {
                     itemObj.setId(item.getString("id"));
                     itemObj.setCount(item.getInteger("Count"));
                     itemObj.setSlot(item.getInteger("Slot"));
+                    itemObj.setItemMeta(itemStack.getItemMeta().serialize());
                     inv.add(itemObj);
                 }
 
