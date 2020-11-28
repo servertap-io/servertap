@@ -688,7 +688,7 @@ public class ServerApi {
             e.printStackTrace();
             throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
         }
-        ctx.json("success");
+        ctx.json(success ? "success" : "failed");
         
     }
 
