@@ -27,6 +27,8 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class ServerApi {
@@ -654,7 +656,7 @@ public class ServerApi {
     @OpenApi(
         path = "/v1/server/exec",
         method = HttpMethod.POST,
-        summary = "Executes a command on the server from the console",
+        summary = "Executes a command on the server from the console, this will not retrive the output.",
         tags = {"Server"},
         headers = {
             @OpenApiParam(name = "key")
@@ -685,7 +687,8 @@ public class ServerApi {
 			// TODO Auto-generated catch block
             e.printStackTrace();
             throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
-		}
+        }
+        ctx.json("success");
         
     }
 
