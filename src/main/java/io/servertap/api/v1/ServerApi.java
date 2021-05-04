@@ -677,7 +677,7 @@ public class ServerApi {
         }
 
         String timeRaw = ctx.formParam("time");
-        long time = timeRaw != null ? Long.parseLong(timeRaw) : 1000;
+        long time = timeRaw != null ? Long.parseLong(timeRaw) : 0;
         if (time < 0) time = 0;
 
         ctx.result(new ServerExecCommandSender().executeCommand(command, time, TimeUnit.MILLISECONDS));
