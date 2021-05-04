@@ -30,7 +30,7 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
     public CompletableFuture<String> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
         Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
                 Bukkit.getPluginManager().getPlugin("ServerTap"),
-                () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)
+                () -> Bukkit.dispatchCommand(this, command)
         );
 
         CompletableFuture<String> future = new CompletableFuture<>();
