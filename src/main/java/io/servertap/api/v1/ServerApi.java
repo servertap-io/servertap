@@ -5,6 +5,7 @@ import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.Lag;
@@ -27,7 +28,10 @@ import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class ServerApi {
@@ -678,10 +682,18 @@ public class ServerApi {
         }
 
         String timeRaw = ctx.formParam("time");
-        long time = timeRaw != null ? Long.parseLong(timeRaw) : 0;
-        if (time < 0) time = 0;
+        AtomicLong time = new AtomicLong(timeRaw != null ? Long.parseLong(timeRaw) : 0);
+        if (time.get() < 0) time.set(0);
 
-        ctx.result(new ServerExecCommandSender().executeCommand(command, time, TimeUnit.MILLISECONDS));
+        ctx.result(CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<String> future = new ServerExecCommandSender().executeCommand(command, time.get(), TimeUnit.MILLISECONDS);
+            try {
+                String output = future.get();
+                return "application/json".equalsIgnoreCase(ctx.contentType()) ? JavalinJson.toJson(output) : output;
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
 }
