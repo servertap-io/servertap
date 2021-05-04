@@ -655,7 +655,8 @@ public class ServerApi {
     @OpenApi(
         path = "/v1/server/exec",
         method = HttpMethod.POST,
-        summary = "Executes a command on the server from the console, returning it's output.",
+        summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
+                "command executors will properly send their messages to the CommandSender, though, most do.",
         tags = {"Server"},
         headers = {
             @OpenApiParam(name = "key")

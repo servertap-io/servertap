@@ -5,8 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationAbandonedEvent;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -20,7 +19,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-public class ServerExecCommandSender implements ConsoleCommandSender {
+public class ServerExecCommandSender implements RemoteConsoleCommandSender {
 
     private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(1);
     private static final ConsoleCommandSender CONSOLE_COMMAND_SENDER = Bukkit.getConsoleSender();
@@ -140,31 +139,6 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
     @Override
     public Server getServer() {
         return CONSOLE_COMMAND_SENDER.getServer();
-    }
-
-    @Override
-    public void abandonConversation(Conversation arg0) {
-        CONSOLE_COMMAND_SENDER.abandonConversation(arg0);
-    }
-
-    @Override
-    public void abandonConversation(Conversation c, ConversationAbandonedEvent e) {
-        CONSOLE_COMMAND_SENDER.abandonConversation(c, e);
-    }
-
-    @Override
-    public void acceptConversationInput(String input) {
-        CONSOLE_COMMAND_SENDER.acceptConversationInput(input);
-    }
-
-    @Override
-    public boolean beginConversation(Conversation c) {
-        return CONSOLE_COMMAND_SENDER.beginConversation(c);
-    }
-
-    @Override
-    public boolean isConversing() {
-        return CONSOLE_COMMAND_SENDER.isConversing();
     }
 
     public void sendRawMessage(String raw) {
