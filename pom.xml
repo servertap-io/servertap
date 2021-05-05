@@ -112,12 +112,14 @@
                 <version>3.2.1</version>
                 <configuration>
                     <relocations>
-                      <relocation>
-                        <pattern>org.bstats</pattern>
-                        <!-- Replace this with your package! -->
-                        <shadedPattern>your.package</shadedPattern>
-                      </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <!-- Replace this with your package! -->
+                            <shadedPattern>io.servertap</shadedPattern>
+                        </relocation>
                     </relocations>
+
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
                 <executions>
                     <execution>

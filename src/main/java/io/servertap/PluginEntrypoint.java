@@ -50,7 +50,6 @@ public class PluginEntrypoint extends JavaPlugin {
         if (app == null) {
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
-                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
 
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
@@ -64,6 +63,8 @@ public class PluginEntrypoint extends JavaPlugin {
                         ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                     }
                 });
+
+                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
             });
 
         }
