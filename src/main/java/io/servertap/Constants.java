@@ -28,4 +28,9 @@ public class Constants {
 
     // Chat messages
     public static final String CHAT_MISSING_MESSAGE = "Missing Message";
+
+    // Command Execution messages
+    public static final String COMMAND_PAYLOAD_MISSING = "Missing Command";
+    public static final String COMMAND_GENERIC_ERROR = "An error occurred while executing command";
+
 }
