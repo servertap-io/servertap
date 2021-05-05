@@ -24,7 +24,7 @@ public class PlayerApi {
             summary = "Gets all currently online players",
             tags = {"Player"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
@@ -64,7 +64,7 @@ public class PlayerApi {
             summary = "Gets a specific online player by their UUID",
             tags = {"Player"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             pathParams = {
                     @OpenApiParam(name = "uuid", description = "UUID of the player")
@@ -80,7 +80,12 @@ public class PlayerApi {
             throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
         }
 
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("uuid")));
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
 
         if (player == null) {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
@@ -111,7 +116,7 @@ public class PlayerApi {
             summary = "Gets all players that have ever joined the server ",
             tags = {"Player"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
@@ -150,7 +155,7 @@ public class PlayerApi {
             summary = "Gets a specific online player's Inventory in the specified world",
             tags = {"Player"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             pathParams = {
                     @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
@@ -162,10 +167,20 @@ public class PlayerApi {
     )
     public static void getPlayerInv(Context ctx) {
         if (ctx.pathParam("playerUuid").isEmpty() || ctx.pathParam("worldUuid").isEmpty()) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
+
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("playerUuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("worldUuid"));
+        if (worldUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
         ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
+        org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
         if (player != null) {
             player.updateInventory();
             Integer location = -1;
@@ -175,7 +190,7 @@ public class PlayerApi {
                     ItemStack itemObj = new ItemStack();
                     // TODO: handle item namespaces other than minecraft: It's fine right now as there seem to be no forge + Paper servers
                     itemObj.setId("minecraft:" + itemStack.getType().toString().toLowerCase());
-                    itemObj.setCount(Integer.valueOf(itemStack.getAmount()));
+                    itemObj.setCount(itemStack.getAmount());
                     itemObj.setSlot(location);
                     inv.add(itemObj);
                 }
@@ -183,10 +198,10 @@ public class PlayerApi {
             ctx.json(inv);
         } else {
             try {
-                World bukWorld = Bukkit.getWorld(UUID.fromString(ctx.pathParam("worldUuid")));
+                World bukWorld = Bukkit.getWorld(worldUUID);
 
                 if (bukWorld == null) {
-                    throw new BadRequestResponse(Constants.WORLD_NOT_FOUND);
+                    throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
                 }
 
                 String dataPath = String.format(
@@ -197,7 +212,7 @@ public class PlayerApi {
                 );
                 File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
-                    throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+                    throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
                 }
                 NBTFile playerFile = new NBTFile(playerfile);
 
