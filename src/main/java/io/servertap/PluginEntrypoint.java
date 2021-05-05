@@ -151,7 +151,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 .description(this.getDescription().getDescription());
         return new OpenApiOptions(applicationInfo)
                 .path("/swagger-docs")
-                .activateAnnotationScanningFor("io.servertap")
+                .activateAnnotationScanningFor("io.servertap.api.v1")
                 .swagger(new SwaggerOptions("/swagger"));
     }
 

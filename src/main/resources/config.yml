@@ -2,3 +2,14 @@ port: 4567
 debug: false
 useKeyAuth: false
 key: 'change_me'
+
+# Example webhook configuration
+#webhooks:
+#  default:
+#    listener: "https://your-webhook-target.com/whatever"
+#    events:
+#      - PlayerJoin
+#      - PlayerQuit
+#      - PlayerKick
+#      - PlayerDeath
+#      - PlayerChat
