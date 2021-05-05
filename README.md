@@ -78,7 +78,7 @@ You can see the full API documentation at http://your-server.net:4567/swagger.
 You can even explore and test the API right from the UI!
 
 >Note: there is a known issue that causes the OpenApi plugin to spew
->tons of logs into your server log. See #60 for details.
+>tons of logs into your server log. See https://github.com/phybros/servertap/issues/60 for details.
 
 Some examples of capabilities are:
 
@@ -104,7 +104,7 @@ key: some-long-super-random-string
 
 Then include a Header called `key` with your specified key on every request to Authenticate.
 
-We need help making this better! See #5 for more info. 
+We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info. 
 
 # Webhooks
 
