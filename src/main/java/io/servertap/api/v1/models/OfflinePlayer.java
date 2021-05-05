@@ -22,15 +22,13 @@ public class OfflinePlayer {
     private Boolean op = null;
 
     @Expose
-    private Double balance =null;
-
+    private Double balance = null;
 
 
     public OfflinePlayer uuid(String uuid) {
         this.uuid = uuid;
         return this;
     }
-
 
 
     /**
@@ -45,8 +43,6 @@ public class OfflinePlayer {
     public void setBalance(Double balance) {
         this.balance = balance;
     }
-
-
 
 
     /**
@@ -79,7 +75,6 @@ public class OfflinePlayer {
     public void setDisplayName(String displayName) {
         this.Name = displayName;
     }
-
 
 
     public OfflinePlayer whitelisted(Boolean whitelisted) {
