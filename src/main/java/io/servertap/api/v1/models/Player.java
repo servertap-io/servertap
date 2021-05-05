@@ -34,15 +34,13 @@ public class Player {
     private Boolean op = null;
 
     @Expose
-    private Double balance =null;
-
+    private Double balance = null;
 
 
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
     }
-
 
 
     /**
@@ -57,8 +55,6 @@ public class Player {
     public void setBalance(Double balance) {
         this.balance = balance;
     }
-
-
 
 
     /**
