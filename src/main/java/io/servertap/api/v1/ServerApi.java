@@ -1,10 +1,7 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
-import io.javalin.http.BadRequestResponse;
-import io.javalin.http.Context;
-import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.http.NotFoundResponse;
+import io.javalin.http.*;
 import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
@@ -485,7 +482,7 @@ public class ServerApi {
         String name = ctx.formParam("name");
 
         if(uuid == null && name == null) {
-            throw new InternalServerErrorResponse(Constants.WHITELIST_MISSING_PARAMS);
+            throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
         }
 
         //Check Mojang API for missing param
@@ -493,18 +490,18 @@ public class ServerApi {
             try {
                 uuid = MojangApiService.getUuid(name);
             } catch(IllegalArgumentException ignored) {
-                throw new InternalServerErrorResponse(Constants.WHITELIST_NAME_NOT_FOUND);
+                throw new NotFoundResponse(Constants.WHITELIST_NAME_NOT_FOUND);
             } catch(IOException ignored) {
-                throw new InternalServerErrorResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
         } else if (name == null) {
             try {
                 List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
                 name = nameHistory.get(nameHistory.size() - 1).getName();
             } catch(IllegalArgumentException ignored) {
-                throw new InternalServerErrorResponse(Constants.WHITELIST_UUID_NOT_FOUND);
+                throw new NotFoundResponse(Constants.WHITELIST_UUID_NOT_FOUND);
             } catch(IOException ignored) {
-                throw new InternalServerErrorResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
         }
 
@@ -582,11 +579,11 @@ public class ServerApi {
         })
     public static void opPlayer(Context ctx) {
         if (ctx.formParam("playerUuid").isEmpty()) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
         org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
         if (player == null) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.setOp(true);
         ctx.json("success");
@@ -607,11 +604,11 @@ public class ServerApi {
     )
     public static void deopPlayer(Context ctx) {
         if (ctx.formParam("playerUuid").isEmpty()) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
         org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
         if (player == null) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.setOp(false);
         ctx.json("success");
@@ -678,7 +675,7 @@ public class ServerApi {
     public static void postCommand(Context ctx) {
         String command = ctx.formParam("command");
         if (StringUtils.isBlank(command)) {
-            throw new InternalServerErrorResponse(Constants.COMMAND_PAYLOAD_MISSING);
+            throw new BadRequestResponse(Constants.COMMAND_PAYLOAD_MISSING);
         }
 
         String timeRaw = ctx.formParam("time");

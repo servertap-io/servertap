@@ -162,7 +162,7 @@ public class PlayerApi {
     )
     public static void getPlayerInv(Context ctx) {
         if (ctx.pathParam("playerUuid").isEmpty() || ctx.pathParam("worldUuid").isEmpty()) {
-            throw new InternalServerErrorResponse(Constants.PLAYER_MISSING_PARAMS);
+            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
         ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
         org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.pathParam("playerUuid")));
@@ -197,7 +197,7 @@ public class PlayerApi {
                 );
                 File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
-                    throw new InternalServerErrorResponse(Constants.PLAYER_NOT_FOUND);
+                    throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
                 }
                 NBTFile playerFile = new NBTFile(playerfile);
 
