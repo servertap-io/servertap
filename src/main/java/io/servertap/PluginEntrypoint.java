@@ -9,15 +9,15 @@ import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bstats.bukkit.Metrics;
 
-import java.util.logging.Logger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -50,20 +50,21 @@ public class PluginEntrypoint extends JavaPlugin {
         if (app == null) {
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
-                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
                 config.showJavalinBanner = false;
 
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
-                String path = ctx.req.getPathInfo();
-                String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs"};
-                List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
-                if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
-                handler.handle(ctx);
-                 } else {
-                ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
-                 }
+                    String path = ctx.req.getPathInfo();
+                    String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs"};
+                    List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
+                    if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
+                        handler.handle(ctx);
+                    } else {
+                        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                    }
                 });
+
+                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
             });
 
         }
@@ -124,7 +125,7 @@ public class PluginEntrypoint extends JavaPlugin {
     public void onDisable() {
         log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
         // Release port so that /reload will work
-        if(app != null) {
+        if (app != null) {
             app.stop();
         }
     }
@@ -146,13 +147,13 @@ public class PluginEntrypoint extends JavaPlugin {
 
     private OpenApiOptions getOpenApiOptions() {
         Info applicationInfo = new Info()
-            .title(this.getDescription().getName())
-            .version(this.getDescription().getVersion())
-            .description(this.getDescription().getDescription());
+                .title(this.getDescription().getName())
+                .version(this.getDescription().getVersion())
+                .description(this.getDescription().getDescription());
         return new OpenApiOptions(applicationInfo)
-            .path("/swagger-docs")
-            .activateAnnotationScanningFor("io.servertap")
-            .swagger(new SwaggerOptions("/swagger"));
+                .path("/swagger-docs")
+                .activateAnnotationScanningFor("io.servertap.api.v1")
+                .swagger(new SwaggerOptions("/swagger"));
     }
 
 }

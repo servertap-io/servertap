@@ -169,6 +169,9 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
+            pathParams = {
+                    @OpenApiParam(name = "uuid", description = "The UUID of the World to save")
+            },
             responses = {
                     @OpenApiResponse(status = "200")
             }
@@ -212,7 +215,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "message", type = String.class)
+                    @OpenApiFormParam(name = "message")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -249,7 +252,13 @@ public class ServerApi {
         if (ctx.formParam("playerUuid").isEmpty()) {
             throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
         }
-        org.bukkit.entity.Player player = Bukkit.getPlayer(UUID.fromString(ctx.formParam("playerUuid")));
+
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
         if (player == null) {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
@@ -287,17 +296,19 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "v1/scoreboard/:objective",
+            path = "/v1/scoreboard/:name",
             summary = "Get information about a specific objective",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
             },
+            pathParams = {
+                    @OpenApiParam(name = "name", description = "The name of the objective to get")
+            },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
             }
     )
-
     public static void objectiveGet(Context ctx) {
         String objectiveName = ctx.pathParam(":name");
         ScoreboardManager manager = Bukkit.getScoreboardManager();
@@ -361,22 +372,27 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/worlds/:world",
+            path = "/v1/worlds/:uuid",
             summary = "Get information about a specific world",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "world", description = "The name of the world")
+                    @OpenApiParam(name = "uuid", description = "The uuid of the world")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
             }
     )
     public static void worldGet(Context ctx) {
-        UUID worldUuid = UUID.fromString(ctx.pathParam(":uuid"));
-        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(worldUuid);
+
+        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        if (worldUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(worldUUID);
 
         // 404 if no world found
         if (bukkitWorld == null) throw new NotFoundResponse();
@@ -592,7 +608,7 @@ public class ServerApi {
             throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("playerUuid"));
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
         if (playerUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
@@ -637,7 +653,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/players/op",
+            path = "/v1/server/ops",
             method = HttpMethod.GET,
             summary = "Get all op players",
             tags = {"Player"},
