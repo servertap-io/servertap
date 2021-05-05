@@ -1,18 +1,20 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
-
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.Lag;
 import io.servertap.PluginEntrypoint;
+import io.servertap.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.mojang.api.models.NameChange;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -26,9 +28,10 @@ import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class ServerApi {
@@ -656,40 +659,41 @@ public class ServerApi {
     @OpenApi(
         path = "/v1/server/exec",
         method = HttpMethod.POST,
-        summary = "Executes a command on the server from the console, this will not retrive the output.",
+        summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
+                "command executors will properly send their messages to the CommandSender, though, most do.",
         tags = {"Server"},
         headers = {
             @OpenApiParam(name = "key")
         },
         formParams = {
-            @OpenApiFormParam(name = "command", type = String.class)
-        }, 
+            @OpenApiFormParam(name = "command", required = true),
+            @OpenApiFormParam(name = "time", type = Long.class)
+        },
         responses = {
             @OpenApiResponse(
                 status = "200"
             )
         }
     )
-
     public static void postCommand(Context ctx) {
-        if(ctx.formParam("command").isEmpty()){
+        String command = ctx.formParam("command");
+        if (StringUtils.isBlank(command)) {
             throw new InternalServerErrorResponse(Constants.COMMAND_PAYLOAD_MISSING);
         }
-        boolean success;
-		try {
-			success = Bukkit.getScheduler().callSyncMethod( Bukkit.getPluginManager().getPlugin("ServerTap"), () -> Bukkit.dispatchCommand( Bukkit.getConsoleSender(), ctx.formParam("command") ) ).get();
-            ctx.json(success);
-        } catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-            e.printStackTrace();
-            throw new InternalServerErrorResponse(Constants.COMMAND_GENERIC_ERROR);
-        }
-        ctx.json(success ? "success" : "failed");
-        
+
+        String timeRaw = ctx.formParam("time");
+        AtomicLong time = new AtomicLong(timeRaw != null ? Long.parseLong(timeRaw) : 0);
+        if (time.get() < 0) time.set(0);
+
+        ctx.result(CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<String> future = new ServerExecCommandSender().executeCommand(command, time.get(), TimeUnit.MILLISECONDS);
+            try {
+                String output = future.get();
+                return "application/json".equalsIgnoreCase(ctx.contentType()) ? JavalinJson.toJson(output) : output;
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
 }

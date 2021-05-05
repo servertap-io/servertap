@@ -31,5 +31,6 @@ public class Constants {
 
     // Command Execution messages
     public static final String COMMAND_PAYLOAD_MISSING = "Missing Command";
-    public static final String COMMAND_GENERIC_ERROR = "An error occured while executing command";
+    public static final String COMMAND_GENERIC_ERROR = "An error occurred while executing command";
+
 }
