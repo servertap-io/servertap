@@ -33,4 +33,6 @@ public class Constants {
     public static final String COMMAND_PAYLOAD_MISSING = "Missing Command";
     public static final String COMMAND_GENERIC_ERROR = "An error occurred while executing command";
 
+    // General errors
+    public static final String INVALID_UUID = "Invalid UUID";
 }

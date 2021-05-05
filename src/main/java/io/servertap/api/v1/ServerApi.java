@@ -1,7 +1,10 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
-import io.javalin.http.*;
+import io.javalin.http.BadRequestResponse;
+import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
+import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
@@ -40,7 +43,7 @@ public class ServerApi {
             summary = "pong!",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -55,7 +58,7 @@ public class ServerApi {
             summary = "Get information about the server",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class))
@@ -130,7 +133,7 @@ public class ServerApi {
             method = HttpMethod.POST,
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200")
@@ -164,7 +167,7 @@ public class ServerApi {
             method = HttpMethod.POST,
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200")
@@ -172,7 +175,13 @@ public class ServerApi {
     )
     public static void saveWorld(Context ctx) {
         org.bukkit.Server bukkitServer = Bukkit.getServer();
-        org.bukkit.World world = bukkitServer.getWorld(UUID.fromString(ctx.pathParam(":uuid")));
+
+        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        if (worldUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.World world = bukkitServer.getWorld(worldUUID);
 
         if (world != null) {
             Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
@@ -200,7 +209,7 @@ public class ServerApi {
             summary = "Send broadcast visible to those currently online.",
             tags = {"Chat"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             formParams = {
                     @OpenApiFormParam(name = "message", type = String.class)
@@ -223,7 +232,7 @@ public class ServerApi {
             summary = "Send a message to a specific player.",
             tags = {"Chat"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             formParams = {
                     @OpenApiFormParam(name = "message", type = String.class),
@@ -245,7 +254,7 @@ public class ServerApi {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.sendMessage(ctx.formParam("message"));
-        
+
         ctx.json("success");
     }
 
@@ -254,7 +263,7 @@ public class ServerApi {
             summary = "Get information about the scoreboard objectives",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Scoreboard.class))
@@ -282,7 +291,7 @@ public class ServerApi {
             summary = "Get information about a specific objective",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
@@ -295,7 +304,9 @@ public class ServerApi {
         org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
         org.bukkit.scoreboard.Objective objective = gameScoreboard.getObjective(objectiveName);
 
-        if(objective == null) { throw new NotFoundResponse(); }
+        if (objective == null) {
+            throw new NotFoundResponse();
+        }
 
         ctx.json(fromBukkitObjective(objective));
     }
@@ -310,8 +321,7 @@ public class ServerApi {
         o.setName(objective.getName());
 
         o.setDisplaySlot("");
-        if(objective.getDisplaySlot() != null)
-        {
+        if (objective.getDisplaySlot() != null) {
             o.setDisplaySlot(objective.getDisplaySlot().toString().toLowerCase());
         }
 
@@ -319,7 +329,7 @@ public class ServerApi {
         gameScoreboard.getEntries().forEach(entry -> {
             org.bukkit.scoreboard.Score score = objective.getScore(entry);
 
-            if(score.isScoreSet()) {
+            if (score.isScoreSet()) {
                 Score s = new Score();
                 s.setEntry(entry);
                 s.setValue(score.getScore());
@@ -337,7 +347,7 @@ public class ServerApi {
             summary = "Get information about all worlds",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
@@ -355,7 +365,7 @@ public class ServerApi {
             summary = "Get information about a specific world",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             pathParams = {
                     @OpenApiParam(name = "world", description = "The name of the world")
@@ -439,7 +449,7 @@ public class ServerApi {
             summary = "Get the whitelist",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
@@ -461,7 +471,7 @@ public class ServerApi {
             description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
             tags = {"Server"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             formParams = {
                     @OpenApiFormParam(name = "uuid", type = String.class),
@@ -481,26 +491,26 @@ public class ServerApi {
         String uuid = ctx.formParam("uuid");
         String name = ctx.formParam("name");
 
-        if(uuid == null && name == null) {
+        if (uuid == null && name == null) {
             throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
         }
 
         //Check Mojang API for missing param
-        if(uuid == null) {
+        if (uuid == null) {
             try {
                 uuid = MojangApiService.getUuid(name);
-            } catch(IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException ignored) {
                 throw new NotFoundResponse(Constants.WHITELIST_NAME_NOT_FOUND);
-            } catch(IOException ignored) {
+            } catch (IOException ignored) {
                 throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
         } else if (name == null) {
             try {
                 List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
                 name = nameHistory.get(nameHistory.size() - 1).getName();
-            } catch(IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException ignored) {
                 throw new NotFoundResponse(Constants.WHITELIST_UUID_NOT_FOUND);
-            } catch(IOException ignored) {
+            } catch (IOException ignored) {
                 throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
         }
@@ -542,7 +552,7 @@ public class ServerApi {
             description = "Responds with an array of objects containing keys name and enabled.",
             tags = {"Plugins"},
             headers = {
-            @OpenApiParam(name = "key")
+                    @OpenApiParam(name = "key")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -564,69 +574,81 @@ public class ServerApi {
     }
 
     @OpenApi(
-        path = "/v1/server/ops",
-        method = HttpMethod.POST,
-        summary = "Sets a specific player to Op",
-        tags = {"Player"},
-        headers = {
-        @OpenApiParam(name = "key")
-        },
-        formParams = {
-            @OpenApiFormParam(name = "playerUuid"), 
-        }, 
-        responses = { 
-            @OpenApiResponse(status = "200")
-        })
+            path = "/v1/server/ops",
+            method = HttpMethod.POST,
+            summary = "Sets a specific player to Op",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            formParams = {
+                    @OpenApiFormParam(name = "playerUuid"),
+            },
+            responses = {
+                    @OpenApiResponse(status = "200")
+            })
     public static void opPlayer(Context ctx) {
         if (ctx.formParam("playerUuid").isEmpty()) {
             throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
+
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("playerUuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
         if (player == null) {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.setOp(true);
         ctx.json("success");
     }
-    
+
     @OpenApi(
-        path = "/v1/server/ops", 
-        method = HttpMethod.DELETE, 
-        summary = "Removes Op from a specific player", 
-        tags = {"Player"},
-        headers = {
-        @OpenApiParam(name = "key")
-        },
-        formParams = {
-            @OpenApiFormParam(name = "playerUuid")
-        }, 
-        responses = { @OpenApiResponse(status = "200")}
+            path = "/v1/server/ops",
+            method = HttpMethod.DELETE,
+            summary = "Removes Op from a specific player",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            formParams = {
+                    @OpenApiFormParam(name = "playerUuid")
+            },
+            responses = {@OpenApiResponse(status = "200")}
     )
     public static void deopPlayer(Context ctx) {
         if (ctx.formParam("playerUuid").isEmpty()) {
             throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
-        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("playerUuid")));
+
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
         if (player == null) {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
         player.setOp(false);
         ctx.json("success");
     }
-    
+
     @OpenApi(
-        path = "/v1/players/op",
-        method = HttpMethod.GET,
-        summary = "Get all op players",
-        tags = {"Player"},
-        headers = {
-        @OpenApiParam(name = "key")
-        },
-        responses = {
-            @OpenApiResponse(
-                status = "200",
-                content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true)) 
-        }
+            path = "/v1/players/op",
+            method = HttpMethod.GET,
+            summary = "Get all op players",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            responses = {
+                    @OpenApiResponse(
+                            status = "200",
+                            content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+            }
     )
     public static void getOps(Context ctx) {
         org.bukkit.OfflinePlayer players[] = Bukkit.getOfflinePlayers();
@@ -641,36 +663,36 @@ public class ServerApi {
             p.setWhitelisted(player.isWhitelisted());
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
-        
+
             if (PluginEntrypoint.getEconomy() != null) {
                 p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
             }
-        
+
             opedPlayers.add(p);
-        
+
         }
         ctx.json(opedPlayers);
-    
+
     }
 
     @OpenApi(
-        path = "/v1/server/exec",
-        method = HttpMethod.POST,
-        summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
-                "command executors will properly send their messages to the CommandSender, though, most do.",
-        tags = {"Server"},
-        headers = {
-            @OpenApiParam(name = "key")
-        },
-        formParams = {
-            @OpenApiFormParam(name = "command", required = true),
-            @OpenApiFormParam(name = "time", type = Long.class)
-        },
-        responses = {
-            @OpenApiResponse(
-                status = "200"
-            )
-        }
+            path = "/v1/server/exec",
+            method = HttpMethod.POST,
+            summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
+                    "command executors will properly send their messages to the CommandSender, though, most do.",
+            tags = {"Server"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            formParams = {
+                    @OpenApiFormParam(name = "command", required = true),
+                    @OpenApiFormParam(name = "time", type = Long.class)
+            },
+            responses = {
+                    @OpenApiResponse(
+                            status = "200"
+                    )
+            }
     )
     public static void postCommand(Context ctx) {
         String command = ctx.formParam("command");

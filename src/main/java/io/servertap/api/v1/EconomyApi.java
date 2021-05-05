@@ -2,8 +2,8 @@ package io.servertap.api.v1;
 
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
+import io.javalin.http.HttpResponseException;
 import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
@@ -15,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class EconomyApi {
@@ -40,7 +41,7 @@ public class EconomyApi {
     public static void getEconomyPluginInformation(Context ctx) {
         Plugin econPlugin;
         if (PluginEntrypoint.getEconomy() == null) {
-            throw new InternalServerErrorResponse(Constants.VAULT_MISSING);
+            throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         } else {
             RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
             if (rsp == null) {
@@ -107,10 +108,14 @@ public class EconomyApi {
         }
 
         if (PluginEntrypoint.getEconomy() == null) {
-            throw new InternalServerErrorResponse(Constants.VAULT_MISSING);
+            throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         }
 
-        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(ctx.formParam("uuid")));
+        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("uuid"));
+        if (playerUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+        OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
 
         double amount = Double.parseDouble(ctx.formParam("amount"));
 
