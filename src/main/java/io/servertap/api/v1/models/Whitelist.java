@@ -1,7 +1,6 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
-
 import org.bukkit.OfflinePlayer;
 
 public class Whitelist {

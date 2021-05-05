@@ -4,29 +4,29 @@ import com.google.gson.annotations.Expose;
 import io.servertap.api.v1.models.Player;
 
 public class PlayerQuitWebhookEvent extends WebhookEvent {
-	@Expose
-	Player player;
+    @Expose
+    Player player;
 
-	@Expose
-	String quitMessage;
+    @Expose
+    String quitMessage;
 
-	public PlayerQuitWebhookEvent() {
-		eventType = EventType.PlayerQuit;
-	}
+    public PlayerQuitWebhookEvent() {
+        eventType = EventType.PlayerQuit;
+    }
 
-	public Player getPlayer() {
-		return player;
-	}
+    public Player getPlayer() {
+        return player;
+    }
 
-	public void setPlayer(Player player) {
-		this.player = player;
-	}
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
-	public String getQuitMessage() {
-		return quitMessage;
-	}
+    public String getQuitMessage() {
+        return quitMessage;
+    }
 
-	public void setQuitMessage(String quitMessage) {
-		this.quitMessage = quitMessage;
-	}
+    public void setQuitMessage(String quitMessage) {
+        this.quitMessage = quitMessage;
+    }
 }

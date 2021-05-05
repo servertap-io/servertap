@@ -13,7 +13,7 @@ public class ServerBan {
 
     @Expose
     private String source = null;
-    
+
     @Expose
     private String reason = null;
 
