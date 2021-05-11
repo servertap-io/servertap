@@ -4,12 +4,12 @@
 
     <groupId>io.servertap</groupId>
     <artifactId>ServerTap</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.18-SNAPSHOT</version>
 
     <scm>
-        <developerConnection>scm:git:ssh://github.com/phybros/servertap.git</developerConnection>
-      <tag>v0.0.6</tag>
-  </scm>
+        <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
+        <tag>v0.0.16</tag>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -63,9 +63,9 @@
         </dependency>
         <!-- NBT API integration -->
         <dependency>
-          <groupId>de.tr7zw</groupId>
-          <artifactId>item-nbt-api-plugin</artifactId>
-          <version>2.3.1</version>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api-plugin</artifactId>
+            <version>2.3.1</version>
         </dependency>
 
         <!-- logging framework -->
@@ -103,6 +103,36 @@
 
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <preparationGoals>clean verify com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version"</preparationGoals>
+                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Setting plugin.yml version: ${project.version}"</completionGoals>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basedir>${basedir}</basedir>
+                    <file>${project.basedir}/src/main/resources/plugin.yml</file>
+                    <regex>true</regex>
+                    <regexFlags>
+                        <regexFlag>MULTILINE</regexFlag>
+                    </regexFlags>
+                    <replacements>
+                        <replacement>
+                            <token>^version: [a-zA-Z0-9.-]+$</token>
+                            <value>version: ${project.version}</value>
+                        </replacement>
+                    </replacements>
                 </configuration>
             </plugin>
 
