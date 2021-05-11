@@ -104,6 +104,7 @@
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <preparationGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version"</preparationGoals>
+                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version"</completionGoals>
                 </configuration>
             </plugin>
 
