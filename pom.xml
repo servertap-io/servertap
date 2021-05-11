@@ -104,6 +104,35 @@
 
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version"</completionGoals>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basedir>${basedir}</basedir>
+                    <file>${project.basedir}/src/main/resources/plugin.yml</file>
+                    <regex>true</regex>
+                    <regexFlags>
+                        <regexFlag>MULTILINE</regexFlag>
+                    </regexFlags>
+                    <replacements>
+                        <replacement>
+                            <token>^version: [a-zA-Z0-9.-]+$</token>
+                            <value>version: ${project.version}</value>
+                        </replacement>
+                    </replacements>
                 </configuration>
             </plugin>
 
