@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.servertap</groupId>
@@ -8,8 +9,8 @@
 
     <scm>
         <developerConnection>scm:git:ssh://github.com/phybros/servertap.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -63,9 +64,9 @@
         </dependency>
         <!-- NBT API integration -->
         <dependency>
-          <groupId>de.tr7zw</groupId>
-          <artifactId>item-nbt-api-plugin</artifactId>
-          <version>2.3.1</version>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api-plugin</artifactId>
+            <version>2.3.1</version>
         </dependency>
 
         <!-- logging framework -->
@@ -103,34 +104,6 @@
 
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <basedir>${basedir}</basedir>
-                    <file>${project.basedir}/src/main/resources/plugin.yml</file>
-                    <regex>true</regex>
-                    <regexFlags>
-                        <regexFlag>MULTILINE</regexFlag>
-                    </regexFlags>
-                    <replacements>
-                        <replacement>
-                            <token>^version: [a-zA-Z0-9.-]+$</token>
-                            <value>version: ${project.version}</value>
-                        </replacement>
-                    </replacements>
                 </configuration>
             </plugin>
 
