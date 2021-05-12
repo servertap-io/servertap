@@ -4,11 +4,11 @@
 
     <groupId>io.servertap</groupId>
     <artifactId>ServerTap</artifactId>
-    <version>0.0.17-SNAPSHOT</version>
+    <version>0.0.17</version>
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
-        <tag>v0.0.16</tag>
+        <tag>v0.0.17</tag>
     </scm>
 
     <properties>
