@@ -2,5 +2,5 @@
 
 set -e
 
-mvn release:prepare
+mvn release:prepare -DignoreSnapshots=true
 mvn release:clean
