@@ -4,11 +4,12 @@
 
     <groupId>io.servertap</groupId>
     <artifactId>ServerTap</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
-    </scm>
+      <tag>v0.1.1</tag>
+  </scm>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
