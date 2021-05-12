@@ -7,7 +7,7 @@
     <version>0.0.14-SNAPSHOT</version>
 
     <scm>
-        <developerConnection>scm:git:ssh://github.com/phybros/servertap.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
         <tag>v0.0.13</tag>
     </scm>
 
@@ -103,8 +103,8 @@
 
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <preparationGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version to ${project.version}"</preparationGoals>
-                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version to ${project.version}"</completionGoals>
+                    <preparationGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version to @{project.version}"</preparationGoals>
+                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version to @{project.version}"</completionGoals>
                 </configuration>
             </plugin>
 
