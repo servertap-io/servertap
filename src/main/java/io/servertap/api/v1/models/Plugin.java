@@ -1,16 +1,11 @@
 package io.servertap.api.v1.models;
 
-import com.google.gson.annotations.Expose;
-
 public class Plugin {
 
-    @Expose
     private String name = null;
 
-    @Expose
     private Boolean enabled = null;
 
-    @Expose
     private String version = null;
 
     public Plugin name(String name) {
