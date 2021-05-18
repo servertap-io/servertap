@@ -1,38 +1,27 @@
 package io.servertap.api.v1.models;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.Set;
 
 /**
  * A Bukkit/Spigot/Paper server
  */
 public class Server {
-    @Expose
     private String name = null;
 
-    @Expose
     private String motd = null;
 
-    @Expose
     private String version = null;
 
-    @Expose
     private String bukkitVersion = null;
 
-    @Expose
     private String tps = null;
 
-    @Expose
     private ServerHealth health = null;
 
-    @Expose
     private Set<ServerBan> bannedIps = null;
 
-    @Expose
     private Set<ServerBan> bannedPlayers = null;
 
-    @Expose
     private Set<Whitelist> whitelistedPlayers = null;
 
     public Server name(String name) {

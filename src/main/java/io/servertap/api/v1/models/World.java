@@ -1,44 +1,31 @@
 package io.servertap.api.v1.models;
 
-import com.google.gson.annotations.Expose;
-
 import java.math.BigDecimal;
 
 /**
  * A Minecraft world
  */
 public class World {
-    @Expose
     private String name = null;
 
-    @Expose
     private String uuid = null;
 
-    @Expose
     private BigDecimal time = null;
 
-    @Expose
     private Boolean storm = null;
 
-    @Expose
     private Boolean thundering = null;
 
-    @Expose
     private Boolean generateStructures = null;
 
-    @Expose
     private Boolean allowAnimals = null;
 
-    @Expose
     private Boolean allowMonsters = null;
 
-    @Expose
     private Integer difficulty = null;
 
-    @Expose
     private Integer environment = null;
 
-    @Expose
     private BigDecimal seed = null;
 
     public World name(String name) {
