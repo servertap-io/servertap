@@ -237,13 +237,17 @@ public class WebhookEventListener implements Listener {
     }
 
     private String normalizeMessage(String message) {
-        if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
+        try {
+            if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
+                return message;
+            }
+            Pattern chatCodePattern = Pattern.compile("§(4|c|6|e|2|a|b|3|1|9|d|5|f|7|8|l|n|o|k|m|r)", Pattern.CASE_INSENSITIVE);
+            Matcher chatCodeMatcher = chatCodePattern.matcher(message);
+            return chatCodeMatcher.replaceAll("");
+                    
+        } catch (Exception e) {
             return message;
         }
-        Pattern chatCodePattern = Pattern.compile("§(4|c|6|e|2|a|b|3|1|9|d|5|f|7|8|l|n|o|k|m|r)", Pattern.CASE_INSENSITIVE);
-        Matcher chatCodeMatcher = chatCodePattern.matcher(message);
-        return chatCodeMatcher.replaceAll("");
-
     }
     private static class PostRequestTask implements Runnable {
         private final WebhookEvent webhookEvent;
