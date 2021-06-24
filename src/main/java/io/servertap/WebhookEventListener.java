@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 public class WebhookEventListener implements Listener {
     private List<RegisteredWebhook> registeredWebhooks;
@@ -106,7 +107,7 @@ public class WebhookEventListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         PlayerChatWebhookEvent eventModel = new PlayerChatWebhookEvent();
 
-        eventModel.setMessage(event.getMessage());
+        eventModel.setMessage(normalizeMessage(event.getMessage()));
         eventModel.setPlayerName(event.getPlayer().getDisplayName());
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
@@ -130,7 +131,7 @@ public class WebhookEventListener implements Listener {
 
         eventModel.setPlayer(player);
         eventModel.setDrops(drops);
-        eventModel.setDeathMessage(event.getDeathMessage());
+        eventModel.setDeathMessage(normalizeMessage(event.getDeathMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -150,7 +151,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setJoinMessage(event.getJoinMessage());
+        eventModel.setJoinMessage(normalizeMessage(event.getJoinMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -170,7 +171,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setQuitMessage(event.getQuitMessage());
+        eventModel.setQuitMessage(normalizeMessage(event.getQuitMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -190,7 +191,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setReason(event.getReason());
+        eventModel.setReason(normalizeMessage(event.getReason()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -235,6 +236,15 @@ public class WebhookEventListener implements Listener {
         return p;
     }
 
+    private String normalizeMessage(String message) {
+        if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
+            return message;
+        }
+        Pattern chatCodePattern = Pattern.compile("§(4|c|6|e|2|a|b|3|1|9|d|5|f|7|8|l|n|o|k|m|r)", Pattern.CASE_INSENSITIVE);
+        Matcher chatCodeMatcher = chatCodePattern.matcher(message);
+        return chatCodeMatcher.replaceAll("");
+
+    }
     private static class PostRequestTask implements Runnable {
         private final WebhookEvent webhookEvent;
         private final String listener;
