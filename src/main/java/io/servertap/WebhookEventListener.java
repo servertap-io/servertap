@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.api.v1.models.events.*;
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
@@ -241,10 +243,7 @@ public class WebhookEventListener implements Listener {
             if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
                 return message;
             }
-            Pattern chatCodePattern = Pattern.compile("§(4|c|6|e|2|a|b|3|1|9|d|5|f|7|8|l|n|o|k|m|r)", Pattern.CASE_INSENSITIVE);
-            Matcher chatCodeMatcher = chatCodePattern.matcher(message);
-            return chatCodeMatcher.replaceAll("");
-                    
+            return ChatColor.stripColor(message);
         } catch (Exception e) {
             return message;
         }
