@@ -55,6 +55,10 @@ public class PlayerApi {
                 p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
             }
 
+            p.setHealth(player.getHealth());
+            p.setHunger(player.getFoodLevel());
+            p.setSaturation(player.getSaturation());
+
             players.add(p);
         }));
 

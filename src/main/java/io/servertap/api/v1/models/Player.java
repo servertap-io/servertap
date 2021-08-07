@@ -42,6 +42,15 @@ public class Player {
     @Expose
     private String world = null;
 
+    @Expose
+    private Double health = null;
+
+    @Expose
+    private Integer hunger = null;
+
+    @Expose
+    private Float saturation = null;
+
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
@@ -238,5 +247,29 @@ public class Player {
 
     public void setWorld(String dimension) {
         this.world = dimension;
+    }
+
+    public Double getHealth() {
+        return this.health;
+    }
+
+    public void setHealth(Double health) {
+        this.health = health;
+    }
+
+    public Integer getHunger() {
+        return this.hunger;
+    }
+
+    public void setHunger(Integer hunger) {
+        this.hunger = hunger;
+    }
+
+    public Float getSaturation() {
+        return this.saturation;
+    }
+
+    public void setSaturation(Float saturation) {
+        this.saturation = saturation;
     }
 }
