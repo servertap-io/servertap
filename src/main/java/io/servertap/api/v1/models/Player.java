@@ -36,12 +36,16 @@ public class Player {
     @Expose
     private Double balance = null;
 
+    @Expose
+    private Double[] location = null;
+
+    @Expose
+    private String world = null;
 
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
     }
-
 
     /**
      * Current exhaustion level
@@ -55,7 +59,6 @@ public class Player {
     public void setBalance(Double balance) {
         this.balance = balance;
     }
-
 
     /**
      * The Player's UUID
@@ -213,5 +216,27 @@ public class Player {
 
     public void setOp(Boolean op) {
         this.op = op;
+    }
+
+    /**
+     * Returns location as an array of Doubles x,y,z
+     * 
+     * @return location
+     */
+
+    public Double[] getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(Double[] location) {
+        this.location = location;
+    }
+
+    public String getWorld() {
+        return this.world;
+    }
+
+    public void setWorld(String dimension) {
+        this.world = dimension;
     }
 }
