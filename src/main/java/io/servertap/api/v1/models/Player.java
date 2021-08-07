@@ -241,6 +241,11 @@ public class Player {
         this.location = location;
     }
 
+    /**
+     * Returns the name of the world the player is currently in
+     * 
+     * @return
+     */
     public String getWorld() {
         return this.world;
     }
