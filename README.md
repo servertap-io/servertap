@@ -104,7 +104,21 @@ key: some-long-super-random-string
 
 Then include a Header called `key` with your specified key on every request to Authenticate.
 
-We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info. 
+We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info.
+
+# CORS
+
+By default, ServerTap allows cross-origin requests from any origin (`*`). To change this, change the `corsOrigins`
+setting in the config file.
+
+Example:
+
+```yaml
+corsOrigins:
+  - https://mysite.com
+```
+
+The setting supports as many origins as you want, just add them to the array.
 
 # Webhooks
 

@@ -52,6 +52,15 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.defaultContentType = "application/json";
                 config.showJavalinBanner = false;
 
+                // unpack the list of strings into varargs
+                List<String> corsOrigins = bukkitConfig.getStringList("corsOrigins");
+                String[] originArray = new String[corsOrigins.size()];
+                for (int i = 0; i < originArray.length; i++) {
+                    log.info(String.format("Enabling CORS for %s", corsOrigins.get(i)));
+                    originArray[i] = corsOrigins.get(i);
+                }
+                config.enableCorsForOrigin(originArray);
+
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
                     String path = ctx.req.getPathInfo();
@@ -74,6 +83,7 @@ public class PluginEntrypoint extends JavaPlugin {
         if (bukkitConfig.getBoolean("debug")) {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
         }
+
         app.routes(() -> {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
