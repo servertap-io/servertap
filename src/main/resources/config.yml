@@ -3,6 +3,11 @@ debug: false
 useKeyAuth: false
 key: 'change_me'
 normalizeMessages: true
+
+# Use this list to set allowed CORS Origins ("*" by default)
+corsOrigins:
+  - "*"
+
 # Example webhook configuration
 #webhooks:
 #  default:
