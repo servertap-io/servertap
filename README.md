@@ -10,7 +10,7 @@ This plugin is under development and is **not ready for real usage yet**.
 
 # Discord
 
-Join the Discord to talk about this plugin https://discord.gg/tG4AEt7
+Join the Discord to talk about this plugin https://discord.gg/rhqXArkQ3U
 
 # Usage
 
