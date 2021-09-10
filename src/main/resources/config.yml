@@ -4,6 +4,15 @@ useKeyAuth: false
 key: 'change_me'
 normalizeMessages: true
 
+# TLS (a.k.a. SSL) options
+tls:
+  # Set to true to enable TLS
+  enabled: false
+  # The path to your keystore (relative to ServerTap's plugin dir)
+  keystore: keystore.jks
+  # The password for the keystore
+  keystorePassword: ""
+
 # Use this list to set allowed CORS Origins ("*" by default)
 corsOrigins:
   - "*"
@@ -18,3 +27,4 @@ corsOrigins:
 #      - PlayerKick
 #      - PlayerDeath
 #      - PlayerChat
+
