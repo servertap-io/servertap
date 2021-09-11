@@ -35,4 +35,7 @@ public class Constants {
 
     // General errors
     public static final String INVALID_UUID = "Invalid UUID";
+
+    // PAPI Messages
+    public static final String PAPI_MESSAGE_MISSING = "Missing message from request";
 }

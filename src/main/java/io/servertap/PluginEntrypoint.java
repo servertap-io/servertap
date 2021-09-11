@@ -7,6 +7,10 @@ import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.servertap.api.v1.*;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
+import io.servertap.api.v1.EconomyApi;
+import io.servertap.api.v1.PAPIApi;
+import io.servertap.api.v1.PlayerApi;
+import io.servertap.api.v1.ServerApi;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
@@ -127,6 +131,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Plugin routes
                 get("plugins", ServerApi::listPlugins);
+
+                // PAPI Routes
+                post("placeholders/replace", PAPIApi::replacePlaceholders);
 
                 // Websocket handler
                 ws("ws/console", WebsocketHandler::events);
