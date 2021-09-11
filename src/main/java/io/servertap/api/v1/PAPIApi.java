@@ -22,8 +22,8 @@ public class PAPIApi {
                     @OpenApiParam(name = "key")
             },
             formParams = {
+                    @OpenApiFormParam(name = "message", required = true),
                     @OpenApiFormParam(name = "uuid"),
-                    @OpenApiFormParam(name = "message")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
@@ -31,22 +31,22 @@ public class PAPIApi {
             }
     )
     public static void replacePlaceholders(Context ctx) {
-        String passedUuid = ctx.formParam("uuid");
-        if (passedUuid == null || passedUuid.isEmpty()) {
-            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
-        }
+        OfflinePlayer player = null;
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("uuid"));
-        if (playerUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
+        String passedUuid = ctx.formParam("uuid");
+        if (passedUuid != null && !passedUuid.isEmpty()) {
+            UUID playerUUID = ValidationUtils.safeUUID(passedUuid);
+            if (playerUUID == null) {
+                throw new BadRequestResponse(Constants.INVALID_UUID);
+            }
+
+            player = Bukkit.getOfflinePlayer(playerUUID);
         }
 
         String passedMessage = ctx.formParam("message");
         if (passedMessage == null || passedMessage.isEmpty()) {
             throw new BadRequestResponse(Constants.PAPI_MESSAGE_MISSING);
         }
-
-        OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             passedMessage = PlaceholderAPI.setPlaceholders(player, passedMessage);
