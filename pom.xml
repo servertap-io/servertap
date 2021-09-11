@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.servertap</groupId>
@@ -8,8 +9,8 @@
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -27,6 +28,10 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
             <layout>default</layout>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
 
@@ -91,6 +96,14 @@
             <version>1.7</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- placeholder API integration -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.10.10</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,8 +116,12 @@
 
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <preparationGoals>clean verify com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Incrementing plugin.yml version"</preparationGoals>
-                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin -Dmessage="Setting plugin.yml version: ${project.version}"</completionGoals>
+                    <preparationGoals>clean verify com.google.code.maven-replacer-plugin:replacer:replace scm:checkin
+                        -Dmessage="Incrementing plugin.yml version"
+                    </preparationGoals>
+                    <completionGoals>com.google.code.maven-replacer-plugin:replacer:replace scm:checkin
+                        -Dmessage="Setting plugin.yml version: ${project.version}"
+                    </completionGoals>
                 </configuration>
             </plugin>
 

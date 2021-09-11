@@ -5,6 +5,7 @@ import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.servertap.api.v1.EconomyApi;
+import io.servertap.api.v1.PAPIApi;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
 import io.swagger.v3.oas.models.info.Info;
@@ -122,6 +123,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Plugin routes
                 get("plugins", ServerApi::listPlugins);
+
+                // PAPI Routes
+                post("placeholders/replace", PAPIApi::replacePlaceholders);
             });
         });
 
