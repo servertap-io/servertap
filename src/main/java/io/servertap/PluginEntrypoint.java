@@ -37,6 +37,9 @@ public class PluginEntrypoint extends JavaPlugin {
     private static Economy econ = null;
     private static Javalin app = null;
 
+    public static final String SERVERTAP_KEY_HEADER = "key";
+    public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
+
     Logger rootLogger = (Logger) LogManager.getRootLogger();
 
     public ArrayList<ConsoleLine> consoleBuffer = new ArrayList<>();
@@ -89,11 +92,28 @@ public class PluginEntrypoint extends JavaPlugin {
                     String path = ctx.req.getPathInfo();
                     String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs"};
                     List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
-                    if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
+
+                    // If the request is for an excluded path, or the user has auth turned off, just serve the req
+                    if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth", false)) {
                         handler.handle(ctx);
-                    } else {
-                        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                        return;
                     }
+
+                    // Auth is turned on, make sure there is a header called "key"
+                    String authKey = bukkitConfig.getString("key", "change_me");
+                    if (ctx.header(SERVERTAP_KEY_HEADER) != null && ctx.header(SERVERTAP_KEY_HEADER).equals(authKey)) {
+                        handler.handle(ctx);
+                        return;
+                    }
+
+                    // If the request is still not handled, check for a cookie (websockets use cookies for auth)
+                    if (ctx.cookie(SERVERTAP_KEY_COOKIE) != null && ctx.cookie(SERVERTAP_KEY_COOKIE).equals(authKey)) {
+                        handler.handle(ctx);
+                        return;
+                    }
+
+                    // fall through, failsafe
+                    ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                 });
 
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));

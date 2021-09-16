@@ -1,25 +1,15 @@
 package io.servertap.api.v1.websockets;
 
-import io.javalin.http.Context;
-import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsHandler;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ConsoleLine;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class WebsocketHandler {
 
