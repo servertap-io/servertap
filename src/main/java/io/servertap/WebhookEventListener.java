@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.api.v1.models.events.*;
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 public class WebhookEventListener implements Listener {
     private List<RegisteredWebhook> registeredWebhooks;
@@ -106,7 +109,7 @@ public class WebhookEventListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         PlayerChatWebhookEvent eventModel = new PlayerChatWebhookEvent();
 
-        eventModel.setMessage(event.getMessage());
+        eventModel.setMessage(normalizeMessage(event.getMessage()));
         eventModel.setPlayerName(event.getPlayer().getDisplayName());
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
@@ -130,7 +133,7 @@ public class WebhookEventListener implements Listener {
 
         eventModel.setPlayer(player);
         eventModel.setDrops(drops);
-        eventModel.setDeathMessage(event.getDeathMessage());
+        eventModel.setDeathMessage(normalizeMessage(event.getDeathMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -150,7 +153,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setJoinMessage(event.getJoinMessage());
+        eventModel.setJoinMessage(normalizeMessage(event.getJoinMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -170,7 +173,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setQuitMessage(event.getQuitMessage());
+        eventModel.setQuitMessage(normalizeMessage(event.getQuitMessage()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -190,7 +193,7 @@ public class WebhookEventListener implements Listener {
         Player player = fromBukkitPlayer(event.getPlayer());
 
         eventModel.setPlayer(player);
-        eventModel.setReason(event.getReason());
+        eventModel.setReason(normalizeMessage(event.getReason()));
 
         for (RegisteredWebhook webhook : registeredWebhooks) {
             List<WebhookEvent.EventType> registeredEvents = webhook.getRegisteredEvents();
@@ -235,6 +238,16 @@ public class WebhookEventListener implements Listener {
         return p;
     }
 
+    private String normalizeMessage(String message) {
+        try {
+            if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
+                return message;
+            }
+            return ChatColor.stripColor(message);
+        } catch (Exception e) {
+            return message;
+        }
+    }
     private static class PostRequestTask implements Runnable {
         private final WebhookEvent webhookEvent;
         private final String listener;
