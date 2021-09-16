@@ -4,6 +4,8 @@ import io.javalin.http.Context;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsHandler;
+import io.servertap.PluginEntrypoint;
+import io.servertap.api.v1.models.ConsoleLine;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -26,6 +28,10 @@ public class WebsocketHandler {
     public static void events(WsHandler ws) {
         ws.onConnect(ctx -> {
             subscribers.put(clientHash(ctx), ctx);
+
+            for (ConsoleLine line : PluginEntrypoint.instance.consoleBuffer) {
+                ctx.send(line);
+            }
         });
 
         // Unsubscribe clients that disconnect
@@ -49,7 +55,7 @@ public class WebsocketHandler {
                 }
 
                 final String command = cmd;
-                Plugin pluginInstance = Bukkit.getPluginManager().getPlugin("ServerTap");
+                Plugin pluginInstance = PluginEntrypoint.instance;
 
                 if (pluginInstance != null) {
                     // Run the command on the main thread

@@ -5,6 +5,7 @@ import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.servertap.api.v1.*;
+import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.api.v1.EconomyApi;
@@ -21,30 +22,43 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.SynchronousQueue;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class PluginEntrypoint extends JavaPlugin {
 
+    public static PluginEntrypoint instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
     private static Economy econ = null;
     private static Javalin app = null;
 
     Logger rootLogger = (Logger) LogManager.getRootLogger();
 
+    public ArrayList<ConsoleLine> consoleBuffer = new ArrayList<>();
+    public int maxConsoleBufferSize = 1000;
+
+    public PluginEntrypoint() {
+        if (instance == null) {
+            instance = this;
+        }
+    }
+
     @Override
     public void onEnable() {
         // Tell bStats what plugin this is
         Metrics metrics = new Metrics(this, 9492);
 
-        rootLogger.addFilter(new ConsoleListener());
-
         saveDefaultConfig();
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
+        maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
+        rootLogger.addFilter(new ConsoleListener(this));
         Bukkit.getScheduler().runTaskTimer(this, new Lag(), 100, 1);
 
         // Get the current class loader.

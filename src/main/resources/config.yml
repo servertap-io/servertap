@@ -18,3 +18,7 @@ corsOrigins:
 #      - PlayerKick
 #      - PlayerDeath
 #      - PlayerChat
+
+# Number of console log lines to send when websocket connections are opened
+# Set to 0 to effectively disable this
+websocketConsoleBuffer: 1000
