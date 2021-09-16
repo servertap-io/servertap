@@ -20,7 +20,7 @@ public class ConsoleListener implements Filter {
 
     @Override
     public Result filter(LogEvent logEvent) {
-        if (plugin.consoleBuffer.size() >= 1000) {
+        if (plugin.consoleBuffer.size() >= plugin.maxConsoleBufferSize) {
             plugin.consoleBuffer.remove(0);
         }
 
