@@ -15,9 +15,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
@@ -49,15 +58,45 @@ public class PluginEntrypoint extends JavaPlugin {
         // Instantiate the web server (which will now load using the plugin's class
         // loader).
         if (app == null) {
+
             app = Javalin.create(config -> {
                 config.defaultContentType = "application/json";
                 config.showJavalinBanner = false;
+
+                boolean tlsConfEnabled = bukkitConfig.getBoolean("tls.enabled", false);
+                if (tlsConfEnabled) {
+                    try {
+                        String keystorePath = bukkitConfig.getString("tls.keystore", "keystore.jks");
+                        String keystorePassword = bukkitConfig.getString("tls.keystorePassword", "");
+
+                        final String fullKeystorePath = getDataFolder().getAbsolutePath() + File.separator + keystorePath;
+
+                        if (!Files.exists(Paths.get(fullKeystorePath))) {
+                            log.warning(String.format("[ServerTap] TLS is enabled but %s doesn't exist. TLS disabled.", fullKeystorePath));
+                        } else {
+                            config.server(() -> {
+                                Server server = new Server();
+                                ServerConnector sslConnector = new ServerConnector(server, getSslContextFactory(fullKeystorePath, keystorePassword));
+                                sslConnector.setPort(bukkitConfig.getInt("port", 4567));
+                                server.setConnectors(new Connector[]{sslConnector});
+                                return server;
+                            });
+
+                            log.info("[ServerTap] TLS is enabled.");
+                        }
+                    } catch (Exception e) {
+                        log.severe("[ServerTap] Error while enabling TLS: " + e.getMessage());
+                        log.warning("[ServerTap] TLS is not enabled.");
+                    }
+                } else {
+                    log.warning("[ServerTap] TLS is not enabled.");
+                }
 
                 // unpack the list of strings into varargs
                 List<String> corsOrigins = bukkitConfig.getStringList("corsOrigins");
                 String[] originArray = new String[corsOrigins.size()];
                 for (int i = 0; i < originArray.length; i++) {
-                    log.info(String.format("Enabling CORS for %s", corsOrigins.get(i)));
+                    log.info(String.format("[ServerTap] Enabling CORS for %s", corsOrigins.get(i)));
                     originArray[i] = corsOrigins.get(i);
                 }
                 config.enableCorsForOrigin(originArray);
@@ -78,8 +117,9 @@ public class PluginEntrypoint extends JavaPlugin {
             });
 
         }
+
         // Don't create a new instance if the plugin is reloaded
-        app.start(bukkitConfig.getInt("port"));
+        app.start(bukkitConfig.getInt("port", 4567));
 
         if (bukkitConfig.getBoolean("debug")) {
             app.before(ctx -> log.info(ctx.req.getPathInfo()));
@@ -133,6 +173,13 @@ public class PluginEntrypoint extends JavaPlugin {
         Thread.currentThread().setContextClassLoader(classLoader);
 
         getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
+    }
+
+    private static SslContextFactory getSslContextFactory(String keystorePath, String keystorePassword) {
+        SslContextFactory sslContextFactory = new SslContextFactory.Server();
+        sslContextFactory.setKeyStorePath(keystorePath);
+        sslContextFactory.setKeyStorePassword(keystorePassword);
+        return sslContextFactory;
     }
 
     @Override

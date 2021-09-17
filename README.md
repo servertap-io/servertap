@@ -4,13 +4,21 @@ ServerTap is a REST API for Bukkit, Spigot, and PaperMC Minecraft servers. It
 allows for server admins to query and interact with their servers using
 simple REST semantics.
 
-This plugin is under development and is **not ready for real usage yet**.
-
-**But** if you're feeling brave, head over to https://github.com/phybros/servertap/releases to grab the latest and greatest plugin JAR.
+Head over to https://github.com/phybros/servertap/releases to grab the latest and greatest plugin JAR.
 
 # Discord
 
 Join the Discord to talk about this plugin https://discord.gg/rhqXArkQ3U
+
+# Contents
+
+- [Usage](#usage)
+- [Current Endpoints](#current-endpoints)
+- [TLS](#tls)
+- [Authentication](#authentication)
+- [CORS](#cors)
+- [Webhooks](#webhooks)
+- [Developing](#developing)
 
 # Usage
 
@@ -92,6 +100,39 @@ Some examples of capabilities are:
 - List/Find Players
 - Get/Pay/Debt Economy (W/ Plugin)
 - List Plugins 
+
+# TLS
+
+ServerTap supports TLS (a.k.a. SSL) via a Java "keystore" file. You can generate a keystore for yourself using the `keytool` utility
+that ships with Java.
+
+Using TLS is **highly recommended** as it encrypts the requests and responses to/from your server on the wire.
+
+Example:
+
+```
+keytool -genkey -keyalg RSA -alias servertap -keystore selfsigned.jks -validity 365 -keysize 2048
+
+Enter keystore password:
+Re-enter new password:
+What is your first and last name?
+  [Unknown]:
+...
+<you can mostly answer whatever you want to all these questions>
+```
+
+Make sure to save the output file `selfsigned.jks` into the `plugins/ServerTap` directory
+
+Then in `config.yml`:
+
+```yaml
+tls:
+  enabled: true
+  keystore: selfsigned.jks
+  keystorePassword: testing
+```
+
+Then make sure to use `https://` when talking to the API.
 
 # Authentication
 
