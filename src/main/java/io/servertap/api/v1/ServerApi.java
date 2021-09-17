@@ -582,6 +582,8 @@ public class ServerApi {
             pl.setName(plugin.getName());
             pl.setEnabled(plugin.isEnabled());
             pl.setVersion(plugin.getDescription().getVersion());
+            pl.setAuthors(plugin.getDescription().getAuthors());
+            pl.setDescription(plugin.getDescription().getDescription());
 
             pluginList.add(pl);
         }
