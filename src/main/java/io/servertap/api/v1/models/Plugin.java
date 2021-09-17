@@ -2,6 +2,8 @@ package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.List;
+
 public class Plugin {
 
     @Expose
@@ -12,6 +14,12 @@ public class Plugin {
 
     @Expose
     private String version = null;
+
+    @Expose
+    private List<String> authors = null;
+
+    @Expose
+    private String description = null;
 
     public Plugin name(String name) {
         this.name = name;
@@ -50,5 +58,21 @@ public class Plugin {
     public Plugin version(String version) {
         this.version = version;
         return this;
+    }
+
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<String> authors) {
+        this.authors = authors;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
