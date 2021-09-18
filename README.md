@@ -18,6 +18,8 @@ Join the Discord to talk about this plugin https://discord.gg/rhqXArkQ3U
 - [Authentication](#authentication)
 - [CORS](#cors)
 - [Webhooks](#webhooks)
+- [Websockets](#websockets)
+  - [Authenticating Websockets](#authenticating-websockets)
 - [Developing](#developing)
 
 # Usage
@@ -204,7 +206,62 @@ The available events are currently:
  * `PlayerKick`
  * `PlayerQuit`
 
-# Developing
+# Websockets
+
+ServerTap has a bi-directional websockets interface which allows you to 
+receive server log lines in realtime (no polling!).
+
+Once connected, any server log line that goes through the normal logging
+filters on the server will come down the websocket in a JSON object like
+this:
+
+```json
+{
+  "msg": "§6/version: §fGets the version of this server including any plugins in use",
+  "ts": 1631834015918,
+  "l": ""
+}
+```
+
+- `ts` is the timestamp of the log, in milliseconds since the UNIX Epoch
+- `l` is the name of the logger that produced the log
+
+Note: you can use a library like
+[ansicolors](https://www.npmjs.com/package/ansicolor) to parse the color
+codes for the browser.
+
+Connect to `ws://<host>:4567/v1/console` (or use `wss://` if you
+have [TLS](#tls) enabled). The last 1000 server log messages will be sent
+to the connecting client. You can configure  the size of the server log
+buffer by changing `websocketConsoleBuffer` in `config.yml`.
+
+You can also send commands through the WS connection and they will be
+executed on the server.
+
+### Authenticating Websockets
+
+Since you can't set headers on websocket connections, you can't use the
+header `key` to authenticate like you can with regular API routes.
+
+Instead you must set a cookie called `x-servertap-key` on the page hosting
+the websocket connection.
+
+Example:
+
+```js
+// set cookie to authenticate the connection
+document.cookie = "x-servertap-key=change_me";
+
+this.ws = new WebSocket("ws://localhost:4567/v1/ws/console");
+
+this.ws.onopen = function() {
+  console.log("Opened connection");
+};
+```
+
+### Note: If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the internet (bad idea).
+
+# Contributing to ServerTap
 
 You need a few things to get started
 
