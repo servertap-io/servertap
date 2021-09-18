@@ -64,6 +64,15 @@ public class PluginEntrypoint extends JavaPlugin {
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
+        // Warn about default auth key
+        if (bukkitConfig.getBoolean("useKeyAuth", true)) {
+            if (bukkitConfig.getString("key", "change_me").equals("change_me")) {
+                log.warning("[ServerTap] AUTH KEY IS SET TO DEFAULT \"change_me\"");
+                log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
+                log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
+            }
+        }
+
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
         rootLogger.addFilter(new ConsoleListener(this));
         Bukkit.getScheduler().runTaskTimer(this, new Lag(), 100, 1);
