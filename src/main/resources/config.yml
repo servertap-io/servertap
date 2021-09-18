@@ -1,6 +1,6 @@
 port: 4567
 debug: false
-useKeyAuth: false
+useKeyAuth: true
 key: 'change_me'
 normalizeMessages: true
 
