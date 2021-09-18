@@ -48,6 +48,7 @@ public class PluginEntrypoint extends JavaPlugin {
 
     public ArrayList<ConsoleLine> consoleBuffer = new ArrayList<>();
     public int maxConsoleBufferSize = 1000;
+    public boolean authEnabled = true;
 
     public PluginEntrypoint() {
         if (instance == null) {
@@ -64,8 +65,10 @@ public class PluginEntrypoint extends JavaPlugin {
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
+        this.authEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
+
         // Warn about default auth key
-        if (bukkitConfig.getBoolean("useKeyAuth", true)) {
+        if (this.authEnabled) {
             if (bukkitConfig.getString("key", "change_me").equals("change_me")) {
                 log.warning("[ServerTap] AUTH KEY IS SET TO DEFAULT \"change_me\"");
                 log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
@@ -137,7 +140,7 @@ public class PluginEntrypoint extends JavaPlugin {
                     List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
 
                     // If the request is for an excluded path, or the user has auth turned off, just serve the req
-                    if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth", false)) {
+                    if (noAuthPathsList.contains(path) || !this.authEnabled) {
                         handler.handle(ctx);
                         return;
                     }
