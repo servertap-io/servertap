@@ -10,6 +10,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,6 +135,11 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
     @Override
     public String getName() {
         return CONSOLE_COMMAND_SENDER.getName();
+    }
+
+    @Override
+    public Component name() {
+        return CONSOLE_COMMAND_SENDER.name();
     }
 
     @Override
