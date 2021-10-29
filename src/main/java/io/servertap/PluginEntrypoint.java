@@ -46,8 +46,6 @@ public class PluginEntrypoint extends JavaPlugin {
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
-        Bukkit.getScheduler().runTaskTimer(this, new Lag(), 100, 1);
-
         // Get the current class loader.
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 

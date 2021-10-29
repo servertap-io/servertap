@@ -8,7 +8,6 @@ import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
-import io.servertap.Lag;
 import io.servertap.PluginEntrypoint;
 import io.servertap.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
@@ -73,9 +72,6 @@ public class ServerApi {
         server.setBukkitVersion(bukkitServer.getBukkitVersion());
         server.setWhitelistedPlayers(getWhitelist());
 
-        // Possibly add 5m and 15m in the future?
-        server.setTps(Lag.getTPSString());
-
         // Get the list of IP bans
         Set<ServerBan> bannedIps = new HashSet<>();
         bukkitServer.getBanList(BanList.Type.IP).getBanEntries().forEach(banEntry -> {
@@ -121,6 +117,15 @@ public class ServerApi {
         health.setMaxMemory(memMax);
         health.setTotalMemory(memTotal);
         health.setFreeMemory(memFree);
+
+        // Transactions per second and ms per transaction
+        double[] dtps = Bukkit.getTPS();
+        ArrayList<Double> tps = new ArrayList<Double>();
+        for (int i = 0; i < dtps.length; i++) {
+            tps.add(Math.round(dtps[i]*10.0)/10.0);
+        }
+        health.setTps(tps);
+        health.setMspt(Math.round(Bukkit.getAverageTickTime()*10.0)/10.0);
 
         server.setHealth(health);
 
