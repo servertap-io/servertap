@@ -1,6 +1,6 @@
 port: 4567
 debug: false
-useKeyAuth: false
+useKeyAuth: true
 key: 'change_me'
 normalizeMessages: true
 
@@ -28,3 +28,6 @@ corsOrigins:
 #      - PlayerDeath
 #      - PlayerChat
 
+# Number of console log lines to send when websocket connections are opened
+# Set to 0 to effectively disable this
+websocketConsoleBuffer: 1000

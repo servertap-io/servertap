@@ -8,8 +8,13 @@ import io.servertap.api.v1.EconomyApi;
 import io.servertap.api.v1.PAPIApi;
 import io.servertap.api.v1.PlayerApi;
 import io.servertap.api.v1.ServerApi;
+import io.servertap.api.v1.models.ConsoleLine;
+import io.servertap.api.v1.websockets.ConsoleListener;
+import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,20 +27,34 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class PluginEntrypoint extends JavaPlugin {
 
-    private static final Logger log = Bukkit.getLogger();
+    public static PluginEntrypoint instance;
+    private static final java.util.logging.Logger log = Bukkit.getLogger();
     private static Economy econ = null;
     private static Javalin app = null;
+
+    public static final String SERVERTAP_KEY_HEADER = "key";
+    public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
+
+    Logger rootLogger = (Logger) LogManager.getRootLogger();
+
+    public ArrayList<ConsoleLine> consoleBuffer = new ArrayList<>();
+    public int maxConsoleBufferSize = 1000;
+    public boolean authEnabled = true;
+
+    public PluginEntrypoint() {
+        if (instance == null) {
+            instance = this;
+        }
+    }
 
     @Override
     public void onEnable() {
@@ -46,6 +65,19 @@ public class PluginEntrypoint extends JavaPlugin {
         FileConfiguration bukkitConfig = getConfig();
         setupEconomy();
 
+        this.authEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
+
+        // Warn about default auth key
+        if (this.authEnabled) {
+            if (bukkitConfig.getString("key", "change_me").equals("change_me")) {
+                log.warning("[ServerTap] AUTH KEY IS SET TO DEFAULT \"change_me\"");
+                log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
+                log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
+            }
+        }
+
+        maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
+        rootLogger.addFilter(new ConsoleListener(this));
         Bukkit.getScheduler().runTaskTimer(this, new Lag(), 100, 1);
 
         // Get the current class loader.
@@ -106,11 +138,28 @@ public class PluginEntrypoint extends JavaPlugin {
                     String path = ctx.req.getPathInfo();
                     String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs"};
                     List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
-                    if (noAuthPathsList.contains(path) || !bukkitConfig.getBoolean("useKeyAuth") || bukkitConfig.getString("key").equals(ctx.header("key"))) {
+
+                    // If the request is for an excluded path, or the user has auth turned off, just serve the req
+                    if (noAuthPathsList.contains(path) || !this.authEnabled) {
                         handler.handle(ctx);
-                    } else {
-                        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                        return;
                     }
+
+                    // Auth is turned on, make sure there is a header called "key"
+                    String authKey = bukkitConfig.getString("key", "change_me");
+                    if (ctx.header(SERVERTAP_KEY_HEADER) != null && ctx.header(SERVERTAP_KEY_HEADER).equals(authKey)) {
+                        handler.handle(ctx);
+                        return;
+                    }
+
+                    // If the request is still not handled, check for a cookie (websockets use cookies for auth)
+                    if (ctx.cookie(SERVERTAP_KEY_COOKIE) != null && ctx.cookie(SERVERTAP_KEY_COOKIE).equals(authKey)) {
+                        handler.handle(ctx);
+                        return;
+                    }
+
+                    // fall through, failsafe
+                    ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                 });
 
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
@@ -166,6 +215,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // PAPI Routes
                 post("placeholders/replace", PAPIApi::replacePlaceholders);
+
+                // Websocket handler
+                ws("ws/console", WebsocketHandler::events);
             });
         });
 
@@ -189,6 +241,7 @@ public class PluginEntrypoint extends JavaPlugin {
         if (app != null) {
             app.stop();
         }
+
     }
 
     private void setupEconomy() {
