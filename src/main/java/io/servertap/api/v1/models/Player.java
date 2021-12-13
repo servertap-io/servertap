@@ -36,6 +36,23 @@ public class Player {
     @Expose
     private Double balance = null;
 
+    @Expose
+    private Double[] location = null;
+
+    @Expose
+    private String dimension = null;
+
+    @Expose
+    private Double health = null;
+
+    @Expose
+    private Integer hunger = null;
+
+    @Expose
+    private Float saturation = null;
+
+    @Expose
+    private String gamemode = null;
 
     public Player uuid(String uuid) {
         this.uuid = uuid;
@@ -206,12 +223,89 @@ public class Player {
      *
      * @return op
      **/
-
     public Boolean isOp() {
         return op;
     }
 
     public void setOp(Boolean op) {
         this.op = op;
+    }
+
+    /**
+     * Location of the player as an array of x,y,z
+     *
+     * @return location
+     */
+    public Double[] getLocation() {
+        return location;
+    }
+
+    public void setLocation(Double[] location) {
+        this.location = location;
+    }
+
+    /**
+     * The dimension the player is currently in. Can be NORMAL, NETHER, THE_END, or CUSTOM
+     *
+     * @return world
+     */
+    public String getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(String dimension) {
+        this.dimension = dimension;
+    }
+
+    /**
+     * The health of the player as a Double
+     *
+     * @return health
+     */
+    public Double getHealth() {
+        return health;
+    }
+
+    public void setHealth(Double health) {
+        this.health = health;
+    }
+
+    /**
+     * The hunger of the player as an Integer
+     *
+     * @return hunger
+     */
+    public Integer getHunger() {
+        return hunger;
+    }
+
+    public void setHunger(Integer hunger) {
+        this.hunger = hunger;
+    }
+
+    /**
+     * The saturation of the player as a Float
+     *
+     * @return saturation
+     */
+    public Float getSaturation() {
+        return saturation;
+    }
+
+    public void setSaturation(Float saturation) {
+        this.saturation = saturation;
+    }
+
+    /**
+     * The gamemode of the player, can be SURVIVAL, CREATIVE, ADVENTURE, or SPECTATOR
+     *
+     * @return gamemode
+     */
+    public String getGamemode() {
+        return gamemode;
+    }
+
+    public void setGamemode(String gamemode) {
+        this.gamemode = gamemode;
     }
 }
