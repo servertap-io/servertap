@@ -1,0 +1,66 @@
+---
+# Project information
+site_name: ServerTap
+site_description: A JSON API for your Bukkit/Spigot/Paper Minecraft server
+site_author: phybros
+site_url: https://servertap.io
+
+# Repository
+repo_name: phybros/servertap
+repo_url: https://github.com/phybros/servertap
+edit_uri: "edit/master/docs/"
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github-alt
+  language: en
+  features:
+    - navigation.sections
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - scheme: slate
+      primary: blue
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+    - scheme: default
+      primary: blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+docs_dir: ./docs
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/phybros/servertap
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/fefHbTFAkj
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+  - minify:
+      minify_html: true
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+# Navigation structure
+nav:
+  - Introduction: index.md

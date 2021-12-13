@@ -1,20 +1,16 @@
----
-title: Welcome to ServerTap
----
+# ServerTap
 
 ServerTap is a REST API for Bukkit, Spigot, and PaperMC Minecraft servers. It
 allows for server admins to query and interact with their servers using
 simple REST semantics.
 
-This plugin is under development and is **not ready for real usage yet**.
+Head over to <https://github.com/phybros/servertap/releases> to grab the latest and greatest plugin JAR.
 
-**But** if you're feeling brave, head over to https://github.com/phybros/servertap/releases to grab the latest and greatest plugin JAR.
+## Discord
 
-# Discord
+Join the Discord to talk about this plugin <https://discord.gg/fefHbTFAkj>
 
-Join the Discord to talk about this plugin https://discord.gg/rhqXArkQ3U
-
-# Usage
+## Usage
 
 Install this plugin by dropping the jar into the `plugins/` directory on your
 server.
@@ -73,14 +69,16 @@ $ curl http://localhost:4567/v1/players
 ]
 ```
 
-# Current Endpoints
+## Current Endpoints
 
 This plugin self-hosts its own API documentation using Swagger.
-You can see the full API documentation at http://your-server.net:4567/swagger.
+You can see the full API documentation at `http://your-server.net:4567/swagger`.
 You can even explore and test the API right from the UI!
 
->Note: there is a known issue that causes the OpenApi plugin to spew
->tons of logs into your server log. See https://github.com/phybros/servertap/issues/60 for details.
+!!! note
+    there is a known issue that causes the OpenApi plugin to spew tons of logs
+    into your server log. See <https://github.com/phybros/servertap/issues/60>
+    for details.
 
 Some examples of capabilities are:
 
@@ -89,13 +87,46 @@ Some examples of capabilities are:
   - Get/Add/Remove Ops
   - Get/Add Whitelist
 - Get/Save/List Worlds
-- List/Read Scoreboard(s) 
+- List/Read Scoreboard(s)
 - Broadcast
 - List/Find Players
 - Get/Pay/Debt Economy (W/ Plugin)
-- List Plugins 
+- List Plugins
 
-# Authentication
+## TLS
+
+ServerTap supports TLS (a.k.a. SSL) via a Java "keystore" file. You can generate a keystore for yourself using the `keytool` utility
+that ships with Java.
+
+Using TLS is **highly recommended** as it encrypts the requests and responses to/from your server on the wire.
+
+Example:
+
+```
+keytool -genkey -keyalg RSA -alias servertap -keystore selfsigned.jks -validity 365 -keysize 2048
+
+Enter keystore password:
+Re-enter new password:
+What is your first and last name?
+  [Unknown]:
+...
+<you can mostly answer whatever you want to all these questions>
+```
+
+Make sure to save the output file `selfsigned.jks` into the `plugins/ServerTap` directory
+
+Then in `config.yml`:
+
+```yaml
+tls:
+  enabled: true
+  keystore: selfsigned.jks
+  keystorePassword: testing
+```
+
+Then make sure to use `https://` when talking to the API.
+
+## Authentication
 
 Authentication is very rudimentary at this point. Add this to your `plugins/ServerTap/config.yml` file:
 
@@ -108,7 +139,7 @@ Then include a Header called `key` with your specified key on every request to A
 
 We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info.
 
-# CORS
+## CORS
 
 By default, ServerTap allows cross-origin requests from any origin (`*`). To change this, change the `corsOrigins`
 setting in the config file.
@@ -122,7 +153,7 @@ corsOrigins:
 
 The setting supports as many origins as you want, just add them to the array.
 
-# Webhooks
+## Webhooks
 
 ServerTap can send webhook messages in response to events on the server.
 
@@ -159,18 +190,74 @@ The webhook requests are `POST` containing a simple JSON payload:
 
 The available events are currently:
 
- * `PlayerJoin`
- * `PlayerDeath`
- * `PlayerChat`
- * `PlayerKick`
- * `PlayerQuit`
+* `PlayerJoin`
+* `PlayerDeath`
+* `PlayerChat`
+* `PlayerKick`
+* `PlayerQuit`
 
-# Developing
+## Websockets
+
+!!! warning
+    If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the internet (bad idea).
+
+ServerTap has a bi-directional websockets interface which allows you to
+receive server log lines in realtime (no polling!).
+
+Once connected, any server log line that goes through the normal logging
+filters on the server will come down the websocket in a JSON object like
+this:
+
+```json
+{
+  "msg": "§6/version: §fGets the version of this server including any plugins in use",
+  "ts": 1631834015918,
+  "l": ""
+}
+```
+
+- `ts` is the timestamp of the log, in milliseconds since the UNIX Epoch
+- `l` is the name of the logger that produced the log
+
+Note: you can use a library like
+[ansicolors](https://www.npmjs.com/package/ansicolor) to parse the color
+codes for the browser.
+
+Connect to `ws://<host>:4567/v1/console` (or use `wss://` if you
+have [TLS](#tls) enabled). The last 1000 server log messages will be sent
+to the connecting client. You can configure  the size of the server log
+buffer by changing `websocketConsoleBuffer` in `config.yml`.
+
+You can also send commands through the WS connection and they will be
+executed on the server.
+
+### Authenticating Websockets
+
+Since you can't set headers on websocket connections, you can't use the
+header `key` to authenticate like you can with regular API routes.
+
+Instead you must set a cookie called `x-servertap-key` on the page hosting
+the websocket connection.
+
+Example:
+
+```js
+// set cookie to authenticate the connection
+document.cookie = "x-servertap-key=change_me";
+
+this.ws = new WebSocket("ws://localhost:4567/v1/ws/console");
+
+this.ws.onopen = function() {
+  console.log("Opened connection");
+};
+```
+
+## Contributing to ServerTap
 
 You need a few things to get started
 
 - An IDE (e.g. IntelliJ)
-- JDK 8 (soon to be 11)
-- Maven
+- JDK 17
+- Maven (>= v3.3)
 
 Then, you can build the plugin `jar` by using the `mvn package` command.
