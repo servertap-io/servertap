@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.servertap.mojang.api.models.NameChange;
 import io.servertap.mojang.api.models.PlayerInfo;
+import io.servertap.utils.GsonSingleton;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class MojangApiService {
     private static final String getNameHistoryResource = "https://api.mojang.com/user/profiles/%s/names";
 
     public static String getUuid(String username) throws IOException {
-        Gson gson = new Gson();
+        Gson gson = GsonSingleton.getInstance();
 
         ApiResponse apiResponse = getApiResponse(String.format(getUuidResource, username));
         if (apiResponse.getHttpStatus() == HttpURLConnection.HTTP_NO_CONTENT) {
@@ -34,7 +35,7 @@ public class MojangApiService {
     public static List<NameChange> getNameHistory(String uuid) throws IOException {
         Type listType = new TypeToken<List<NameChange>>() {
         }.getType();
-        Gson gson = new Gson();
+        Gson gson = GsonSingleton.getInstance();
 
         //This API call doesn't accept UUIDS with dashes
         ApiResponse apiResponse = getApiResponse(String.format(getNameHistoryResource, uuid).replace("-", ""));

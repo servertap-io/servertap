@@ -11,6 +11,7 @@ import io.servertap.api.v1.ServerApi;
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
+import io.servertap.utils.GsonJsonMapper;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.logging.log4j.LogManager;
@@ -92,6 +93,8 @@ public class PluginEntrypoint extends JavaPlugin {
         if (app == null) {
 
             app = Javalin.create(config -> {
+                config.jsonMapper(new GsonJsonMapper());
+
                 config.defaultContentType = "application/json";
                 config.showJavalinBanner = false;
 
@@ -190,12 +193,12 @@ public class PluginEntrypoint extends JavaPlugin {
                 post("server/whitelist", ServerApi::whitelistPost);
                 get("worlds", ServerApi::worldsGet);
                 post("worlds/save", ServerApi::saveAllWorlds);
+                get("worlds/{uuid}", ServerApi::worldGet);
+                post("worlds/{uuid}/save", ServerApi::saveWorld);
                 get("worlds/download", ServerApi::downloadWorlds);
-                get("worlds/:uuid", ServerApi::worldGet);
-                get("worlds/:uuid/download", ServerApi::downloadWorld);
-                post("worlds/:uuid/save", ServerApi::saveWorld);
+                get("worlds/{uuid}/download", ServerApi::downloadWorld);
                 get("scoreboard", ServerApi::scoreboardGet);
-                get("scoreboard/:name", ServerApi::objectiveGet);
+                get("scoreboard/{name}", ServerApi::objectiveGet);
 
                 // Chat
                 post("chat/broadcast", ServerApi::broadcastPost);
@@ -204,8 +207,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 // Player routes
                 get("players", PlayerApi::playersGet);
                 get("players/all", PlayerApi::offlinePlayersGet);
-                get("players/:uuid", PlayerApi::playerGet);
-                get("players/:playerUuid/:worldUuid/inventory", PlayerApi::getPlayerInv);
+                get("players/{uuid}", PlayerApi::playerGet);
+                get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
 
                 // Economy routes
                 post("economy/pay", EconomyApi::playerPay);
@@ -268,6 +271,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 .description(this.getDescription().getDescription());
         return new OpenApiOptions(applicationInfo)
                 .path("/swagger-docs")
+                .includePath(Constants.API_V1 + "/*")
                 .activateAnnotationScanningFor("io.servertap.api.v1")
                 .swagger(new SwaggerOptions("/swagger"));
     }

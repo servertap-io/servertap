@@ -2,7 +2,6 @@ package io.servertap.api.v1;
 
 import com.google.gson.Gson;
 import io.javalin.http.*;
-import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.Lag;
@@ -11,6 +10,7 @@ import io.servertap.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.mojang.api.models.NameChange;
+import io.servertap.utils.GsonSingleton;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.BanList;
@@ -19,7 +19,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -160,7 +163,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/worlds/:uuid/save",
+            path = "/v1/worlds/{uuid}/save",
             summary = "Triggers a world save",
             method = HttpMethod.POST,
             tags = {"Server"},
@@ -401,7 +404,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/scoreboard/:name",
+            path = "/v1/scoreboard/{name}",
             summary = "Get information about a specific objective",
             tags = {"Server"},
             headers = {
@@ -415,7 +418,7 @@ public class ServerApi {
             }
     )
     public static void objectiveGet(Context ctx) {
-        String objectiveName = ctx.pathParam(":name");
+        String objectiveName = ctx.pathParam("name");
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
         org.bukkit.scoreboard.Objective objective = gameScoreboard.getObjective(objectiveName);
@@ -477,7 +480,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/worlds/:uuid",
+            path = "/v1/worlds/{uuid}",
             summary = "Get information about a specific world",
             tags = {"Server"},
             headers = {
@@ -650,7 +653,7 @@ public class ServerApi {
             }
         }
         whitelist.add(newEntry);
-        final String json = new Gson().toJson(whitelist);
+        final String json = GsonSingleton.getInstance().toJson(whitelist);
         try {
             final String path = Paths.get(directory.getAbsolutePath(), "whitelist.json").toString();
             final File myObj = new File(path);
@@ -827,11 +830,13 @@ public class ServerApi {
         AtomicLong time = new AtomicLong(timeRaw != null ? Long.parseLong(timeRaw) : 0);
         if (time.get() < 0) time.set(0);
 
-        ctx.result(CompletableFuture.supplyAsync(() -> {
+        ctx.future(CompletableFuture.supplyAsync(() -> {
             CompletableFuture<String> future = new ServerExecCommandSender().executeCommand(command, time.get(), TimeUnit.MILLISECONDS);
             try {
                 String output = future.get();
-                return "application/json".equalsIgnoreCase(ctx.contentType()) ? JavalinJson.toJson(output) : output;
+                Gson g = GsonSingleton.getInstance();
+
+                return "application/json".equalsIgnoreCase(ctx.contentType()) ? g.toJson(output) : output;
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }

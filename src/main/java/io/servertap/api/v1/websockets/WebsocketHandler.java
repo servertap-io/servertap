@@ -1,7 +1,7 @@
 package io.servertap.api.v1.websockets;
 
+import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
-import io.javalin.websocket.WsHandler;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ConsoleLine;
 import org.bukkit.Bukkit;
@@ -15,7 +15,7 @@ public class WebsocketHandler {
 
     private final static Map<String, WsContext> subscribers = new ConcurrentHashMap<>();
 
-    public static void events(WsHandler ws) {
+    public static void events(WsConfig ws) {
         ws.onConnect(ctx -> {
             subscribers.put(clientHash(ctx), ctx);
 
