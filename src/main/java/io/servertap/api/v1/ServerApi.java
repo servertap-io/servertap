@@ -217,12 +217,12 @@ public class ServerApi {
             } else {
                 String name = file.getAbsolutePath().substring(baseName.length())
                         // Trim first slash (absolute path)
-                        .replaceFirst("^/", "");
-//              Join path and folder name
+                        .replaceFirst("^" + File.separator, "");
+                // Join path and folder name
                 if(rootName == null) {
-                    name = folder.getName() + "/" + name;
+                    name = folder.getName() + File.separator + name;
                 } else {
-                    name = rootName + "/" + name;
+                    name = rootName + File.separator + name;
                 }
                 ZipEntry zipEntry = new ZipEntry(name);
                 zip.putNextEntry(zipEntry);
@@ -234,7 +234,7 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/worlds/:uuid/download",
-            summary = "Downloads a Zip compressed archive of the world's folder",
+            summary = "Downloads a ZIP compressed archive of the world's folder",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
@@ -268,12 +268,14 @@ public class ServerApi {
             ZipOutputStream zip = new ZipOutputStream(ctx.res.getOutputStream());
             addFolderToZip(folder, zip, folder.getAbsolutePath(), null);
             zip.close();
+        } else {
+            throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
         }
     }
 
     @OpenApi(
             path = "/v1/worlds/download",
-            summary = "Downloads a Zip compressed archive of all the worlds' folders",
+            summary = "Downloads a ZIP compressed archive of all the worlds' folders",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
