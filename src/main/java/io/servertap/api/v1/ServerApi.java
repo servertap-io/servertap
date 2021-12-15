@@ -306,12 +306,7 @@ public class ServerApi {
                 throw new InternalServerErrorResponse("Couldn't download world " + world.getName() + ": " + e.getMessage());
             }
         }
-        try {
-            zip.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        zip.close();
     }
 
     @OpenApi(
