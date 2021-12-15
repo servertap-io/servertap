@@ -1,10 +1,7 @@
 package io.servertap.api.v1;
 
 import com.google.gson.Gson;
-import io.javalin.http.BadRequestResponse;
-import io.javalin.http.Context;
-import io.javalin.http.NotFoundResponse;
-import io.javalin.http.ServiceUnavailableResponse;
+import io.javalin.http.*;
 import io.javalin.plugin.json.JavalinJson;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
@@ -14,6 +11,7 @@ import io.servertap.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.mojang.api.models.NameChange;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -21,9 +19,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -33,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class ServerApi {
 
@@ -204,6 +202,116 @@ public class ServerApi {
         }
 
         ctx.json("success");
+    }
+
+    private static void addFolderToZip(File folder, ZipOutputStream zip, String baseName, String rootName) throws IOException {
+        File[] files = folder.listFiles();
+        assert files != null;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                if(rootName == null) {
+                    addFolderToZip(file, zip, baseName, folder.getName());
+                } else {
+                    addFolderToZip(file, zip, baseName, rootName);
+                }
+            } else {
+                String name = file.getAbsolutePath().substring(baseName.length())
+                        // Trim first slash (absolute path)
+                        .replaceFirst("^/", "");
+//              Join path and folder name
+                if(rootName == null) {
+                    name = folder.getName() + "/" + name;
+                } else {
+                    name = rootName + "/" + name;
+                }
+                ZipEntry zipEntry = new ZipEntry(name);
+                zip.putNextEntry(zipEntry);
+                IOUtils.copy(new FileInputStream(file), zip);
+                zip.closeEntry();
+            }
+        }
+    }
+
+    @OpenApi(
+            path = "/v1/worlds/:uuid/download",
+            summary = "Downloads a Zip compressed archive of the world's folder",
+            method = HttpMethod.GET,
+            tags = {"Server"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            pathParams = {
+                    @OpenApiParam(name = "uuid", description = "The UUID of the World to download")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/zip")),
+            }
+    )
+    public static void downloadWorld(Context ctx) throws IOException {
+        org.bukkit.Server bukkitServer = Bukkit.getServer();
+
+        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        if (worldUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        org.bukkit.World world = bukkitServer.getWorld(worldUUID);
+
+        if (world != null) {
+            File folder = world.getWorldFolder();
+
+            // Set headers for proper zip download
+            ctx.header("Content-Disposition", "attachment; filename=\"" + folder.getName() + ".zip\"");
+            ctx.header("Content-Type", "application/zip");
+
+
+            ZipOutputStream zip = new ZipOutputStream(ctx.res.getOutputStream());
+            addFolderToZip(folder, zip, folder.getAbsolutePath(), null);
+            zip.close();
+        }
+    }
+
+    @OpenApi(
+            path = "/v1/worlds/download",
+            summary = "Downloads a Zip compressed archive of all the worlds' folders",
+            method = HttpMethod.GET,
+            tags = {"Server"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/zip")),
+            }
+    )
+    public static void downloadWorlds(Context ctx) throws IOException {
+        org.bukkit.Server bukkitServer = Bukkit.getServer();
+
+        Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
+
+        ctx.header("Content-Disposition", "attachment; filename=\"worlds.zip\"");
+        ctx.header("Content-Type", "application/zip");
+
+        ZipOutputStream zip = new ZipOutputStream(ctx.res.getOutputStream());
+
+        for (org.bukkit.World world : Bukkit.getWorlds()) {
+            try {
+
+                File folder = world.getWorldFolder();
+
+                addFolderToZip(folder, zip, folder.getAbsolutePath(), null);
+
+            } catch (Exception e) {
+                // Just warn about the issue
+                log.warning(String.format("Couldn't save World %s %s", world.getName(), e.getMessage()));
+                throw new InternalServerErrorResponse("Couldn't download world " + world.getName() + ": " + e.getMessage());
+            }
+        }
+        try {
+            zip.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @OpenApi(
