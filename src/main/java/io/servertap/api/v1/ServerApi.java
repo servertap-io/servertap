@@ -236,7 +236,7 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/worlds/:uuid/download",
+            path = "/v1/worlds/{uuid}/download",
             summary = "Downloads a ZIP compressed archive of the world's folder",
             method = HttpMethod.GET,
             tags = {"Server"},
