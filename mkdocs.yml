@@ -13,6 +13,7 @@ edit_uri: "edit/master/docs/"
 theme:
   name: material
   icon:
+    logo: material/cube-outline
     repo: fontawesome/brands/github-alt
   language: en
   features:

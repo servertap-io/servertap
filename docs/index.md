@@ -95,8 +95,8 @@ Some examples of capabilities are:
 
 ## TLS
 
-ServerTap supports TLS (a.k.a. SSL) via a Java "keystore" file. You can generate a keystore for yourself using the `keytool` utility
-that ships with Java.
+ServerTap supports TLS (a.k.a. SSL) via a Java "keystore" file. You can generate a keystore for yourself using the
+`keytool` utility that ships with Java.
 
 Using TLS is **highly recommended** as it encrypts the requests and responses to/from your server on the wire.
 
@@ -199,7 +199,8 @@ The available events are currently:
 ## Websockets
 
 !!! warning
-    If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the internet (bad idea).
+    If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the
+    internet (bad idea).
 
 ServerTap has a bi-directional websockets interface which allows you to
 receive server log lines in realtime (no polling!).
