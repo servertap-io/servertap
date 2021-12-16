@@ -211,14 +211,12 @@ this:
 
 ```json
 {
-  "msg": "§6/version: §fGets the version of this server including any plugins in use",
-  "ts": 1631834015918,
-  "l": ""
+  "message": "§6/version: §fGets the version of this server including any plugins in use",
+  "timestampMillis": 1631834015918,
+  "loggerName": "",
+  "level": "INFO"
 }
 ```
-
-- `ts` is the timestamp of the log, in milliseconds since the UNIX Epoch
-- `l` is the name of the logger that produced the log
 
 Note: you can use a library like
 [ansicolors](https://www.npmjs.com/package/ansicolor) to parse the color

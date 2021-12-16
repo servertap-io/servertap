@@ -26,6 +26,7 @@ public class ConsoleListener implements Filter {
 
         ConsoleLine line = new ConsoleLine();
 
+        line.setLevel(logEvent.getLevel().toString());
         line.setTimestampMillis(logEvent.getTimeMillis());
         line.setMessage(logEvent.getMessage().getFormattedMessage());
         line.setLoggerName(logEvent.getLoggerName());
