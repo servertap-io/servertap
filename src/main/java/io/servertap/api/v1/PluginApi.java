@@ -56,6 +56,21 @@ public class PluginApi {
         ctx.json(pluginList);
     }
 
+    @OpenApi(
+            path = "/v1/plugins",
+            method = HttpMethod.POST,
+            summary = "Download and install a plugin from a URL",
+            tags = {"Plugins"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            formParams = {
+                    @OpenApiFormParam(name = "downloadUrl", required = true)
+            },
+            responses = {
+                    @OpenApiResponse(status = "201", content = @OpenApiContent(type = "application/json"))
+            }
+    )
     public static void installPlugin(Context ctx) {
         String stagingPath = PluginEntrypoint.instance.getDataFolder().getPath() + File.separator + "downloads";
         File holdingArea = new File(stagingPath);
