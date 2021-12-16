@@ -59,7 +59,7 @@ public class PluginApi {
     @OpenApi(
             path = "/v1/plugins",
             method = HttpMethod.POST,
-            summary = "Download and install a plugin from a URL",
+            summary = "Download and install a plugin from a URL (URL MUST be urlencoded)",
             tags = {"Plugins"},
             headers = {
                     @OpenApiParam(name = "key")
