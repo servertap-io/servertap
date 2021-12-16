@@ -7,8 +7,11 @@ simple REST semantics.
 Head over to https://github.com/phybros/servertap/releases to grab the latest and greatest plugin JAR.
 
 # Discord
-
-Join the Discord to talk about this plugin https://discord.gg/fefHbTFAkj
+<a href="https://discord.gg/fefHbTFAkj">
+        <img src="https://img.shields.io/discord/919982507271802890?logo=discord"
+            alt="chat on Discord"></a>
+            
+Join the Discord to talk about this plugin https://discord.gg/fefHbTFAkj 
 
 # Contents
 
