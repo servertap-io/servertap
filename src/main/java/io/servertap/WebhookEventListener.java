@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.api.v1.models.events.*;
+import io.servertap.utils.GsonSingleton;
 import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.*;
 
 public class WebhookEventListener implements Listener {
     private List<RegisteredWebhook> registeredWebhooks;
@@ -260,7 +259,7 @@ public class WebhookEventListener implements Listener {
         @Override
         public void run() {
             try {
-                Gson gson = new Gson();
+                Gson gson = GsonSingleton.getInstance();
                 String jsonContent = gson.toJson(webhookEvent);
                 byte[] output = jsonContent.getBytes(StandardCharsets.UTF_8);
 

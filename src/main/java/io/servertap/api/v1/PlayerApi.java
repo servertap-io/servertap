@@ -42,7 +42,7 @@ public class PlayerApi {
     }
 
     @OpenApi(
-            path = "/v1/players/:uuid",
+            path = "/v1/players/{uuid}",
             method = HttpMethod.GET,
             summary = "Gets a specific online player by their UUID",
             tags = {"Player"},
@@ -158,7 +158,7 @@ public class PlayerApi {
     }
 
     @OpenApi(
-            path = "/v1/players/:playerUuid/:worldUuid/inventory",
+            path = "/v1/players/{playerUuid}/{worldUuid}/inventory",
             method = HttpMethod.GET,
             summary = "Gets a specific online player's Inventory in the specified world",
             tags = {"Player"},
