@@ -1,17 +1,20 @@
 package io.servertap.api.v1.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.Expose;
 
 public class ConsoleLine {
 
-    @JsonProperty("msg")
+    @Expose
     private String message;
 
-    @JsonProperty("ts")
+    @Expose
     private Long timestampMillis;
 
-    @JsonProperty("l")
+    @Expose
     private String loggerName;
+
+    @Expose
+    private String level;
 
     public String getMessage() {
         return message;
@@ -35,5 +38,13 @@ public class ConsoleLine {
 
     public void setLoggerName(String loggerName) {
         this.loggerName = loggerName;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 }
