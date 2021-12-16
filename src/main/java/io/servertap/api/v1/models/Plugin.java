@@ -16,7 +16,19 @@ public class Plugin {
     private String version = null;
 
     @Expose
+    private String website = null;
+
+    @Expose
     private List<String> authors = null;
+
+    @Expose
+    private List<String> depends = null;
+
+    @Expose
+    private List<String> softDepends = null;
+
+    @Expose
+    private String apiVersion = null;
 
     @Expose
     private String description = null;
@@ -74,5 +86,37 @@ public class Plugin {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public List<String> getDepends() {
+        return depends;
+    }
+
+    public void setDepends(List<String> depends) {
+        this.depends = depends;
+    }
+
+    public List<String> getSoftDepends() {
+        return softDepends;
+    }
+
+    public void setSoftDepends(List<String> softDepends) {
+        this.softDepends = softDepends;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 }

@@ -670,36 +670,6 @@ public class ServerApi {
     }
 
     @OpenApi(
-            path = "/v1/plugins",
-            method = HttpMethod.GET,
-            summary = "Get a list of installed plugins",
-            description = "Responds with an array of objects containing keys name and enabled.",
-            tags = {"Plugins"},
-            headers = {
-                    @OpenApiParam(name = "key")
-            },
-            responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
-            }
-    )
-    public static void listPlugins(Context ctx) {
-        ArrayList<io.servertap.api.v1.models.Plugin> pluginList = new ArrayList<>();
-        for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-
-            io.servertap.api.v1.models.Plugin pl = new io.servertap.api.v1.models.Plugin();
-            pl.setName(plugin.getName());
-            pl.setEnabled(plugin.isEnabled());
-            pl.setVersion(plugin.getDescription().getVersion());
-            pl.setAuthors(plugin.getDescription().getAuthors());
-            pl.setDescription(plugin.getDescription().getDescription());
-
-            pluginList.add(pl);
-        }
-
-        ctx.json(pluginList);
-    }
-
-    @OpenApi(
             path = "/v1/server/ops",
             method = HttpMethod.POST,
             summary = "Sets a specific player to Op",

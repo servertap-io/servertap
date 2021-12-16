@@ -4,10 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
-import io.servertap.api.v1.EconomyApi;
-import io.servertap.api.v1.PAPIApi;
-import io.servertap.api.v1.PlayerApi;
-import io.servertap.api.v1.ServerApi;
+import io.servertap.api.v1.*;
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
@@ -216,7 +213,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("economy", EconomyApi::getEconomyPluginInformation);
 
                 // Plugin routes
-                get("plugins", ServerApi::listPlugins);
+                get("plugins", PluginApi::listPlugins);
+                post("plugins", PluginApi::installPlugin);
 
                 // PAPI Routes
                 post("placeholders/replace", PAPIApi::replacePlaceholders);
