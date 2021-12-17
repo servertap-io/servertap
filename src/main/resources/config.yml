@@ -42,3 +42,18 @@ blocked-paths:
 # - /v1/ping
 # - /v1/players/{uuid}
 # - /v1/server/*
+
+auth:
+  static:
+    - name: my-key
+      key: 123abc
+      allow:
+        - "/*"
+      deny:
+        - "/v1/console"
+    - name: my-second-key
+      key: 123abc
+      allow:
+        - "/*"
+      deny:
+        - "/v1/console"

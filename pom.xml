@@ -115,6 +115,7 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
+
         <!-- NBT API integration -->
         <dependency>
             <groupId>de.tr7zw</groupId>
