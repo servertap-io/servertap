@@ -222,7 +222,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("economy", EconomyApi::getEconomyPluginInformation);
 
                 // Plugin routes
-                get("plugins", ServerApi::listPlugins);
+                get("plugins", PluginApi::listPlugins);
+                post("plugins", PluginApi::installPlugin);
 
                 // PAPI Routes
                 post("placeholders/replace", PAPIApi::replacePlaceholders);
