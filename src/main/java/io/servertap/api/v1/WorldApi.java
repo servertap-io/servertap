@@ -134,7 +134,11 @@ public class WorldApi {
 
                 TarArchiveEntry tarEntry = new TarArchiveEntry(file, name);
                 tar.putArchiveEntry(tarEntry);
-                IOUtils.copy(new FileInputStream(file), tar);
+
+                FileInputStream in = new FileInputStream(file);
+                IOUtils.copy(in, tar);
+                in.close();
+
                 tar.closeArchiveEntry();
             }
         }
@@ -177,6 +181,9 @@ public class WorldApi {
             TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
             addFolderToTarGz(folder, tar, folder.getAbsolutePath(), null);
             tar.finish();
+            tar.close();
+            gzOut.close();
+            buffOut.close();
         } else {
             throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
         }
@@ -220,6 +227,9 @@ public class WorldApi {
             }
         }
         tar.finish();
+        tar.close();
+        gzOut.close();
+        buffOut.close();
     }
 
     @OpenApi(
