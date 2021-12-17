@@ -102,7 +102,7 @@ public class PluginApi {
                 long startTime = System.currentTimeMillis();
                 String downloadFileName = stagingPath + "/" + FilenameUtils.getName(url.getPath());
                 File downloadedFile = new File(downloadFileName);
-                FileUtils.copyURLToFile(url, downloadedFile, 5000, 60000);
+                FileUtils.copyURLToFile(url, downloadedFile);
                 long elapsed = System.currentTimeMillis() - startTime;
 
                 String msg = String.format("Downloaded plugin in %.2f seconds", elapsed / 1000.0);
