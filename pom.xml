@@ -53,6 +53,13 @@
             <artifactId>javalin-openapi</artifactId>
             <version>4.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
+        </dependency>
+
         <!-- for Vault integration-->
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
