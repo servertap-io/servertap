@@ -10,7 +10,7 @@ public class OfflinePlayer {
     private String uuid = null;
 
     @Expose
-    private String Name = null;
+    private String name = null;
 
     @Expose
     private Boolean whitelisted = null;
@@ -59,7 +59,7 @@ public class OfflinePlayer {
     }
 
     public OfflinePlayer name(String displayName) {
-        this.Name = displayName;
+        this.name = displayName;
         return this;
     }
 
@@ -69,11 +69,11 @@ public class OfflinePlayer {
      * @return displayName
      **/
     public String getDisplayName() {
-        return Name;
+        return name;
     }
 
     public void setDisplayName(String displayName) {
-        this.Name = displayName;
+        this.name = displayName;
     }
 
 
