@@ -8,6 +8,7 @@ import io.servertap.api.v1.*;
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
+import io.servertap.metrics.Metrics;
 import io.servertap.utils.GsonJsonMapper;
 import io.swagger.v3.oas.models.info.Info;
 import net.milkbowl.vault.economy.Economy;
@@ -65,7 +66,7 @@ public class PluginEntrypoint extends JavaPlugin {
     @Override
     public void onEnable() {
         // Tell bStats what plugin this is
-//        Metrics metrics = new Metrics(this, 9492);
+        Metrics metrics = new Metrics(this, 9492);
 
         saveDefaultConfig();
         FileConfiguration bukkitConfig = getConfig();
