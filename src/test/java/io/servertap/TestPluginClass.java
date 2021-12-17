@@ -11,7 +11,7 @@ public class TestPluginClass {
     private static ServerMock server;
     private static PluginEntrypoint plugin;
 
-    private static final String TEST_URL_BASE = "http://localhost:4567/v1";
+    private static final String TEST_URL_BASE = "http://localhost:4567";
 
     @BeforeAll
     public static void setUp() {
@@ -27,7 +27,7 @@ public class TestPluginClass {
     @Test
     @DisplayName("Verify that auth is on")
     void verifyTestEnvironment() {
-        HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/players/all").asJson();
+        HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/v1/players/all").asJson();
         Assertions.assertEquals(401, response.getStatus());
     }
 
