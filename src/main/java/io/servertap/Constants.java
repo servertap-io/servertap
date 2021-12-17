@@ -38,4 +38,7 @@ public class Constants {
 
     // PAPI Messages
     public static final String PAPI_MESSAGE_MISSING = "Missing message from request";
+
+    // Plugin Errors
+    public static final String PLUGIN_INVALID_URL = "Invalid URL submitted (malformed)";
 }
