@@ -28,10 +28,4 @@ public class TestPluginClass {
         HttpResponse<JsonNode> response = Unirest.get("http://localhost:4567/v1/players/all").asJson();
         Assertions.assertEquals(401, response.getStatus());
     }
-
-    @Test
-    @DisplayName("deliberately make test that fails")
-    void failOnPurpose() {
-        Assertions.fail();
-    }
 }
