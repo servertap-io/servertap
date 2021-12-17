@@ -14,13 +14,8 @@ jobs:
       with:
         distribution: adopt
         java-version: 17
-    - name: Build and Run Tests
-      run: mvn test --batch-mode --fail-at-end
-    - name: Publish Test Report
-      if: ${{ always() }}
-      uses: scacap/action-surefire-report@v1
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file pom.xml -Dmaven.test.skip=true
     - name: Clean up artifacts
       run: rm target/original-*.jar
     - uses: actions/upload-artifact@v2
