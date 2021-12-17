@@ -9,10 +9,12 @@ import io.servertap.Constants;
 import io.servertap.api.v1.models.World;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -170,8 +172,9 @@ public class WorldApi {
             ctx.header("Content-Disposition", "attachment; filename=\"" + folder.getName() + ".tar.gz\"");
             ctx.header("Content-Type", "application/zip");
 
-
-            TarArchiveOutputStream tar = new TarArchiveOutputStream(ctx.res.getOutputStream());
+            BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+            GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+            TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
             addFolderToTarGz(folder, tar, folder.getAbsolutePath(), null);
             tar.finish();
         } else {
@@ -199,7 +202,9 @@ public class WorldApi {
         ctx.header("Content-Disposition", "attachment; filename=\"worlds.tar.gz\"");
         ctx.header("Content-Type", "application/zip");
 
-        TarArchiveOutputStream tar = new TarArchiveOutputStream(ctx.res.getOutputStream());
+        BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+        GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+        TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
 
         for (org.bukkit.World world : Bukkit.getWorlds()) {
             try {
