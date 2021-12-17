@@ -7,14 +7,20 @@ import io.javalin.http.NotFoundResponse;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.api.v1.models.World;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -105,30 +111,31 @@ public class WorldApi {
         ctx.json("success");
     }
 
-    private static void addFolderToZip(File folder, ZipOutputStream zip, String baseName, String rootName) throws IOException {
+    private static void addFolderToTarGz(File folder, TarArchiveOutputStream tar, String baseName, String rootName) throws IOException {
         File[] files = folder.listFiles();
         assert files != null;
         for (File file : files) {
             if (file.isDirectory()) {
-                if(rootName == null) {
-                    addFolderToZip(file, zip, baseName, folder.getName());
+                if (rootName == null) {
+                    addFolderToTarGz(file, tar, baseName, folder.getName());
                 } else {
-                    addFolderToZip(file, zip, baseName, rootName);
+                    addFolderToTarGz(file, tar, baseName, rootName);
                 }
             } else {
                 String name = file.getAbsolutePath().substring(baseName.length())
                         // Trim first slash (absolute path)
                         .replaceFirst("^" + File.separator, "");
                 // Join path and folder name
-                if(rootName == null) {
+                if (rootName == null) {
                     name = folder.getName() + File.separator + name;
                 } else {
                     name = rootName + File.separator + name;
                 }
-                ZipEntry zipEntry = new ZipEntry(name);
-                zip.putNextEntry(zipEntry);
-                IOUtils.copy(new FileInputStream(file), zip);
-                zip.closeEntry();
+
+                TarArchiveEntry tarEntry = new TarArchiveEntry(file, name);
+                tar.putArchiveEntry(tarEntry);
+                IOUtils.copy(new FileInputStream(file), tar);
+                tar.closeArchiveEntry();
             }
         }
     }
@@ -162,13 +169,14 @@ public class WorldApi {
             File folder = world.getWorldFolder();
 
             // Set headers for proper zip download
-            ctx.header("Content-Disposition", "attachment; filename=\"" + folder.getName() + ".zip\"");
+            ctx.header("Content-Disposition", "attachment; filename=\"" + folder.getName() + ".tar.gz\"");
             ctx.header("Content-Type", "application/zip");
 
-
-            ZipOutputStream zip = new ZipOutputStream(ctx.res.getOutputStream());
-            addFolderToZip(folder, zip, folder.getAbsolutePath(), null);
-            zip.close();
+            BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+            GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+            TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
+            addFolderToTarGz(folder, tar, folder.getAbsolutePath(), null);
+            tar.finish();
         } else {
             throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
         }
@@ -191,17 +199,19 @@ public class WorldApi {
 
         Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
 
-        ctx.header("Content-Disposition", "attachment; filename=\"worlds.zip\"");
+        ctx.header("Content-Disposition", "attachment; filename=\"worlds.tar.gz\"");
         ctx.header("Content-Type", "application/zip");
 
-        ZipOutputStream zip = new ZipOutputStream(ctx.res.getOutputStream());
+        BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+        GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+        TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
 
         for (org.bukkit.World world : Bukkit.getWorlds()) {
             try {
 
                 File folder = world.getWorldFolder();
 
-                addFolderToZip(folder, zip, folder.getAbsolutePath(), null);
+                addFolderToTarGz(folder, tar, folder.getAbsolutePath(), null);
 
             } catch (Exception e) {
                 // Just warn about the issue
@@ -209,7 +219,7 @@ public class WorldApi {
                 throw new InternalServerErrorResponse("Couldn't download world " + world.getName() + ": " + e.getMessage());
             }
         }
-        zip.close();
+        tar.finish();
     }
 
     @OpenApi(
