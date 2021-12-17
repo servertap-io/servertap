@@ -269,7 +269,7 @@ this.ws.onopen = function() {
 You need a few things to get started
 
 - An IDE (e.g. IntelliJ)
-- JDK 8 (soon to be 11)
+- JDK 17
 - Maven
 
 Then, you can build the plugin `jar` by using the `mvn package` command.
