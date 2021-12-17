@@ -11,6 +11,8 @@ public class TestPluginClass {
     private static ServerMock server;
     private static PluginEntrypoint plugin;
 
+    private static final String TEST_URL_BASE = "http://localhost:4567/v1";
+
     @BeforeAll
     public static void setUp() {
         MockBukkit.mock();
@@ -25,7 +27,21 @@ public class TestPluginClass {
     @Test
     @DisplayName("Verify that auth is on")
     void verifyTestEnvironment() {
-        HttpResponse<JsonNode> response = Unirest.get("http://localhost:4567/v1/players/all").asJson();
+        HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/players/all").asJson();
         Assertions.assertEquals(401, response.getStatus());
+    }
+
+    @Test
+    @DisplayName("swagger endpoint loads")
+    void verifySwaggerUI() {
+        HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/swagger").asJson();
+        Assertions.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    @DisplayName("swagger-docs endpoint loads")
+    void verifySwaggerDocs() {
+        HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/swagger-docs").asJson();
+        Assertions.assertEquals(200, response.getStatus());
     }
 }
