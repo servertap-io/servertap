@@ -41,4 +41,8 @@ public class Constants {
 
     // Plugin Errors
     public static final String PLUGIN_INVALID_URL = "Invalid URL submitted (malformed)";
+
+    // auth
+    public static final String AUTH_ALLOW_DENY = "allow-deny";
+    public static final String AUTH_DENY_ALLOW = "deny-allow";
 }

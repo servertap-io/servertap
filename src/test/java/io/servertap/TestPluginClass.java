@@ -2,6 +2,7 @@ package io.servertap;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import io.servertap.utils.AuthHandler;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -43,5 +44,26 @@ public class TestPluginClass {
     void verifySwaggerDocs() {
         HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/swagger-docs").asJson();
         Assertions.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    @DisplayName("check a route")
+    void testRouteAuth() {
+        AuthHandler a = new AuthHandler(MockConfiguration.authConfig().getConfigurationSection("auth"));
+
+        // Exact path matches
+        Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/worlds"));
+        Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/success"));
+
+        // Some wildcards
+        Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/a/asdf/b/c"));
+        Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/a/a/b/c"));
+        Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/a/a/a/a/a/a/b/c"));
+
+        // Should fail
+        Assertions.assertFalse(a.checkAuth("fakekey1", "/v1/unspecified"));
+        Assertions.assertFalse(a.checkAuth("fakekey1", "/v1/console"));
+        Assertions.assertFalse(a.checkAuth("fakekey1", "/kjsbdfklsjbgfjkdsg"));
+        Assertions.assertFalse(a.checkAuth("wrong-key-here", "/v1/success"));
     }
 }
