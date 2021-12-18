@@ -43,75 +43,42 @@ public class AuthHandler {
         if (authKey == null) return false;
 
         // default deny
-        CheckResult result = CheckResult.AMBIGUOUS;
-        CheckResult allowResult = CheckResult.AMBIGUOUS;
+        boolean allowed = false;
         CheckResult denyResult = CheckResult.AMBIGUOUS;
 
         for (String allow : authKey.getAllow()) {
-            allow = "^" + allow.replaceAll("\\*", "[^/]*") + "$";
+            allow = "^" + allow.replaceAll("/\\*\\*", "/.*") + "$";
+            allow = "^" + allow.replaceAll("/\\*", "/[^/]*") + "$";
             if (route.matches(allow)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, allow));
-                allowResult = CheckResult.ALLOW;
+                allowed = true;
             }
         }
 
         for (String deny : authKey.getDeny()) {
-            deny = "^" + deny.replaceAll("\\*", "[^/]*") + "$";
+            deny = "^" + deny.replaceAll("/\\*\\*", "/.*") + "$";
+            deny = "^" + deny.replaceAll("/\\*", "/[^/]*") + "$";
             if (route.matches(deny)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, deny));
-                denyResult = CheckResult.DENY;
+                allowed = false;
             }
         }
 
-        if (authKey.getOrder().equalsIgnoreCase(Constants.AUTH_ALLOW_DENY)) {
-            if (allowResult == CheckResult.AMBIGUOUS && denyResult == CheckResult.AMBIGUOUS) {
-                return true;
-            }
-
-            if (allowResult == CheckResult.ALLOW && denyResult == CheckResult.AMBIGUOUS) {
-                return true;
-            }
-
-            if (allowResult == CheckResult.AMBIGUOUS && denyResult == CheckResult.DENY) {
-                return false;
-            }
-
-            if (allowResult == CheckResult.ALLOW && denyResult == CheckResult.DENY) {
-                return false;
-            }
-        } else if (authKey.getOrder().equalsIgnoreCase(Constants.AUTH_DENY_ALLOW)) {
-            if (allowResult == CheckResult.AMBIGUOUS && denyResult == CheckResult.AMBIGUOUS) {
-                return false;
-            }
-
-            if (allowResult == CheckResult.ALLOW && denyResult == CheckResult.AMBIGUOUS) {
-                return true;
-            }
-
-            if (allowResult == CheckResult.AMBIGUOUS && denyResult == CheckResult.DENY) {
-                return false;
-            }
-
-            if (allowResult == CheckResult.ALLOW && denyResult == CheckResult.DENY) {
-                return false;
-            }
-        }
-
-        return false;
+        return allowed;
     }
 
-    private CheckResult routeMatch(List<String> routes, String check) {
+    private boolean routeMatch(List<String> routes, String check) {
         CheckResult result = CheckResult.AMBIGUOUS;
 
         for (String route : routes) {
             route = "^" + route.replaceAll("\\*", "[^/]*") + "$";
             if (check.matches(route)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", check, route));
-                return CheckResult.ALLOW;
+                return true;
             }
         }
 
-        return result;
+        return false;
     }
 
     public ConfigurationSection getConfig() {

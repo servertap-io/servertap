@@ -6,7 +6,7 @@ auth:
       allow:
         - "/v1/worlds"
         - "/v1/success"
-        - "/v1/a/*/b/c"
+        - "/v1/a/**/b/c"
       deny:
         - "/v1/console"
 
