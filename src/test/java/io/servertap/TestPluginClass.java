@@ -61,9 +61,18 @@ public class TestPluginClass {
         Assertions.assertTrue(a.checkAuth("fakekey1", "/v1/a/a/a/a/a/a/b/c"));
 
         // Should fail
-        Assertions.assertFalse(a.checkAuth("fakekey1", "/v1/unspecified"));
-        Assertions.assertFalse(a.checkAuth("fakekey1", "/v1/console"));
-        Assertions.assertFalse(a.checkAuth("fakekey1", "/kjsbdfklsjbgfjkdsg"));
+        Assertions.assertFalse(a.checkAuth("fakekey3", "/v1/unspecified"));
+        Assertions.assertFalse(a.checkAuth("fakekey3", "/v1/console"));
+        Assertions.assertFalse(a.checkAuth("fakekey3", "/kjsbdfklsjbgfjkdsg"));
         Assertions.assertFalse(a.checkAuth("wrong-key-here", "/v1/success"));
     }
-}
+
+    @Test
+    @DisplayName("check deny-allow routes")
+    void testDenyAllow() {
+        AuthHandler a = new AuthHandler(MockConfiguration.authConfig().getConfigurationSection("auth"));
+
+        Assertions.assertFalse(a.checkAuth("fakekey3", "/v1/shouldfail"));
+        Assertions.assertTrue(a.checkAuth("fakekey3", "/v1/allowed"));
+    }
+    }

@@ -14,7 +14,15 @@ auth:
     - name: key2
       key: fakekey2
       order: "deny-allow"
-      allow:
-        - "/*"
       deny:
-        - "/v1/console"
+        - "/v1/*"
+      allow:
+        - "/v1/allowed"
+
+    - name: key3
+      key: fakekey3
+      order: "deny-allow"
+      deny:
+        - "/*"
+      allow:
+        - "/v1/allowed"
