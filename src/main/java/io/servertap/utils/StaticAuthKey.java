@@ -1,7 +1,6 @@
 package io.servertap.utils;
 
 import io.servertap.Constants;
-import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.jetbrains.annotations.NotNull;
@@ -26,12 +25,13 @@ public class StaticAuthKey implements ConfigurationSerializable {
         this.name = data.get("name").toString();
         this.key = data.get("key").toString();
 
-        List<String> defaultDeny = new ArrayList<>();
-        List<String> defaultAllow = new ArrayList<>();
-        defaultAllow.add("/v1/*");
+        this.allow = new ArrayList<>();
+        this.deny = new ArrayList<>();
 
-        this.allow = (List<String>) data.getOrDefault("allow", defaultAllow);
-        this.deny = (List<String>) data.getOrDefault("deny", defaultDeny);
+        this.allow = (List<String>) data.getOrDefault("allow", this.allow);
+        this.allow.forEach(a -> a = convertToRegex(a));
+        this.deny = (List<String>) data.getOrDefault("deny", this.deny);
+        this.deny.forEach(d -> d = convertToRegex(d));
 
         this.order = data.getOrDefault("order", Constants.AUTH_DENY_ALLOW).toString();
     }
@@ -48,6 +48,13 @@ public class StaticAuthKey implements ConfigurationSerializable {
         result.put("order", this.order);
 
         return result;
+    }
+
+    private String convertToRegex(String pattern) {
+        pattern = "^" + pattern.replaceAll("/\\*\\*", "/.*") + "$";
+        pattern = "^" + pattern.replaceAll("/\\*", "/[^/]*") + "$";
+
+        return pattern;
     }
 
     public String getName() {

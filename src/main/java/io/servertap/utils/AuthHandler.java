@@ -1,20 +1,14 @@
 package io.servertap.utils;
 
-import io.servertap.Constants;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class AuthHandler {
-
-    enum CheckResult {
-        ALLOW,
-        DENY,
-        AMBIGUOUS,
-    }
-
     private static final Logger log = Bukkit.getLogger();
     private ConfigurationSection config;
 
@@ -44,11 +38,8 @@ public class AuthHandler {
 
         // default deny
         boolean allowed = false;
-        CheckResult denyResult = CheckResult.AMBIGUOUS;
 
         for (String allow : authKey.getAllow()) {
-            allow = "^" + allow.replaceAll("/\\*\\*", "/.*") + "$";
-            allow = "^" + allow.replaceAll("/\\*", "/[^/]*") + "$";
             if (route.matches(allow)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, allow));
                 allowed = true;
@@ -56,8 +47,6 @@ public class AuthHandler {
         }
 
         for (String deny : authKey.getDeny()) {
-            deny = "^" + deny.replaceAll("/\\*\\*", "/.*") + "$";
-            deny = "^" + deny.replaceAll("/\\*", "/[^/]*") + "$";
             if (route.matches(deny)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, deny));
                 allowed = false;
@@ -65,20 +54,6 @@ public class AuthHandler {
         }
 
         return allowed;
-    }
-
-    private boolean routeMatch(List<String> routes, String check) {
-        CheckResult result = CheckResult.AMBIGUOUS;
-
-        for (String route : routes) {
-            route = "^" + route.replaceAll("\\*", "[^/]*") + "$";
-            if (check.matches(route)) {
-                log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", check, route));
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public ConfigurationSection getConfig() {
