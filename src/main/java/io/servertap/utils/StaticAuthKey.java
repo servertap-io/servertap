@@ -28,12 +28,12 @@ public class StaticAuthKey implements ConfigurationSerializable {
         this.allow = new ArrayList<>();
         this.deny = new ArrayList<>();
 
-        this.allow = (List<String>) data.getOrDefault("allow", this.allow);
-        this.allow.forEach(a -> a = convertToRegex(a));
-        this.deny = (List<String>) data.getOrDefault("deny", this.deny);
-        this.deny.forEach(d -> d = convertToRegex(d));
-
-        this.order = data.getOrDefault("order", Constants.AUTH_DENY_ALLOW).toString();
+        for(String rule : (List<String>) data.getOrDefault("allow", this.allow)) {
+            this.allow.add(convertToRegex(rule));
+        }
+        for(String rule : (List<String>) data.getOrDefault("deny", this.deny)) {
+            this.deny.add(convertToRegex(rule));
+        }
     }
 
     @NotNull
@@ -45,16 +45,15 @@ public class StaticAuthKey implements ConfigurationSerializable {
         result.put("key", this.key);
         result.put("allow", this.allow);
         result.put("deny", this.deny);
-        result.put("order", this.order);
 
         return result;
     }
 
     private String convertToRegex(String pattern) {
-        pattern = "^" + pattern.replaceAll("/\\*\\*", "/.*") + "$";
-        pattern = "^" + pattern.replaceAll("/\\*", "/[^/]*") + "$";
+        pattern = pattern.replaceAll("/\\*\\*", "/.*");
+        pattern = pattern.replaceAll("/\\*", "/[^/]*");
 
-        return pattern;
+        return String.format("^%s$", pattern);
     }
 
     public String getName() {

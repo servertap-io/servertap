@@ -75,4 +75,4 @@ public class TestPluginClass {
         Assertions.assertFalse(a.checkAuth("fakekey3", "/v1/shouldfail"));
         Assertions.assertTrue(a.checkAuth("fakekey3", "/v1/allowed"));
     }
-    }
+}

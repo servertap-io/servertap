@@ -2,7 +2,6 @@ auth:
   static:
     - name: normal
       key: fakekey1
-      order: "allow-deny"
       allow:
         - "/v1/worlds"
         - "/v1/success"
@@ -13,7 +12,6 @@ auth:
 
     - name: key2
       key: fakekey2
-      order: "deny-allow"
       deny:
         - "/v1/*"
       allow:
@@ -21,7 +19,6 @@ auth:
 
     - name: key3
       key: fakekey3
-      order: "deny-allow"
       deny:
         - "/*"
       allow:

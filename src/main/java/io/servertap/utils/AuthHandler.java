@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AuthHandler {
@@ -21,15 +22,23 @@ public class AuthHandler {
     }
 
     private void loadConfig() {
-        log.info(String.join(", ", this.config.getKeys(true)));
-
         List<?> c = this.getConfig().getList("static");
 
         assert c != null;
         for (Object s : c) {
             StaticAuthKey authKey = new StaticAuthKey((LinkedHashMap<String, Object>) s);
             authDatabase.put(authKey.getKey(), authKey);
+
+            log.info("Deny:");
+            for (String rule : authKey.getDeny()) {
+                log.info(rule);
+            }
+            log.info("Allow:");
+            for (String rule : authKey.getAllow()) {
+                log.info(rule);
+            }
         }
+
     }
 
     public boolean checkAuth(String key, String route) {
