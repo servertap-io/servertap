@@ -27,7 +27,14 @@ auth:
       allow:
         - "/v1/allowed"
 
-    - name: key3
+    - name: key4
       key: fakekey4
       allow:
         - "/allowed"
+
+    - name: key5
+      key: fakekey5
+      allow:
+        - "/**"
+      deny:
+        - "/deniedpath"

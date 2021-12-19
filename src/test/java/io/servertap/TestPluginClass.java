@@ -99,4 +99,15 @@ public class TestPluginClass {
         Assertions.assertTrue(a.checkAuth("fakekey4", "/allowed"));
 
     }
+
+    @Test
+    @DisplayName("test blanket allow")
+    void testBlanketAllow() {
+        AuthHandler a = new AuthHandler(MockConfiguration.authConfig().getConfigurationSection("auth"));
+
+        Assertions.assertTrue(a.checkAuth("fakekey5", "/random"));
+        Assertions.assertTrue(a.checkAuth("fakekey5", "/any/thing/should/work"));
+        Assertions.assertTrue(a.checkAuth("fakekey5", "/allowed"));
+        Assertions.assertFalse(a.checkAuth("fakekey5", "/deniedpath"));
+    }
 }
