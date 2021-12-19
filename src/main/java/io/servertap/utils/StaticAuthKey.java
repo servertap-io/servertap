@@ -19,7 +19,6 @@ public class StaticAuthKey implements ConfigurationSerializable {
     private String key;
     private List<String> allow;
     private List<String> deny;
-    private String order;
 
     public StaticAuthKey(Map<String, Object> data) {
         this.name = data.get("name").toString();
@@ -86,13 +85,5 @@ public class StaticAuthKey implements ConfigurationSerializable {
 
     public void setDeny(List<String> deny) {
         this.deny = deny;
-    }
-
-    public String getOrder() {
-        return order;
-    }
-
-    public void setOrder(String order) {
-        this.order = order;
     }
 }

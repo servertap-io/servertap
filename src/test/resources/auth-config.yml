@@ -16,6 +16,9 @@ auth:
         - "/v1/*"
       allow:
         - "/v1/allowed"
+        - "/single/*/wildcard"
+        - "/wildcardend/**"
+        - "/double/**/wildcard"
 
     - name: key3
       key: fakekey3
@@ -23,3 +26,8 @@ auth:
         - "/*"
       allow:
         - "/v1/allowed"
+
+    - name: key3
+      key: fakekey4
+      allow:
+        - "/allowed"

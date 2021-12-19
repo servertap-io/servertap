@@ -6,7 +6,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AuthHandler {
@@ -48,17 +47,17 @@ public class AuthHandler {
         // default deny
         boolean allowed = false;
 
-        for (String allow : authKey.getAllow()) {
-            if (route.matches(allow)) {
-                log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, allow));
-                allowed = true;
-            }
-        }
-
         for (String deny : authKey.getDeny()) {
             if (route.matches(deny)) {
                 log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, deny));
                 allowed = false;
+            }
+        }
+
+        for (String allow : authKey.getAllow()) {
+            if (route.matches(allow)) {
+                log.info(String.format("ROUTE MATCH FOUND: '%s' ~ '%s'", route, allow));
+                allowed = true;
             }
         }
 
