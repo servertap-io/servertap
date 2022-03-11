@@ -34,7 +34,7 @@ jobs:
       run: mvn -B package --file pom.xml -Dmaven.test.skip=true
     - name: Clean up artifacts
       run: rm target/original-*.jar
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Release
         path: target/*.jar
