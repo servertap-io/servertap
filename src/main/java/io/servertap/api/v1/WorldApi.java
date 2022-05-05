@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedOutputStream;
@@ -329,4 +330,54 @@ public class WorldApi {
 
         return world;
     }
+
+
+    @OpenApi(
+        path = "/v1/worlds/{uuid}/{x},{y},{z}",
+        summary = "Get the block at a specific location in a given world",
+        tags = {"Server"},
+        headers = {
+                @OpenApiParam(name = "key")
+        },
+        pathParams = {
+                @OpenApiParam(name = "uuid", description = "The uuid of the world"),
+                @OpenApiParam(name = "x", description = "The x coordinate"),
+                @OpenApiParam(name = "y", description = "The y coordinate"),
+                @OpenApiParam(name = "z", description = "The z coordinate")
+        },
+        responses = {
+                @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
+        }
+    )
+    public static void worldGetBlock(Context ctx) {
+        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        Integer x = ValidationUtils.safeInteger(ctx.pathParam("x"));
+        Integer y = ValidationUtils.safeInteger(ctx.pathParam("y"));
+        Integer z = ValidationUtils.safeInteger(ctx.pathParam("z"));
+        if (worldUUID == null) {
+            throw new BadRequestResponse(Constants.INVALID_UUID);
+        }
+
+        if(x == null || y == null || z == null) {
+            throw new BadRequestResponse("Invalid coordinates");
+        }
+
+        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(worldUUID);
+
+        // 404 if no world found
+        if (bukkitWorld == null) throw new NotFoundResponse();
+
+        Block block = bukkitWorld.getBlockAt(x, y, z);
+        io.servertap.api.v1.models.Block blockObj = new io.servertap.api.v1.models.Block();
+        blockObj.setBlockPower(block.getBlockPower());
+        blockObj.setBlockType(block.getType().name().toLowerCase());
+        blockObj.setIsEmpty(block.isEmpty());
+        blockObj.setHumidity(block.getHumidity());
+        blockObj.setTemperature(block.getTemperature());
+        blockObj.setIsLiquid(block.isLiquid());
+        blockObj.setLightLevel(block.getLightLevel());
+        blockObj.setBiome(block.getBiome().name().toLowerCase());
+        ctx.json(blockObj);
+    }
+
 }

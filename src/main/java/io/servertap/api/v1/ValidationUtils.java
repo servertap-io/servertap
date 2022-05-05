@@ -12,4 +12,12 @@ public class ValidationUtils {
         }
     }
 
+    public static Integer safeInteger(String input) {
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException nfe) {
+            return null;
+        }
+    }
+
 }

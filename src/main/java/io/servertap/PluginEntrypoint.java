@@ -201,6 +201,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 post("worlds/save", WorldApi::saveAllWorlds);
                 get("worlds/download", WorldApi::downloadWorlds);
                 get("worlds/{uuid}", WorldApi::worldGet);
+                get("worlds/{uuid}/{x},{y},{z}", WorldApi::worldGetBlock);
                 post("worlds/{uuid}/save", WorldApi::saveWorld);
                 get("worlds/{uuid}/download", WorldApi::downloadWorld);
                 get("scoreboard", ServerApi::scoreboardGet);
