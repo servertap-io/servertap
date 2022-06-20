@@ -35,6 +35,12 @@ public class Server {
     @Expose
     private Set<Whitelist> whitelistedPlayers = null;
 
+    @Expose
+    private int maxPlayers = 0;
+
+    @Expose
+    private int onlinePlayers = 0;
+
     public Server name(String name) {
         this.name = name;
         return this;
@@ -115,5 +121,21 @@ public class Server {
 
     public void setWhitelistedPlayers(Set<Whitelist> whitelistPlayers) {
         this.whitelistedPlayers = whitelistPlayers;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public int getOnlinePlayers() {
+        return onlinePlayers;
+    }
+
+    public void setOnlinePlayers(int onlinePlayers) {
+        this.onlinePlayers = onlinePlayers;
     }
 }

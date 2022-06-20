@@ -70,6 +70,8 @@ public class ServerApi {
         server.setVersion(bukkitServer.getVersion());
         server.setBukkitVersion(bukkitServer.getBukkitVersion());
         server.setWhitelistedPlayers(getWhitelist());
+        server.setMaxPlayers(bukkitServer.getMaxPlayers());
+        server.setOnlinePlayers(bukkitServer.getOnlinePlayers().size());
 
         // Possibly add 5m and 15m in the future?
         server.setTps(Lag.getTPSString());
