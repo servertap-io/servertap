@@ -116,6 +116,8 @@ public class PlayerApi {
 
         p.setGamemode(player.getGameMode().toString());
 
+        p.setLastPlayed(player.getLastPlayed());
+
         return p;
     }
 
@@ -150,8 +152,9 @@ public class PlayerApi {
                 p.setBalance(PluginEntrypoint.getEconomy().getBalance(offlinePlayers[i]));
             }
 
-            players.add(p);
+            p.setLastPlayed(player.getLastPlayed());
 
+            players.add(p);
         }
 
         ctx.json(players);

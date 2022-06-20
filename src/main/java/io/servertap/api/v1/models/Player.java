@@ -54,6 +54,9 @@ public class Player {
     @Expose
     private String gamemode = null;
 
+    @Expose
+    private Long lastPlayed = null;
+
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
@@ -307,5 +310,13 @@ public class Player {
 
     public void setGamemode(String gamemode) {
         this.gamemode = gamemode;
+    }
+
+    public Long getLastPlayed() {
+        return lastPlayed;
+    }
+
+    public void setLastPlayed(Long lastPlayed) {
+        this.lastPlayed = lastPlayed;
     }
 }
