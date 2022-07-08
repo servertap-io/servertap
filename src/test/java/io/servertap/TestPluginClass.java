@@ -15,8 +15,8 @@ public class TestPluginClass {
 
     @BeforeAll
     public static void setUp() {
-        MockBukkit.mock();
-        plugin = (PluginEntrypoint) MockBukkit.load(PluginEntrypoint.class);
+        server = MockBukkit.mock();
+        plugin = MockBukkit.load(PluginEntrypoint.class);
     }
 
     @AfterAll
