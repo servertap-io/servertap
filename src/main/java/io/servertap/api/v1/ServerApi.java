@@ -463,7 +463,7 @@ public class ServerApi {
             }
     )
     public static void getOps(Context ctx) {
-        org.bukkit.OfflinePlayer players[] = Bukkit.getOfflinePlayers();
+        Set<org.bukkit.OfflinePlayer> players = Bukkit.getOperators();
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<io.servertap.api.v1.models.OfflinePlayer>();
         for (org.bukkit.OfflinePlayer player : players) {
             if (!player.isOp()) {

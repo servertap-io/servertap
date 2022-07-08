@@ -5,7 +5,7 @@ description: ServerTap is a REST API for Bukkit/Spigot/PaperMC Minecraft servers
 authors: [phybros, ATechAdventurer, c1oneman, Earlh21, Scarsz, au5ton, Aberdeener, Hedlund01, matteoturini, Diddyy]
 load: STARTUP
 website: https://servertap.io
-api-version: 1.14
+api-version: 1.16
 softdepend:
   - Vault
   - PlaceholderAPI
