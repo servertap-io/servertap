@@ -2,7 +2,6 @@ package io.servertap.api.v1.websockets;
 
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ConsoleLine;
-import io.servertap.api.v1.websockets.WebsocketHandler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.Filter;
@@ -32,7 +31,7 @@ public class ConsoleListener implements Filter {
         line.setLoggerName(logEvent.getLoggerName());
 
         plugin.consoleBuffer.add(line);
-        WebsocketHandler.broadcast(line);
+        ConsoleWebsocketHandler.broadcast(line);
         return Result.NEUTRAL;
     }
 

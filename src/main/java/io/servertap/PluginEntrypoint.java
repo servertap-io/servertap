@@ -7,6 +7,7 @@ import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.servertap.api.v1.*;
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
+import io.servertap.api.v1.websockets.ConsoleWebsocketHandler;
 import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.metrics.Metrics;
 import io.servertap.utils.GsonJsonMapper;
@@ -168,7 +169,7 @@ public class PluginEntrypoint extends JavaPlugin {
                     }
 
                     // fall through, failsafe
-                    ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+                    ctx.status(401).result("Unauthorized key, reference the key in config.yml");
                 });
 
                 config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
@@ -229,7 +230,8 @@ public class PluginEntrypoint extends JavaPlugin {
                 post("placeholders/replace", PAPIApi::replacePlaceholders);
 
                 // Websocket handler
-                ws("ws/console", WebsocketHandler::events);
+                ws("ws", WebsocketHandler::events);
+                ws("ws/console", ConsoleWebsocketHandler::events);
             });
         });
 

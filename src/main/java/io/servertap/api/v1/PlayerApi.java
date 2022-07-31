@@ -7,13 +7,14 @@ import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
+import io.servertap.api.v1.models.OfflinePlayer;
 import io.servertap.api.v1.models.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -32,13 +33,15 @@ public class PlayerApi {
             }
     )
     public static void playersGet(Context ctx) {
+        ctx.json(playersGet());
+    }
+
+    public static ArrayList<Player> playersGet() {
         ArrayList<Player> players = new ArrayList<>();
 
-        Bukkit.getOnlinePlayers().forEach((player -> {
-            players.add(getPlayer(player));
-        }));
+        Bukkit.getOnlinePlayers().forEach((player -> players.add(getPlayer(player))));
 
-        ctx.json(players);
+        return players;
     }
 
     @OpenApi(
@@ -66,13 +69,19 @@ public class PlayerApi {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
 
-        org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
+        Player p = playerGet(playerUUID);
 
-        if (player == null) {
+        if (p == null) {
             throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         }
 
-        ctx.json(getPlayer(player));
+        ctx.json(p);
+    }
+
+    public static Player playerGet(UUID uuid) {
+        org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
+        if(p != null) return getPlayer(p);
+        return null;
     }
 
     /**
@@ -81,7 +90,7 @@ public class PlayerApi {
      * @param player The Bukkit player
      * @return The ServerTap player
      */
-    private static Player getPlayer(org.bukkit.entity.Player player) {
+    public static Player getPlayer(org.bukkit.entity.Player player) {
         Player p = new Player();
         p.setUuid(player.getUniqueId().toString());
         p.setDisplayName(player.getDisplayName());
@@ -134,13 +143,16 @@ public class PlayerApi {
     )
     public static void offlinePlayersGet(Context ctx) {
 
-        ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
+        ArrayList<OfflinePlayer> players = offlinePlayersGet();
 
-        OfflinePlayer[] offlinePlayers = Bukkit.getOfflinePlayers();
+        ctx.json(players);
+    }
 
-        for (int i = 0; i < offlinePlayers.length; i++) {
-            io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-            OfflinePlayer player = offlinePlayers[i];
+    public static ArrayList<OfflinePlayer> offlinePlayersGet() {
+        ArrayList<OfflinePlayer> players = new ArrayList<>();
+
+        for(org.bukkit.OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+            OfflinePlayer p = new OfflinePlayer();
 
             p.setDisplayName(player.getName());
             p.setUuid(player.getUniqueId().toString());
@@ -149,7 +161,7 @@ public class PlayerApi {
             p.setOp(player.isOp());
 
             if (PluginEntrypoint.getEconomy() != null) {
-                p.setBalance(PluginEntrypoint.getEconomy().getBalance(offlinePlayers[i]));
+                p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
             }
 
             p.setLastPlayed(player.getLastPlayed());
@@ -157,7 +169,7 @@ public class PlayerApi {
             players.add(p);
         }
 
-        ctx.json(players);
+        return players;
     }
 
     @OpenApi(
@@ -189,10 +201,23 @@ public class PlayerApi {
         if (worldUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
+        try {
+            ArrayList<ItemStack> inv = getPlayerInv(playerUUID, worldUUID);
+            if(inv == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+            ctx.json(inv);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundResponse(e.getMessage());
+        } catch (IOException e) {
+            throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
+        }
+    }
 
-        ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
+    public static ArrayList<ItemStack> getPlayerInv(UUID playerUUID, UUID worldUUID) throws IOException {
+        if(playerUUID == null || worldUUID == null) throw new IllegalArgumentException(Constants.INVALID_UUID);
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
-        if (player != null) {
+        ArrayList<ItemStack> inv = new ArrayList<>();
+        if(player != null) {
+            // Player is online
             player.updateInventory();
             Integer location = -1;
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
@@ -206,25 +231,27 @@ public class PlayerApi {
                     inv.add(itemObj);
                 }
             }
-            ctx.json(inv);
         } else {
+            // Player is offline or doesn't exist
             try {
                 World bukWorld = Bukkit.getWorld(worldUUID);
 
                 if (bukWorld == null) {
-                    throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
+                    throw new IllegalArgumentException(Constants.WORLD_NOT_FOUND);
                 }
 
                 String dataPath = String.format(
                         "%s/%s/playerdata/%s.dat",
                         new File("./").getAbsolutePath(),
                         bukWorld.getName(),
-                        ctx.pathParam("playerUuid")
+                        playerUUID
                 );
                 File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
-                    throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+                    // Player doesn't exist
+                    return null;
                 }
+                // Player is offline, read inventory from disk
                 NBTFile playerFile = new NBTFile(playerfile);
 
                 for (NBTListCompound item : playerFile.getCompoundList("Inventory")) {
@@ -234,17 +261,13 @@ public class PlayerApi {
                     itemObj.setSlot(item.getInteger("Slot"));
                     inv.add(itemObj);
                 }
-
-                ctx.json(inv);
-
-            } catch (HttpResponseException e) {
-                // Pass any javalin exceptions up the chain
+            } catch (IllegalArgumentException | IOException e) {
                 throw e;
             } catch (Exception e) {
                 Bukkit.getLogger().warning(e.getMessage());
-                throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
+                return null;
             }
         }
-
+        return inv;
     }
 }

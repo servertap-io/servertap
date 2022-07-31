@@ -35,6 +35,8 @@ public class Constants {
 
     // General errors
     public static final String INVALID_UUID = "Invalid UUID";
+    public static final String UNKNOWN_WEBSOCKET_COMMAND = "Unknown websocket command";
+    public static final String INTERNAL_SERVER_ERROR = "Internal server error";
 
     // PAPI Messages
     public static final String PAPI_MESSAGE_MISSING = "Missing message from request";
