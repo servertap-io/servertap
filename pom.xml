@@ -127,7 +127,7 @@
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
-            <version>3.13.10</version>
+            <version>3.13.11</version>
             <classifier>standalone</classifier>
             <scope>test</scope>
         </dependency>
