@@ -257,12 +257,16 @@ public class PluginEntrypoint extends JavaPlugin {
 
     private void setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            log.info(String.format("[%s] No Vault plugin detected", getDescription().getName()));
             return;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
+            log.info(String.format("[%s] No Economy providers detected", getDescription().getName()));
             return;
         }
+
+        log.info(String.format("[%s] Hooked economy provider: %s", getDescription().getName(), rsp.getProvider().getName()));
         econ = rsp.getProvider();
     }
 
