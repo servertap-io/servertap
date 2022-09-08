@@ -20,7 +20,7 @@ public class ConsoleListener implements Filter {
 
     @Override
     public Result filter(LogEvent logEvent) {
-        if (plugin.consoleBuffer.size() >= plugin.maxConsoleBufferSize) {
+        if (plugin.maxConsoleBufferSize > 0 && plugin.consoleBuffer.size() >= plugin.maxConsoleBufferSize) {
             plugin.consoleBuffer.remove(0);
         }
 
@@ -31,8 +31,12 @@ public class ConsoleListener implements Filter {
         line.setMessage(logEvent.getMessage().getFormattedMessage());
         line.setLoggerName(logEvent.getLoggerName());
 
-        plugin.consoleBuffer.add(line);
+        if (plugin.maxConsoleBufferSize > 0) {
+            plugin.consoleBuffer.add(line);
+        }
+
         WebsocketHandler.broadcast(line);
+
         return Result.NEUTRAL;
     }
 

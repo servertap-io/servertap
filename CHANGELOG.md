@@ -4,7 +4,7 @@
 
 ### Internals/Bugfixes
 
-* Fixed bug with the `/economy` routes not working
+* Fixed bug with the `/economy` routes not working (#173)
 * Updated versions of javalin, junit, jackson-databind, and unirest
 
 ## v0.3.0
