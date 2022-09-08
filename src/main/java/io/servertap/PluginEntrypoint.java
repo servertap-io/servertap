@@ -230,6 +230,9 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Websocket handler
                 ws("ws/console", WebsocketHandler::events);
+
+                // Advancement routes
+                get("advancements", AdvancementsApi::getAdvancements);
             });
         });
 
