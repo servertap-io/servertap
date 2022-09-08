@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.1
+
+### Internals/Bugfixes
+
+* Fixed bug with the `/economy` routes not working
+* Updated versions of javalin, junit, jackson-databind, and unirest
+
 ## v0.3.0
 
 ### New Features
