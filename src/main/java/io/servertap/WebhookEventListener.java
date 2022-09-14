@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.api.v1.models.events.*;
+import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -217,8 +218,8 @@ public class WebhookEventListener implements Listener {
     private Player fromBukkitPlayer(org.bukkit.entity.Player player) {
         Player p = new Player();
 
-        if (PluginEntrypoint.getEconomy() != null) {
-            p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
+        if (EconomyWrapper.getInstance().getEconomy() != null) {
+            p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
         }
 
         p.setUuid(player.getUniqueId().toString());
@@ -239,7 +240,7 @@ public class WebhookEventListener implements Listener {
 
     private String normalizeMessage(String message) {
         try {
-            if(!this.plugin.getConfig().getBoolean("normalizeMessages")){
+            if (!this.plugin.getConfig().getBoolean("normalizeMessages")) {
                 return message;
             }
             return ChatColor.stripColor(message);
@@ -247,6 +248,7 @@ public class WebhookEventListener implements Listener {
             return message;
         }
     }
+
     private static class PostRequestTask implements Runnable {
         private final WebhookEvent webhookEvent;
         private final String listener;

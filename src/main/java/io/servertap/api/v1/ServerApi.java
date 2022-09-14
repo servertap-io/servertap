@@ -8,11 +8,11 @@ import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
 import io.servertap.Lag;
-import io.servertap.PluginEntrypoint;
 import io.servertap.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.mojang.api.models.NameChange;
+import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.BanList;
@@ -476,8 +476,8 @@ public class ServerApi {
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
 
-            if (PluginEntrypoint.getEconomy() != null) {
-                p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
+            if (EconomyWrapper.getInstance().getEconomy() != null) {
+                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
             }
 
             opedPlayers.add(p);

@@ -5,9 +5,9 @@ import de.tr7zw.nbtapi.NBTListCompound;
 import io.javalin.http.*;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
-import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
+import io.servertap.utils.EconomyWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -96,8 +96,8 @@ public class PlayerApi {
         p.setBanned(player.isBanned());
         p.setOp(player.isOp());
 
-        if (PluginEntrypoint.getEconomy() != null) {
-            p.setBalance(PluginEntrypoint.getEconomy().getBalance(player));
+        if (EconomyWrapper.getInstance().getEconomy() != null) {
+            p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
         }
 
         p.setHunger(player.getFoodLevel());
@@ -148,8 +148,8 @@ public class PlayerApi {
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
 
-            if (PluginEntrypoint.getEconomy() != null) {
-                p.setBalance(PluginEntrypoint.getEconomy().getBalance(offlinePlayers[i]));
+            if (EconomyWrapper.getInstance().getEconomy() != null) {
+                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(offlinePlayers[i]));
             }
 
             p.setLastPlayed(player.getLastPlayed());

@@ -6,10 +6,9 @@ import io.javalin.http.HttpResponseException;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.plugin.openapi.annotations.*;
 import io.servertap.Constants;
-import io.servertap.PluginEntrypoint;
+import io.servertap.utils.EconomyWrapper;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -37,10 +36,9 @@ public class EconomyApi {
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )
-
     public static void getEconomyPluginInformation(Context ctx) {
         Plugin econPlugin;
-        if (PluginEntrypoint.getEconomy() == null) {
+        if (EconomyWrapper.getInstance().getEconomy() == null) {
             throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         } else {
             RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
@@ -107,7 +105,7 @@ public class EconomyApi {
             throw new BadRequestResponse(Constants.VAULT_MISSING_PAY_PARAMS);
         }
 
-        if (PluginEntrypoint.getEconomy() == null) {
+        if (EconomyWrapper.getInstance().getEconomy() == null) {
             throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         }
 
@@ -126,12 +124,12 @@ public class EconomyApi {
         EconomyResponse response;
 
         if (action == TransactionType.PAY) {
-            response = PluginEntrypoint.getEconomy().depositPlayer(player, amount);
+            response = EconomyWrapper.getInstance().getEconomy().depositPlayer(player, amount);
         } else {
-            response = PluginEntrypoint.getEconomy().withdrawPlayer(player, amount);
+            response = EconomyWrapper.getInstance().getEconomy().withdrawPlayer(player, amount);
         }
 
-        if (response.type != ResponseType.SUCCESS) {
+        if (response.type != EconomyResponse.ResponseType.SUCCESS) {
             throw new InternalServerErrorResponse(response.errorMessage);
         }
 

@@ -9,15 +9,14 @@ import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.metrics.Metrics;
+import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonJsonMapper;
 import io.swagger.v3.oas.models.info.Info;
-import net.milkbowl.vault.economy.Economy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.eclipse.jetty.server.Connector;
@@ -39,7 +38,7 @@ public class PluginEntrypoint extends JavaPlugin {
 
     public static PluginEntrypoint instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
-    private static Economy econ = null;
+    private EconomyWrapper economyWrapper;
     private static Javalin app = null;
 
     public static final String SERVERTAP_KEY_HEADER = "key";
@@ -68,9 +67,12 @@ public class PluginEntrypoint extends JavaPlugin {
         // Tell bStats what plugin this is
         Metrics metrics = new Metrics(this, 9492);
 
+        // Initialize config file + set defaults
         saveDefaultConfig();
         FileConfiguration bukkitConfig = getConfig();
-        setupEconomy();
+
+        // Initialize any economy integration (if one is installed)
+        EconomyWrapper.getInstance().setupEconomy();
 
         this.authEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
 
@@ -256,25 +258,6 @@ public class PluginEntrypoint extends JavaPlugin {
             app.stop();
         }
 
-    }
-
-    private void setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            log.info(String.format("[%s] No Vault plugin detected", getDescription().getName()));
-            return;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            log.info(String.format("[%s] No Economy providers detected", getDescription().getName()));
-            return;
-        }
-
-        log.info(String.format("[%s] Hooked economy provider: %s", getDescription().getName(), rsp.getProvider().getName()));
-        econ = rsp.getProvider();
-    }
-
-    public static Economy getEconomy() {
-        return econ;
     }
 
     private OpenApiOptions getOpenApiOptions() {
