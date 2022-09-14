@@ -4,6 +4,12 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+/**
+ * We can't simply reference Economy in PluginEntrypoint due to OpenApi annotation doing reflection, which can fail at
+ * runtime due to the `scope` of the Vault API being `provided`.
+ *
+ * More details here: https://github.com/phybros/servertap/issues/175
+ */
 public class EconomyWrapper {
 
     private static final java.util.logging.Logger log = Bukkit.getLogger();
