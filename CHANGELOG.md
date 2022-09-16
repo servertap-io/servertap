@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.0
+
+### New Features
+
+* Added new route to get all available advancements `GET /v1/advancements`
+
+### Internals/Bugfixes
+
+* Fixed buggy interaction between Vault API and Swagger/OpenApi (#175)
+
 ## v0.3.1
 
 ### Internals/Bugfixes
