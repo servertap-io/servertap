@@ -109,6 +109,7 @@ public class WebhookEventListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         PlayerChatWebhookEvent eventModel = new PlayerChatWebhookEvent();
 
+        eventModel.setPlayer(fromBukkitPlayer(event.getPlayer()));
         eventModel.setMessage(normalizeMessage(event.getMessage()));
         eventModel.setPlayerName(event.getPlayer().getDisplayName());
 
