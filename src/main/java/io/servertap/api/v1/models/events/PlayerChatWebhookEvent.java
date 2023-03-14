@@ -1,8 +1,12 @@
 package io.servertap.api.v1.models.events;
 
 import com.google.gson.annotations.Expose;
+import io.servertap.api.v1.models.Player;
 
 public class PlayerChatWebhookEvent extends WebhookEvent {
+    @Expose
+    private Player player;
+
     @Expose
     String playerName;
 
@@ -27,5 +31,13 @@ public class PlayerChatWebhookEvent extends WebhookEvent {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }
