@@ -1,5 +1,8 @@
 package io.servertap.api.v1.models;
 
+import org.bukkit.GameMode;
+import org.bukkit.World.Environment;
+
 import com.google.gson.annotations.Expose;
 
 /**
@@ -40,7 +43,7 @@ public class Player {
     private Double[] location = null;
 
     @Expose
-    private String dimension = null;
+    private Environment dimension = null;
 
     @Expose
     private Double health = null;
@@ -52,7 +55,7 @@ public class Player {
     private Float saturation = null;
 
     @Expose
-    private String gamemode = null;
+    private GameMode gamemode = null;
 
     @Expose
     private Long lastPlayed = null;
@@ -252,11 +255,11 @@ public class Player {
      *
      * @return world
      */
-    public String getDimension() {
+    public Environment getDimension() {
         return dimension;
     }
 
-    public void setDimension(String dimension) {
+    public void setDimension(Environment dimension) {
         this.dimension = dimension;
     }
 
@@ -304,11 +307,11 @@ public class Player {
      *
      * @return gamemode
      */
-    public String getGamemode() {
+    public GameMode getGamemode() {
         return gamemode;
     }
 
-    public void setGamemode(String gamemode) {
+    public void setGamemode(GameMode gamemode) {
         this.gamemode = gamemode;
     }
 
