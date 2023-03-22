@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 
 import java.math.BigDecimal;
 
+import org.bukkit.Difficulty;
 import org.bukkit.World.Environment;
 
 /**
@@ -35,7 +36,7 @@ public class World {
     private Boolean allowMonsters = null;
 
     @Expose
-    private Integer difficulty = null;
+    private Difficulty difficulty = null;
 
     @Expose
     private Environment environment = null;
@@ -177,7 +178,7 @@ public class World {
         this.allowMonsters = allowMonsters;
     }
 
-    public World difficulty(Integer difficulty) {
+    public World difficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
         return this;
     }
@@ -187,11 +188,11 @@ public class World {
      *
      * @return difficulty
      **/
-    public Integer getDifficulty() {
+    public Difficulty getDifficulty() {
         return difficulty;
     }
 
-    public void setDifficulty(Integer difficulty) {
+    public void setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
 

@@ -291,30 +291,12 @@ public class WorldApi {
 
         world.setName(bukkitWorld.getName());
         world.setUuid(bukkitWorld.getUID().toString());
-
-        // TODO: The Enum for Environment makes this annoying to get
         world.setEnvironment(bukkitWorld.getEnvironment());
         world.setTime(BigDecimal.valueOf(bukkitWorld.getTime()));
         world.setAllowAnimals(bukkitWorld.getAllowAnimals());
         world.setAllowMonsters(bukkitWorld.getAllowMonsters());
         world.setGenerateStructures(bukkitWorld.canGenerateStructures());
-
-        int value = 0;
-        switch (bukkitWorld.getDifficulty()) {
-            case PEACEFUL:
-                value = 0;
-                break;
-            case EASY:
-                value = 1;
-                break;
-            case NORMAL:
-                value = 3;
-                break;
-            case HARD:
-                value = 2;
-                break;
-        }
-        world.setDifficulty(value);
+        world.setDifficulty(bukkitWorld.getDifficulty());
         world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
         world.setStorm(bukkitWorld.hasStorm());
         world.setThundering(bukkitWorld.isThundering());
