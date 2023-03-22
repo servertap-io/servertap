@@ -61,7 +61,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class, type = "application/json"))
             }
     )
     public static void serverGet(Context ctx) {
@@ -202,7 +202,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Scoreboard.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Scoreboard.class, type = "application/json"))
             }
     )
 
@@ -234,7 +234,7 @@ public class ServerApi {
                     @OpenApiParam(name = "name", description = "The name of the objective to get")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class, type = "application/json"))
             }
     )
     public static void objectiveGet(Context ctx) {
@@ -299,7 +299,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true, type = "application/json"))
             }
     )
     public static void whitelistGet(Context ctx) {
@@ -470,7 +470,7 @@ public class ServerApi {
             responses = {
                     @OpenApiResponse(
                             status = "200",
-                            content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+                            content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true, type = "application/json"))
             }
     )
     public static void getOps(Context ctx) {

@@ -23,7 +23,7 @@ public class AdvancementsApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.Advancement.class, isArray = true)),
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.Advancement.class, isArray = true, type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )

@@ -29,7 +29,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true, type = "application/json"))
             }
     )
     public static void playersGet(Context ctx) {
@@ -55,7 +55,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "uuid", description = "UUID of the player")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, type = "application/json"))
             }
     )
     public static void playerGet(Context ctx) {
@@ -132,7 +132,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true, type = "application/json"))
             }
     )
     public static void offlinePlayersGet(Context ctx) {
@@ -177,7 +177,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "worldUuid", description = "UUID of the world")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true, type = "application/json"))
             }
     )
     public static void getPlayerInv(Context ctx) {

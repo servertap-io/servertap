@@ -245,7 +245,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true, type = "application/json"))
             }
     )
     public static void worldsGet(Context ctx) {
@@ -267,7 +267,7 @@ public class WorldApi {
                     @OpenApiParam(name = "uuid", description = "The uuid of the world")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, type = "application/json"))
             }
     )
     public static void worldGet(Context ctx) {
