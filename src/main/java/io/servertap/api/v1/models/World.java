@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 
 import java.math.BigDecimal;
 
+import org.bukkit.World.Environment;
+
 /**
  * A Minecraft world
  */
@@ -36,7 +38,7 @@ public class World {
     private Integer difficulty = null;
 
     @Expose
-    private Integer environment = null;
+    private Environment environment = null;
 
     @Expose
     private BigDecimal seed = null;
@@ -193,7 +195,7 @@ public class World {
         this.difficulty = difficulty;
     }
 
-    public World environment(Integer environment) {
+    public World environment(Environment environment) {
         this.environment = environment;
         return this;
     }
@@ -203,11 +205,11 @@ public class World {
      *
      * @return environment
      **/
-    public Integer getEnvironment() {
+    public Environment getEnvironment() {
         return environment;
     }
 
-    public void setEnvironment(Integer environment) {
+    public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 

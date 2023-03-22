@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.World.Environment;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedOutputStream;
@@ -35,6 +36,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/save",
             summary = "Triggers a world save of all worlds",
+            operationId = "saveAllWorlds",
             method = HttpMethod.POST,
             tags = {"Server"},
             headers = {
@@ -70,6 +72,7 @@ public class WorldApi {
             path = "/v1/worlds/{uuid}/save",
             summary = "Triggers a world save",
             method = HttpMethod.POST,
+            operationId = "saveWorld",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -147,6 +150,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}/download",
             summary = "Downloads a ZIP compressed archive of the world's folder",
+            operationId = "downloadWorldZip",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
@@ -192,6 +196,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/download",
             summary = "Downloads a ZIP compressed archive of all the worlds' folders",
+            operationId = "downloadAllWorldsZip",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
@@ -235,12 +240,13 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds",
             summary = "Get information about all worlds",
+            operationId = "getWorlds",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true, type = "application/json"))
             }
     )
     public static void worldsGet(Context ctx) {
@@ -253,6 +259,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}",
             summary = "Get information about a specific world",
+            operationId = "getWorld",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -261,7 +268,7 @@ public class WorldApi {
                     @OpenApiParam(name = "uuid", description = "The uuid of the world")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, type = "application/json"))
             }
     )
     public static void worldGet(Context ctx) {
@@ -286,21 +293,7 @@ public class WorldApi {
         world.setUuid(bukkitWorld.getUID().toString());
 
         // TODO: The Enum for Environment makes this annoying to get
-        switch (bukkitWorld.getEnvironment()) {
-            case NORMAL:
-                world.setEnvironment(0);
-                break;
-            case NETHER:
-                world.setEnvironment(-1);
-                break;
-            case THE_END:
-                world.setEnvironment(1);
-                break;
-            default:
-                world.setEnvironment(0);
-                break;
-        }
-
+        world.setEnvironment(bukkitWorld.getEnvironment());
         world.setTime(BigDecimal.valueOf(bukkitWorld.getTime()));
         world.setAllowAnimals(bukkitWorld.getAllowAnimals());
         world.setAllowMonsters(bukkitWorld.getAllowMonsters());
@@ -322,7 +315,6 @@ public class WorldApi {
                 break;
         }
         world.setDifficulty(value);
-
         world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
         world.setStorm(bukkitWorld.hasStorm());
         world.setThundering(bukkitWorld.isThundering());
