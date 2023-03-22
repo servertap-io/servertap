@@ -35,6 +35,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/save",
             summary = "Triggers a world save of all worlds",
+            operationId = "saveAllWorlds",
             method = HttpMethod.POST,
             tags = {"Server"},
             headers = {
@@ -70,6 +71,7 @@ public class WorldApi {
             path = "/v1/worlds/{uuid}/save",
             summary = "Triggers a world save",
             method = HttpMethod.POST,
+            operationId = "saveWorld",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -147,6 +149,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}/download",
             summary = "Downloads a ZIP compressed archive of the world's folder",
+            operationId = "downloadWorldZip",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
@@ -192,6 +195,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/download",
             summary = "Downloads a ZIP compressed archive of all the worlds' folders",
+            operationId = "downloadAllWorldsZip",
             method = HttpMethod.GET,
             tags = {"Server"},
             headers = {
@@ -235,6 +239,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds",
             summary = "Get information about all worlds",
+            operationId = "getWorlds",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -253,6 +258,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}",
             summary = "Get information about a specific world",
+            operationId = "getWorld",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")

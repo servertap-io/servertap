@@ -22,6 +22,7 @@ public class PlayerApi {
 
     @OpenApi(
             path = "/v1/players",
+            operationId = "getAllOnlinePlayers",
             summary = "Gets all currently online players",
             tags = {"Player"},
             headers = {
@@ -44,6 +45,7 @@ public class PlayerApi {
     @OpenApi(
             path = "/v1/players/{uuid}",
             method = HttpMethod.GET,
+            operationId = "getOnlinePlayerByUUID",
             summary = "Gets a specific online player by their UUID",
             tags = {"Player"},
             headers = {
@@ -123,6 +125,7 @@ public class PlayerApi {
 
     @OpenApi(
             path = "/v1/players/all",
+            operationId = "getAllPlayers",
             summary = "Gets all players that have ever joined the server ",
             tags = {"Player"},
             headers = {
@@ -162,6 +165,7 @@ public class PlayerApi {
 
     @OpenApi(
             path = "/v1/players/{playerUuid}/{worldUuid}/inventory",
+            operationId = "getPlayerInventory",
             method = HttpMethod.GET,
             summary = "Gets a specific online player's Inventory in the specified world",
             tags = {"Player"},

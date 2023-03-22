@@ -14,6 +14,7 @@ public class PAPIApi {
 
     @OpenApi(
             path = "/v1/placeholders/replace",
+            operationId = "replacePlaceholders",
             method = HttpMethod.POST,
             summary = "Process a string using PlaceholderAPI",
             description = "Process a string using PlaceholderAPI",

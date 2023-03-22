@@ -24,6 +24,7 @@ public class PluginApi {
 
     @OpenApi(
             path = "/v1/plugins",
+            operationId = "getPlugins",
             method = HttpMethod.GET,
             summary = "Get a list of installed plugins",
             description = "Responds with an array of objects containing keys name and enabled.",
@@ -32,7 +33,7 @@ public class PluginApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.Plugin, isArray = true))
             }
     )
     public static void listPlugins(Context ctx) {
@@ -59,6 +60,7 @@ public class PluginApi {
     @OpenApi(
             path = "/v1/plugins",
             method = HttpMethod.POST,
+            operationId = "installPlugin",
             summary = "Download and install a plugin from a URL (URL MUST be urlencoded)",
             tags = {"Plugins"},
             headers = {

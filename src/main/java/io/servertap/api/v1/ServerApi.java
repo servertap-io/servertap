@@ -39,6 +39,7 @@ public class ServerApi {
     @OpenApi(
             path = "/v1/ping",
             summary = "pong!",
+            operationId = "ping",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -53,6 +54,7 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server",
+            operationId = "getServerInfo",
             summary = "Get information about the server",
             tags = {"Server"},
             headers = {
@@ -131,6 +133,7 @@ public class ServerApi {
     @OpenApi(
             path = "/v1/chat/broadcast",
             method = HttpMethod.POST,
+            operationId = "broadcastMessage",
             summary = "Send broadcast visible to those currently online.",
             tags = {"Chat"},
             headers = {
@@ -155,6 +158,7 @@ public class ServerApi {
             path = "/v1/chat/tell",
             method = HttpMethod.POST,
             summary = "Send a message to a specific player.",
+            operationId = "tellPlayer",
             tags = {"Chat"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -192,6 +196,7 @@ public class ServerApi {
     @OpenApi(
             path = "/v1/scoreboard",
             summary = "Get information about the scoreboard objectives",
+            operationId = "getScoreBoard",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -220,6 +225,7 @@ public class ServerApi {
     @OpenApi(
             path = "/v1/scoreboard/{name}",
             summary = "Get information about a specific objective",
+            operationId = "getScoreboardByName",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -287,6 +293,7 @@ public class ServerApi {
             path = "/v1/server/whitelist",
             method = HttpMethod.GET,
             summary = "Get the whitelist",
+            operationId = "getWhitelist",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -308,6 +315,7 @@ public class ServerApi {
             path = "/v1/server/whitelist",
             method = HttpMethod.POST,
             summary = "Update the whitelist",
+            operationId = "addToWhitelist",
             description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
             tags = {"Server"},
             headers = {
@@ -389,6 +397,7 @@ public class ServerApi {
             path = "/v1/server/ops",
             method = HttpMethod.POST,
             summary = "Sets a specific player to Op",
+            operationId = "opPlayer",
             tags = {"Player"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -421,6 +430,7 @@ public class ServerApi {
             path = "/v1/server/ops",
             method = HttpMethod.DELETE,
             summary = "Removes Op from a specific player",
+            operationId = "deopPlayer",
             tags = {"Player"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -452,6 +462,7 @@ public class ServerApi {
             path = "/v1/server/ops",
             method = HttpMethod.GET,
             summary = "Get all op players",
+            operationId = "getOps",
             tags = {"Player"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -492,6 +503,7 @@ public class ServerApi {
             method = HttpMethod.POST,
             summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
                     "command executors will properly send their messages to the CommandSender, though, most do.",
+            operationId = "executeCommand",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
