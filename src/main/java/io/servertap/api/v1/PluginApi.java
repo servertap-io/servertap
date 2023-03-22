@@ -33,7 +33,7 @@ public class PluginApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.Plugin, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.Plugin.class, isArray = true))
             }
     )
     public static void listPlugins(Context ctx) {
