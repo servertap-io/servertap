@@ -184,7 +184,7 @@ public class World {
     }
 
     /**
-     * Peaceful (0), Easy (1), Normal (2), Hard (3)
+     * Peaceful(PEACEFUL), Easy(EASY), Normal(NORMAL), Hard(HARD)
      *
      * @return difficulty
      **/
@@ -202,7 +202,7 @@ public class World {
     }
 
     /**
-     * Overworld (0), Nether (-1), End (1)
+     * Overworld (NORMAL), Nether (NETHER), End (THE_END), Custom (CUSTOM)
      *
      * @return environment
      **/
