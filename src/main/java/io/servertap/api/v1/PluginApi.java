@@ -3,7 +3,7 @@ package io.servertap.api.v1;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.PluginEntrypoint;
 import io.servertap.api.v1.models.Plugin;
@@ -24,7 +24,7 @@ public class PluginApi {
 
     @OpenApi(
             path = "/v1/plugins",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Get a list of installed plugins",
             description = "Responds with an array of objects containing keys name and enabled.",
             tags = {"Plugins"},
@@ -58,14 +58,14 @@ public class PluginApi {
 
     @OpenApi(
             path = "/v1/plugins",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Download and install a plugin from a URL (URL MUST be urlencoded)",
             tags = {"Plugins"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "downloadUrl", required = true)
+                    @OpenApiParam(name = "downloadUrl", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "201", content = @OpenApiContent(type = "application/json"))

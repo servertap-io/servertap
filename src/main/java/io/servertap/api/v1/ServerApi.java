@@ -1,11 +1,10 @@
 package io.servertap.api.v1;
 
-import com.google.gson.Gson;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.http.ServiceUnavailableResponse;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.Lag;
 import io.servertap.ServerExecCommandSender;
@@ -27,7 +26,6 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
@@ -130,14 +128,14 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/chat/broadcast",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Send broadcast visible to those currently online.",
             tags = {"Chat"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "message")
+                    @OpenApiParam(name = "message")
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -153,15 +151,15 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/chat/tell",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Send a message to a specific player.",
             tags = {"Chat"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "message", type = String.class),
-                    @OpenApiFormParam(name = "playerUuid", type = String.class)
+                    @OpenApiParam(name = "message", type = String.class),
+                    @OpenApiParam(name = "playerUuid", type = String.class)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -285,14 +283,14 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/whitelist",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Get the whitelist",
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class))
             }
     )
     public static void whitelistGet(Context ctx) {
@@ -306,7 +304,7 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/whitelist",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Update the whitelist",
             description = "Possible responses are: `success`, `failed`, `Error: duplicate entry`, and `No whitelist`.",
             tags = {"Server"},
@@ -314,8 +312,8 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "uuid", type = String.class),
-                    @OpenApiFormParam(name = "name", type = String.class)
+                    @OpenApiParam(name = "uuid", type = String.class),
+                    @OpenApiParam(name = "name", type = String.class)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
@@ -387,14 +385,14 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/ops",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Sets a specific player to Op",
             tags = {"Player"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "playerUuid"),
+                    @OpenApiParam(name = "playerUuid"),
             },
             responses = {
                     @OpenApiResponse(status = "200")
@@ -419,14 +417,14 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/ops",
-            method = HttpMethod.DELETE,
+            methods = {HttpMethod.DELETE},
             summary = "Removes Op from a specific player",
             tags = {"Player"},
             headers = {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "playerUuid")
+                    @OpenApiParam(name = "playerUuid")
             },
             responses = {@OpenApiResponse(status = "200")}
     )
@@ -450,7 +448,7 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/ops",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Get all op players",
             tags = {"Player"},
             headers = {
@@ -459,7 +457,10 @@ public class ServerApi {
             responses = {
                     @OpenApiResponse(
                             status = "200",
-                            content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+                            content = @OpenApiContent(
+                                    from = io.servertap.api.v1.models.OfflinePlayer.class
+                            )
+                    )
             }
     )
     public static void getOps(Context ctx) {
@@ -489,7 +490,7 @@ public class ServerApi {
 
     @OpenApi(
             path = "/v1/server/exec",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Executes a command on the server from the console, returning it's output. Be aware that not all " +
                     "command executors will properly send their messages to the CommandSender, though, most do.",
             tags = {"Server"},
@@ -497,8 +498,8 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "command", required = true),
-                    @OpenApiFormParam(name = "time", type = Long.class)
+                    @OpenApiParam(name = "command", required = true),
+                    @OpenApiParam(name = "time", type = Long.class)
             },
             responses = {
                     @OpenApiResponse(
@@ -516,17 +517,22 @@ public class ServerApi {
         AtomicLong time = new AtomicLong(timeRaw != null ? Long.parseLong(timeRaw) : 0);
         if (time.get() < 0) time.set(0);
 
-        ctx.future(CompletableFuture.supplyAsync(() -> {
-            CompletableFuture<String> future = new ServerExecCommandSender().executeCommand(command, time.get(), TimeUnit.MILLISECONDS);
-            try {
-                String output = future.get();
-                Gson g = GsonSingleton.getInstance();
+        ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
+                        output -> {
+                            if ("application/json".equalsIgnoreCase(ctx.contentType())) {
+                                ctx.json(output);
+                            } else {
+                                ctx.html(output);
+                            }
+                        }
+                )
+                .exceptionally(throwable -> {
+                    throw new RuntimeException(throwable);
+                }));
+    }
 
-                return "application/json".equalsIgnoreCase(ctx.contentType()) ? g.toJson(output) : output;
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }));
+    private static CompletableFuture<String> runCommandAsync(String command, long time) {
+        return new ServerExecCommandSender().executeCommand(command, time, TimeUnit.MILLISECONDS);
     }
 
 }

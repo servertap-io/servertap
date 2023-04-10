@@ -13,11 +13,11 @@ jobs:
       release_id: ${{ steps.release.outputs.id }}
     steps:
     - uses: actions/checkout@v3
-    - name: Set up JDK 17
+    - name: Set up JDK 19
       uses: actions/setup-java@v3
       with:
         distribution: temurin
-        java-version: 17
+        java-version: 19
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml

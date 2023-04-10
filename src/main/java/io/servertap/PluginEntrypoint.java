@@ -1,9 +1,12 @@
 package io.servertap;
 
 import io.javalin.Javalin;
-import io.javalin.plugin.openapi.OpenApiOptions;
-import io.javalin.plugin.openapi.OpenApiPlugin;
-import io.javalin.plugin.openapi.ui.SwaggerOptions;
+import io.javalin.community.ssl.SSLPlugin;
+import io.javalin.openapi.OpenApiContact;
+import io.javalin.openapi.plugin.OpenApiPlugin;
+import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
+import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.servertap.api.v1.*;
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
@@ -11,7 +14,6 @@ import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.metrics.Metrics;
 import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonJsonMapper;
-import io.swagger.v3.oas.models.info.Info;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
@@ -89,13 +91,6 @@ public class PluginEntrypoint extends JavaPlugin {
         rootLogger.addFilter(new ConsoleListener(this));
         Bukkit.getScheduler().runTaskTimer(this, new Lag(), 100, 1);
 
-        // Get the current class loader.
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-        // Temporarily set this thread's class loader to the plugin's class loader.
-        // Replace JavalinTestPlugin.class with your own plugin's class.
-        Thread.currentThread().setContextClassLoader(PluginEntrypoint.class.getClassLoader());
-
         // Instantiate the web server (which will now load using the plugin's class
         // loader).
         if (app == null) {
@@ -103,7 +98,7 @@ public class PluginEntrypoint extends JavaPlugin {
             app = Javalin.create(config -> {
                 config.jsonMapper(new GsonJsonMapper());
 
-                config.defaultContentType = "application/json";
+                config.http.defaultContentType = "application/json";
                 config.showJavalinBanner = false;
 
                 boolean tlsConfEnabled = bukkitConfig.getBoolean("tls.enabled", false);
@@ -117,14 +112,11 @@ public class PluginEntrypoint extends JavaPlugin {
                         if (!Files.exists(Paths.get(fullKeystorePath))) {
                             log.warning(String.format("[ServerTap] TLS is enabled but %s doesn't exist. TLS disabled.", fullKeystorePath));
                         } else {
-                            config.server(() -> {
-                                Server server = new Server();
-                                ServerConnector sslConnector = new ServerConnector(server, getSslContextFactory(fullKeystorePath, keystorePassword));
-                                sslConnector.setPort(bukkitConfig.getInt("port", 4567));
-                                server.setConnectors(new Connector[]{sslConnector});
-                                return server;
+                            // register the SSL plugin
+                            SSLPlugin plugin = new SSLPlugin(conf -> {
+                                conf.keystoreFromPath(fullKeystorePath, keystorePassword);
                             });
-
+                            config.plugins.register(plugin);
                             log.info("[ServerTap] TLS is enabled.");
                         }
                     } catch (Exception e) {
@@ -137,23 +129,43 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // unpack the list of strings into varargs
                 List<String> corsOrigins = bukkitConfig.getStringList("corsOrigins");
-                String[] originArray = new String[corsOrigins.size()];
-                for (int i = 0; i < originArray.length; i++) {
-                    log.info(String.format("[ServerTap] Enabling CORS for %s", corsOrigins.get(i)));
-                    originArray[i] = corsOrigins.get(i);
-                }
-                config.enableCorsForOrigin(originArray);
+                config.plugins.enableCors(cors -> cors.add(corsConfig -> {
+                    for (String origin : corsOrigins) {
+                        if (origin.trim().equals("*")) {
+                            corsConfig.anyHost();
+                            break;
+                        } else {
+                            log.info(String.format("[ServerTap] Enabling CORS for %s", origin));
+                            corsConfig.allowHost(origin);
+                        }
+                    }
+                }));
 
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
-                    String path = ctx.req.getPathInfo();
-                    String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs"};
-                    List<String> noAuthPathsList = Arrays.asList(noAuthPaths);
+                    String path = ctx.req().getPathInfo();
 
-                    // If the request is for an excluded path, or the user has auth turned off, just serve the req
-                    if (noAuthPathsList.contains(path) || !this.authEnabled) {
+                    // If auth is not enabled just serve it all
+                    if (!this.authEnabled) {
                         handler.handle(ctx);
                         return;
+                    }
+
+                    // At this point in the code, auth is enabled
+
+                    // Add some paths that will always bypass auth
+                    List<String> noAuthPathsList = new ArrayList<>();
+                    noAuthPathsList.add("/swagger");
+                    noAuthPathsList.add("/swagger-docs");
+                    noAuthPathsList.add("/webjars");
+
+                    // If the request path starts with any of the noAuthPathsList just allow it
+                    for (String noAuthPath : noAuthPathsList) {
+                        if (path.startsWith(noAuthPath)) {
+                            log.info("bypassing auth for " + path);
+                            handler.handle(ctx);
+                            return;
+                        }
                     }
 
                     // Auth is turned on, make sure there is a header called "key"
@@ -173,16 +185,19 @@ public class PluginEntrypoint extends JavaPlugin {
                     ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                 });
 
-                config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
-            });
+                config.plugins.register(new OpenApiPlugin(getOpenApiConfig()));
 
+                SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
+                swaggerConfiguration.setDocumentationPath("/swagger-docs");
+                config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+            });
         }
 
         // Don't create a new instance if the plugin is reloaded
         app.start(bukkitConfig.getInt("port", 4567));
 
         if (bukkitConfig.getBoolean("debug")) {
-            app.before(ctx -> log.info(ctx.req.getPathInfo()));
+            app.before(ctx -> log.info(ctx.req().getPathInfo()));
         }
 
         app.routes(() -> {
@@ -238,16 +253,7 @@ public class PluginEntrypoint extends JavaPlugin {
             });
         });
 
-        // Put the original class loader back where it was.
-        Thread.currentThread().setContextClassLoader(classLoader);
         getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
-    }
-
-    private static SslContextFactory getSslContextFactory(String keystorePath, String keystorePassword) {
-        SslContextFactory sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStorePath(keystorePath);
-        sslContextFactory.setKeyStorePassword(keystorePassword);
-        return sslContextFactory;
     }
 
     @Override
@@ -260,18 +266,15 @@ public class PluginEntrypoint extends JavaPlugin {
 
     }
 
-    private OpenApiOptions getOpenApiOptions() {
-        Info applicationInfo = new Info()
-                .title(this.getDescription().getName())
-                .version(this.getDescription().getVersion())
-                .description(this.getDescription().getDescription());
-        SwaggerOptions opts = new SwaggerOptions("/swagger");
-
-        return new OpenApiOptions(applicationInfo)
-                .path("/swagger-docs")
-                .includePath(Constants.API_V1 + "/*")
-                .activateAnnotationScanningFor("io.servertap.api.v1")
-                .swagger(opts);
+    private OpenApiPluginConfiguration getOpenApiConfig() {
+        return new OpenApiPluginConfiguration()
+                .withDocumentationPath("/swagger-docs")
+                .withDefinitionConfiguration((version, definition) -> definition
+                        .withOpenApiInfo((openApiInfo) -> {
+                            openApiInfo.setTitle(this.getDescription().getName());
+                            openApiInfo.setVersion(this.getDescription().getVersion());
+                            openApiInfo.setDescription(this.getDescription().getDescription());
+                        }));
     }
 
 }

@@ -2,7 +2,7 @@ package io.servertap.api.v1;
 
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ public class PAPIApi {
 
     @OpenApi(
             path = "/v1/placeholders/replace",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Process a string using PlaceholderAPI",
             description = "Process a string using PlaceholderAPI",
             tags = {"PlaceholderAPI"},
@@ -22,8 +22,8 @@ public class PAPIApi {
                     @OpenApiParam(name = "key")
             },
             formParams = {
-                    @OpenApiFormParam(name = "message", required = true),
-                    @OpenApiFormParam(name = "uuid"),
+                    @OpenApiParam(name = "message", required = true),
+                    @OpenApiParam(name = "uuid"),
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
