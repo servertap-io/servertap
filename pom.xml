@@ -249,6 +249,11 @@
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
+                        </filter>
+                        <filter>
+                            <artifact>org.jetbrains.kotlin:kotlin-stdlib</artifact>
+                            <excludes>
+                                <exclude>**</exclude>
                             </excludes>
                         </filter>
                     </filters>
