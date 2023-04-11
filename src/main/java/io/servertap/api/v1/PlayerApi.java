@@ -104,7 +104,7 @@ public class PlayerApi {
         p.setHealth(player.getHealth());
         p.setSaturation(player.getSaturation());
 
-        p.setDimension(player.getWorld().getEnvironment().toString());
+        p.setDimension(player.getWorld().getEnvironment());
 
         Location playerLocation = player.getLocation();
         Double[] convertedLocation = new Double[3];
@@ -114,7 +114,7 @@ public class PlayerApi {
 
         p.setLocation(convertedLocation);
 
-        p.setGamemode(player.getGameMode().toString());
+        p.setGamemode(player.getGameMode());
 
         p.setLastPlayed(player.getLastPlayed());
 
