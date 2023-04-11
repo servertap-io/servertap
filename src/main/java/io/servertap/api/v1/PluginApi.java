@@ -64,9 +64,17 @@ public class PluginApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "downloadUrl", required = true)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "downloadUrl", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "201", content = @OpenApiContent(type = "application/json"))
             }

@@ -21,10 +21,18 @@ public class PAPIApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "message", required = true),
-                    @OpenApiParam(name = "uuid"),
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "message", type = "string"),
+                                            @OpenApiContentProperty(name = "uuid", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))

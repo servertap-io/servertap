@@ -134,9 +134,17 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "message")
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "message", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
@@ -157,10 +165,18 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "message", type = String.class),
-                    @OpenApiParam(name = "playerUuid", type = String.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "message", type = "string"),
+                                            @OpenApiContentProperty(name = "playerUuid", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
@@ -311,10 +327,18 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "uuid", type = String.class),
-                    @OpenApiParam(name = "name", type = String.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "name", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
@@ -391,9 +415,17 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "playerUuid"),
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "playerUuid", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200")
             })
@@ -423,9 +455,17 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "playerUuid")
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "playerUuid", type = "string")
+                                    }
+                            )
+                    }
+            ),
             responses = {@OpenApiResponse(status = "200")}
     )
     public static void deopPlayer(Context ctx) {
@@ -497,10 +537,18 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "command", required = true),
-                    @OpenApiParam(name = "time", type = Long.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "command", type = "string"),
+                                            @OpenApiContentProperty(name = "time", type = "long")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(
                             status = "200"

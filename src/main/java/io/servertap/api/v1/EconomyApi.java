@@ -65,10 +65,18 @@ public class EconomyApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "uuid"),
-                    @OpenApiParam(name = "amount", type = Double.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
@@ -87,10 +95,18 @@ public class EconomyApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiParam(name = "uuid"),
-                    @OpenApiParam(name = "amount", type = Double.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
