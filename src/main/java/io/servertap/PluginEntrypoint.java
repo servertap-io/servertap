@@ -115,6 +115,11 @@ public class PluginEntrypoint extends JavaPlugin {
                             // register the SSL plugin
                             SSLPlugin plugin = new SSLPlugin(conf -> {
                                 conf.keystoreFromPath(fullKeystorePath, keystorePassword);
+                                conf.http2 = false;
+                                conf.insecure = false;
+                                conf.secure = true;
+                                conf.securePort = bukkitConfig.getInt("port", 4567);
+                                conf.sniHostCheck = bukkitConfig.getBoolean("tls.sni", false);
                             });
                             config.plugins.register(plugin);
                             log.info("[ServerTap] TLS is enabled.");
