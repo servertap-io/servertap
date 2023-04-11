@@ -130,11 +130,11 @@ public class PluginEntrypoint extends JavaPlugin {
                 // unpack the list of strings into varargs
                 List<String> corsOrigins = bukkitConfig.getStringList("corsOrigins");
                 config.plugins.enableCors(cors -> cors.add(corsConfig -> {
-                    for (String origin : corsOrigins) {
-                        if (origin.trim().equals("*")) {
-                            corsConfig.anyHost();
-                            break;
-                        } else {
+                    if (corsOrigins.contains("*")) {
+                        log.info("[ServerTap] Enabling CORS for *");
+                        corsConfig.anyHost();
+                    } else {
+                        for (String origin : corsOrigins) {
                             log.info(String.format("[ServerTap] Enabling CORS for %s", origin));
                             corsConfig.allowHost(origin);
                         }
@@ -162,7 +162,6 @@ public class PluginEntrypoint extends JavaPlugin {
                     // If the request path starts with any of the noAuthPathsList just allow it
                     for (String noAuthPath : noAuthPathsList) {
                         if (path.startsWith(noAuthPath)) {
-                            log.info("bypassing auth for " + path);
                             handler.handle(ctx);
                             return;
                         }
