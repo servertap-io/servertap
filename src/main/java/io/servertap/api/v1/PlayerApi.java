@@ -3,7 +3,7 @@ package io.servertap.api.v1;
 import de.tr7zw.nbtapi.NBTFile;
 import de.tr7zw.nbtapi.NBTListCompound;
 import io.javalin.http.*;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
@@ -28,7 +28,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
             }
     )
     public static void playersGet(Context ctx) {
@@ -43,7 +43,7 @@ public class PlayerApi {
 
     @OpenApi(
             path = "/v1/players/{uuid}",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Gets a specific online player by their UUID",
             tags = {"Player"},
             headers = {
@@ -104,7 +104,7 @@ public class PlayerApi {
         p.setHealth(player.getHealth());
         p.setSaturation(player.getSaturation());
 
-        p.setDimension(player.getWorld().getEnvironment().toString());
+        p.setDimension(player.getWorld().getEnvironment());
 
         Location playerLocation = player.getLocation();
         Double[] convertedLocation = new Double[3];
@@ -114,7 +114,7 @@ public class PlayerApi {
 
         p.setLocation(convertedLocation);
 
-        p.setGamemode(player.getGameMode().toString());
+        p.setGamemode(player.getGameMode());
 
         p.setLastPlayed(player.getLastPlayed());
 
@@ -129,7 +129,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class))
             }
     )
     public static void offlinePlayersGet(Context ctx) {
@@ -162,7 +162,7 @@ public class PlayerApi {
 
     @OpenApi(
             path = "/v1/players/{playerUuid}/{worldUuid}/inventory",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Gets a specific online player's Inventory in the specified world",
             tags = {"Player"},
             headers = {
@@ -173,7 +173,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "worldUuid", description = "UUID of the world")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class))
             }
     )
     public static void getPlayerInv(Context ctx) {

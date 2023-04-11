@@ -4,7 +4,7 @@ import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.api.v1.models.World;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -35,7 +35,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/save",
             summary = "Triggers a world save of all worlds",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -69,7 +69,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}/save",
             summary = "Triggers a world save",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -147,7 +147,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/{uuid}/download",
             summary = "Downloads a ZIP compressed archive of the world's folder",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -176,7 +176,7 @@ public class WorldApi {
             ctx.header("Content-Disposition", "attachment; filename=\"" + folder.getName() + ".tar.gz\"");
             ctx.header("Content-Type", "application/zip");
 
-            BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+            BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res().getOutputStream());
             GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
             TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
             addFolderToTarGz(folder, tar, folder.getAbsolutePath(), null);
@@ -192,7 +192,7 @@ public class WorldApi {
     @OpenApi(
             path = "/v1/worlds/download",
             summary = "Downloads a ZIP compressed archive of all the worlds' folders",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             tags = {"Server"},
             headers = {
                     @OpenApiParam(name = "key")
@@ -209,7 +209,7 @@ public class WorldApi {
         ctx.header("Content-Disposition", "attachment; filename=\"worlds.tar.gz\"");
         ctx.header("Content-Type", "application/zip");
 
-        BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res.getOutputStream());
+        BufferedOutputStream buffOut = new BufferedOutputStream(ctx.res().getOutputStream());
         GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
         TarArchiveOutputStream tar = new TarArchiveOutputStream(gzOut);
 
@@ -240,7 +240,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
             }
     )
     public static void worldsGet(Context ctx) {
@@ -284,45 +284,12 @@ public class WorldApi {
 
         world.setName(bukkitWorld.getName());
         world.setUuid(bukkitWorld.getUID().toString());
-
-        // TODO: The Enum for Environment makes this annoying to get
-        switch (bukkitWorld.getEnvironment()) {
-            case NORMAL:
-                world.setEnvironment(0);
-                break;
-            case NETHER:
-                world.setEnvironment(-1);
-                break;
-            case THE_END:
-                world.setEnvironment(1);
-                break;
-            default:
-                world.setEnvironment(0);
-                break;
-        }
-
+        world.setEnvironment(bukkitWorld.getEnvironment());
         world.setTime(BigDecimal.valueOf(bukkitWorld.getTime()));
         world.setAllowAnimals(bukkitWorld.getAllowAnimals());
         world.setAllowMonsters(bukkitWorld.getAllowMonsters());
         world.setGenerateStructures(bukkitWorld.canGenerateStructures());
-
-        int value = 0;
-        switch (bukkitWorld.getDifficulty()) {
-            case PEACEFUL:
-                value = 0;
-                break;
-            case EASY:
-                value = 1;
-                break;
-            case NORMAL:
-                value = 3;
-                break;
-            case HARD:
-                value = 2;
-                break;
-        }
-        world.setDifficulty(value);
-
+        world.setDifficulty(bukkitWorld.getDifficulty());
         world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
         world.setStorm(bukkitWorld.hasStorm());
         world.setThundering(bukkitWorld.isThundering());

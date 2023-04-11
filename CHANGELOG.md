@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.5.0
+
+### ⚠️ BREAKING CHANGES ⚠️
+
+* Gamemode, Environment/Dimension, and Difficulty now use their native
+Bukkit names
+  * e.g. in `/v1/players` instead of returning `0` for difficulty it will
+    now return `SURVIVAL`.
+* Now compiled with ☕️ **Java 19**
+
+### New Features
+
+* TLS now optionally supports Server Name Indication (SNI)
+  * Set `tls.sni` to `true` in your config to enable it (expert)
+* Player is now included in the `PlayerChatWebhookEvent` request body (#194)
+
+### Internals/Bugfixes
+
+* ServerTap is now using Javalin v5!
+* Fixed OpenApi spewing tons of WARNs into logs when viewing `/swagger` (#60)
+* Updated versions of javalin, slf4j, unirest, jackson-databind, junit
+dependencies.
+* No longer messes with ClassLoader on startup
+
 ## v0.4.0
 
 ### New Features

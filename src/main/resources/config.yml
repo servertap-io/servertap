@@ -12,6 +12,8 @@ tls:
   keystore: keystore.jks
   # The password for the keystore
   keystorePassword: ""
+  # Enforce Server Name Indication (SNI) or not
+  sni: false
 
 # Use this list to set allowed CORS Origins ("*" by default)
 corsOrigins:

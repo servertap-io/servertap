@@ -1,6 +1,6 @@
 # ServerTap
 
-<a href="https://github.com/phybros/servertap/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/phybros/servertap/build"></a>
+<a href="https://github.com/phybros/servertap/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/phybros/servertap/build.yml?branch=main"></a>
 <img alt="bukkit version %3E%3D 1.16" src="https://img.shields.io/badge/bukkit%20version-%3E%3D1.16-brightgreen">
 <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/phybros/servertap/total?color=brightgreen">
 <a href="https://discord.gg/fefHbTFAkj"><img src="https://img.shields.io/discord/919982507271802890?logo=discord&label=discord&color=brightgreen" alt="chat on Discord"></a>
@@ -92,9 +92,6 @@ This plugin self-hosts its own API documentation using Swagger.
 You can see the full API documentation at http://your-server.net:4567/swagger.
 You can even explore and test the API right from the UI!
 
->Note: there is a known issue that causes the OpenApi plugin to spew
->tons of logs into your server log. See https://github.com/phybros/servertap/issues/60 for details.
-
 Some examples of capabilities are:
 
 - Ping
@@ -140,6 +137,11 @@ tls:
 ```
 
 Then make sure to use `https://` when talking to the API.
+
+## SNI
+
+TLS optionally supports Server Name Indication (SNI) since `v0.5.0`. Set `tls.sni` to `true` in your config to enable it
+(expert). 99.9% of users won't need to think about this option and can just leave it `false`.
 
 # Authentication
 
@@ -233,7 +235,7 @@ Note: you can use a library like
 [ansicolors](https://www.npmjs.com/package/ansicolor) to parse the color
 codes for the browser.
 
-Connect to `ws://<host>:4567/v1/console` (or use `wss://` if you
+Connect to `ws://<host>:4567/v1/ws/console` (or use `wss://` if you
 have [TLS](#tls) enabled). The last 1000 server log messages will be sent
 to the connecting client. You can configure  the size of the server log
 buffer by changing `websocketConsoleBuffer` in `config.yml`.
@@ -269,7 +271,7 @@ this.ws.onopen = function() {
 You need a few things to get started
 
 - An IDE (e.g. IntelliJ)
-- JDK 17
+- JDK 19
 - Maven
 
 Then, you can build the plugin `jar` by using the `mvn package` command.

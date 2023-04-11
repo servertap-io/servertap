@@ -1,6 +1,8 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.Difficulty;
+import org.bukkit.World.Environment;
 
 import java.math.BigDecimal;
 
@@ -33,18 +35,13 @@ public class World {
     private Boolean allowMonsters = null;
 
     @Expose
-    private Integer difficulty = null;
+    private Difficulty difficulty = null;
 
     @Expose
-    private Integer environment = null;
+    private Environment environment = null;
 
     @Expose
     private BigDecimal seed = null;
-
-    public World name(String name) {
-        this.name = name;
-        return this;
-    }
 
     /**
      * The name of the world
@@ -57,11 +54,6 @@ public class World {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public World time(BigDecimal time) {
-        this.time = time;
-        return this;
     }
 
     public String getUuid() {
@@ -85,11 +77,6 @@ public class World {
         this.time = time;
     }
 
-    public World storm(Boolean storm) {
-        this.storm = storm;
-        return this;
-    }
-
     /**
      * True if there is currently a storm
      *
@@ -101,11 +88,6 @@ public class World {
 
     public void setStorm(Boolean storm) {
         this.storm = storm;
-    }
-
-    public World thundering(Boolean thundering) {
-        this.thundering = thundering;
-        return this;
     }
 
     /**
@@ -121,11 +103,6 @@ public class World {
         this.thundering = thundering;
     }
 
-    public World generateStructures(Boolean generateStructures) {
-        this.generateStructures = generateStructures;
-        return this;
-    }
-
     /**
      * True if the world can generate structures
      *
@@ -137,11 +114,6 @@ public class World {
 
     public void setGenerateStructures(Boolean generateStructures) {
         this.generateStructures = generateStructures;
-    }
-
-    public World allowAnimals(Boolean allowAnimals) {
-        this.allowAnimals = allowAnimals;
-        return this;
     }
 
     /**
@@ -157,11 +129,6 @@ public class World {
         this.allowAnimals = allowAnimals;
     }
 
-    public World allowMonsters(Boolean allowMonsters) {
-        this.allowMonsters = allowMonsters;
-        return this;
-    }
-
     /**
      * True if monsters can spawn
      *
@@ -175,45 +142,30 @@ public class World {
         this.allowMonsters = allowMonsters;
     }
 
-    public World difficulty(Integer difficulty) {
-        this.difficulty = difficulty;
-        return this;
-    }
-
     /**
-     * Peaceful (0), Easy (1), Normal (2), Hard (3)
+     * Peaceful(PEACEFUL), Easy(EASY), Normal(NORMAL), Hard(HARD)
      *
      * @return difficulty
      **/
-    public Integer getDifficulty() {
+    public Difficulty getDifficulty() {
         return difficulty;
     }
 
-    public void setDifficulty(Integer difficulty) {
+    public void setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
 
-    public World environment(Integer environment) {
-        this.environment = environment;
-        return this;
-    }
-
     /**
-     * Overworld (0), Nether (-1), End (1)
+     * Overworld (NORMAL), Nether (NETHER), End (THE_END), Custom (CUSTOM)
      *
      * @return environment
      **/
-    public Integer getEnvironment() {
+    public Environment getEnvironment() {
         return environment;
     }
 
-    public void setEnvironment(Integer environment) {
+    public void setEnvironment(Environment environment) {
         this.environment = environment;
-    }
-
-    public World seed(BigDecimal seed) {
-        this.seed = seed;
-        return this;
     }
 
     /**

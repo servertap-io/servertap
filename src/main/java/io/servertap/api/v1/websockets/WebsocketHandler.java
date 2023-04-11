@@ -10,10 +10,12 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class WebsocketHandler {
 
     private final static Map<String, WsContext> subscribers = new ConcurrentHashMap<>();
+    private static final Logger log = Bukkit.getLogger();
 
     public static void events(WsConfig ws) {
         ws.onConnect(ctx -> {

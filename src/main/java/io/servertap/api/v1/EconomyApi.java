@@ -4,7 +4,7 @@ import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
 import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.plugin.openapi.annotations.*;
+import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.utils.EconomyWrapper;
 import net.milkbowl.vault.economy.Economy;
@@ -25,7 +25,7 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy",
-            method = HttpMethod.GET,
+            methods = {HttpMethod.GET},
             summary = "Economy plugin information",
             tags = {"Economy"},
             headers = {
@@ -58,17 +58,25 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy/pay",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Pay a player",
             description = "Deposits the provided amount into the player's Vault",
             tags = {"Economy"},
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiFormParam(name = "uuid"),
-                    @OpenApiFormParam(name = "amount", type = Double.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
@@ -80,17 +88,25 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy/debit",
-            method = HttpMethod.POST,
+            methods = {HttpMethod.POST},
             summary = "Debit a player",
             description = "Withdraws the provided amount out of the player's Vault",
             tags = {"Economy"},
             headers = {
                     @OpenApiParam(name = "key")
             },
-            formParams = {
-                    @OpenApiFormParam(name = "uuid"),
-                    @OpenApiFormParam(name = "amount", type = Double.class)
-            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                    }
+                            )
+                    }
+            ),
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
