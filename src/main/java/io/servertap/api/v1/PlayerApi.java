@@ -1,7 +1,6 @@
 package io.servertap.api.v1;
 
 import de.tr7zw.nbtapi.NBTFile;
-import de.tr7zw.nbtapi.NBTListCompound;
 import io.javalin.http.*;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
@@ -227,13 +226,13 @@ public class PlayerApi {
                 }
                 NBTFile playerFile = new NBTFile(playerfile);
 
-                for (NBTListCompound item : playerFile.getCompoundList("Inventory")) {
+                playerFile.getCompoundList("Inventory").forEach(item -> {
                     ItemStack itemObj = new ItemStack();
                     itemObj.setId(item.getString("id"));
                     itemObj.setCount(item.getInteger("Count"));
                     itemObj.setSlot(item.getInteger("Slot"));
                     inv.add(itemObj);
-                }
+                });
 
                 ctx.json(inv);
 
