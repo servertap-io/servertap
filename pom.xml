@@ -240,6 +240,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.4.1</version>
                 <configuration>
+                    <minimizeJar>true</minimizeJar>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
 
                     <filters>
