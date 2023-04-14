@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.1
+
+### Internals/Bugfixes
+
+* v0.5.0 was not backwards compatible and **required** Java 19, my bad.
+Now works with Java 17 thru 20.
+* Upgraded `item-nbt-api-plugin` to latest
+
 ## v0.5.0
 
 ### ⚠️ BREAKING CHANGES ⚠️
