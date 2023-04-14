@@ -218,6 +218,7 @@ public class PluginEntrypoint extends JavaPlugin {
                 delete("server/ops", ServerApi::deopPlayer);
                 get("server/whitelist", ServerApi::whitelistGet);
                 post("server/whitelist", ServerApi::whitelistPost);
+                delete("server/whitelist", ServerApi::whitelistDelete);
                 get("worlds", WorldApi::worldsGet);
                 post("worlds/save", WorldApi::saveAllWorlds);
                 get("worlds/download", WorldApi::downloadWorlds);

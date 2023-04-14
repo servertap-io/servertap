@@ -408,6 +408,87 @@ public class ServerApi {
     }
 
     @OpenApi(
+            path = "/v1/server/whitelist",
+            methods = {HttpMethod.DELETE},
+            summary = "Delete specific player from the whitelist",
+            tags = {"Server"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "uuid", type = "string"),
+                                            @OpenApiContentProperty(name = "name", type = "string")
+                                    }
+                            )
+                    }
+            ),
+            responses = {@OpenApiResponse(status = "200")}
+    )
+    public static void whitelistDelete(Context ctx) {
+        final org.bukkit.Server bukkitServer = Bukkit.getServer();
+        if (!bukkitServer.hasWhitelist()) {
+            ctx.json("No whitelist");
+            return;
+        }
+
+        String uuid = ctx.formParam("uuid");
+        String name = ctx.formParam("name");
+
+        if (uuid == null && name == null) {
+            throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
+        }
+
+        //Check Mojang API for missing param
+        if (uuid == null) {
+            try {
+                uuid = MojangApiService.getUuid(name);
+            } catch (IllegalArgumentException ignored) {
+                throw new NotFoundResponse(Constants.WHITELIST_NAME_NOT_FOUND);
+            } catch (IOException ignored) {
+                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+            }
+        } else if (name == null) {
+            try {
+                List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
+                name = nameHistory.get(nameHistory.size() - 1).getName();
+            } catch (IllegalArgumentException ignored) {
+                throw new NotFoundResponse(Constants.WHITELIST_UUID_NOT_FOUND);
+            } catch (IOException ignored) {
+                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
+            }
+        }
+
+        //Whitelist file doesn't accept UUIDs without dashes
+        uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
+
+        final File directory = new File("./");
+        Set<Whitelist> whitelist = getWhitelist();
+
+        String finalUuid = uuid;
+        whitelist.removeIf(entry -> entry.getUuid().toLowerCase().equals(finalUuid));
+
+        final String json = GsonSingleton.getInstance().toJson(whitelist);
+        try {
+            final String path = Paths.get(directory.getAbsolutePath(), "whitelist.json").toString();
+            final File myObj = new File(path);
+            final FileWriter whitelistFile = new FileWriter(myObj);
+            whitelistFile.write(json);
+            whitelistFile.close();
+            bukkitServer.reloadWhitelist();
+            ctx.json("success");
+        } catch (final IOException e) {
+            log.warning("An error occurred updating whitelist.");
+            e.printStackTrace();
+            ctx.json("failed");
+        }
+    }
+
+    @OpenApi(
             path = "/v1/server/ops",
             methods = {HttpMethod.POST},
             summary = "Sets a specific player to Op",
