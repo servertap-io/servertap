@@ -1,9 +1,6 @@
 package io.servertap.api.v1;
 
-import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTCompoundList;
 import de.tr7zw.nbtapi.NBTFile;
-import de.tr7zw.nbtapi.NBTListCompound;
 import io.javalin.http.*;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
