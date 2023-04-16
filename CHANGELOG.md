@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.2
+
+### New Features
+
+* New endpoint: `DELETE /v1/server/whitelist` to remove someone from the
+whitelist
+
+### Internals/Bugfixes
+
+* Updated to preserve compatibility with 1.16.5 / Java 16
+
 ## v0.5.1
 
 ### Internals/Bugfixes
