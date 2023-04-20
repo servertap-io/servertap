@@ -14,6 +14,7 @@
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
+        <java.version>16</java.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 

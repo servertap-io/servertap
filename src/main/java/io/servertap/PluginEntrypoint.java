@@ -36,7 +36,7 @@ import java.util.List;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
-public class PluginEntrypoint extends JavaPlugin {
+public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpointApi {
 
     public static PluginEntrypoint instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
@@ -282,4 +282,8 @@ public class PluginEntrypoint extends JavaPlugin {
                         }));
     }
 
+    @Override
+    public Javalin getJavalin() {
+        return app;
+    }
 }
