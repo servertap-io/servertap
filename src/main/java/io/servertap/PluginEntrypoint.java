@@ -2,7 +2,6 @@ package io.servertap;
 
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
-import io.javalin.openapi.OpenApiContact;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
@@ -21,17 +20,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
@@ -148,6 +142,10 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
+                    if (getConfig().getStringList("blocked-paths").contains(ctx.path())) {
+                        ctx.status(403).result("Forbidden");
+                        return;
+                    }
                     String path = ctx.req().getPathInfo();
 
                     // If auth is not enabled just serve it all
@@ -189,11 +187,13 @@ public class PluginEntrypoint extends JavaPlugin {
                     ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                 });
 
-                config.plugins.register(new OpenApiPlugin(getOpenApiConfig()));
+                if (!bukkitConfig.getBoolean("disable-swagger", false)) {
+                    config.plugins.register(new OpenApiPlugin(getOpenApiConfig()));
 
-                SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
-                swaggerConfiguration.setDocumentationPath("/swagger-docs");
-                config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+                    SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
+                    swaggerConfiguration.setDocumentationPath("/swagger-docs");
+                    config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+                }
             });
         }
 
@@ -208,57 +208,85 @@ public class PluginEntrypoint extends JavaPlugin {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
                 // Pings
-                get("ping", ServerApi::ping);
+                if (endpointCategoryEnabled("ping")) {
+                    get("ping", ServerApi::ping);
+                }
 
                 // Server routes
-                get("server", ServerApi::serverGet);
-                post("server/exec", ServerApi::postCommand);
-                get("server/ops", ServerApi::getOps);
-                post("server/ops", ServerApi::opPlayer);
-                delete("server/ops", ServerApi::deopPlayer);
-                get("server/whitelist", ServerApi::whitelistGet);
-                post("server/whitelist", ServerApi::whitelistPost);
-                delete("server/whitelist", ServerApi::whitelistDelete);
-                get("worlds", WorldApi::worldsGet);
-                post("worlds/save", WorldApi::saveAllWorlds);
-                get("worlds/download", WorldApi::downloadWorlds);
-                get("worlds/{uuid}", WorldApi::worldGet);
-                post("worlds/{uuid}/save", WorldApi::saveWorld);
-                get("worlds/{uuid}/download", WorldApi::downloadWorld);
-                get("scoreboard", ServerApi::scoreboardGet);
-                get("scoreboard/{name}", ServerApi::objectiveGet);
+                if (endpointCategoryEnabled("server")) {
+                    get("server", ServerApi::serverGet);
+                    post("server/exec", ServerApi::postCommand);
+                    get("server/ops", ServerApi::getOps);
+                    post("server/ops", ServerApi::opPlayer);
+                    delete("server/ops", ServerApi::deopPlayer);
+                    get("server/whitelist", ServerApi::whitelistGet);
+                    post("server/whitelist", ServerApi::whitelistPost);
+                    delete("server/whitelist", ServerApi::whitelistDelete);
+                }
+
+                if (endpointCategoryEnabled("worlds")) {
+                    get("worlds", WorldApi::worldsGet);
+                    post("worlds/save", WorldApi::saveAllWorlds);
+                    get("worlds/download", WorldApi::downloadWorlds);
+                    get("worlds/{uuid}", WorldApi::worldGet);
+                    post("worlds/{uuid}/save", WorldApi::saveWorld);
+                    get("worlds/{uuid}/download", WorldApi::downloadWorld);
+                }
+
+                if (endpointCategoryEnabled("scoreboard")) {
+                    get("scoreboard", ServerApi::scoreboardGet);
+                    get("scoreboard/{name}", ServerApi::objectiveGet);
+                }
 
                 // Chat
-                post("chat/broadcast", ServerApi::broadcastPost);
-                post("chat/tell", ServerApi::tellPost);
+                if (endpointCategoryEnabled("chat")) {
+                    post("chat/broadcast", ServerApi::broadcastPost);
+                    post("chat/tell", ServerApi::tellPost);
+                }
 
                 // Player routes
-                get("players", PlayerApi::playersGet);
-                get("players/all", PlayerApi::offlinePlayersGet);
-                get("players/{uuid}", PlayerApi::playerGet);
-                get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
+                if (endpointCategoryEnabled("players")) {
+                    get("players", PlayerApi::playersGet);
+                    get("players/all", PlayerApi::offlinePlayersGet);
+                    get("players/{uuid}", PlayerApi::playerGet);
+                    get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
+                }
 
                 // Economy routes
-                post("economy/pay", EconomyApi::playerPay);
-                post("economy/debit", EconomyApi::playerDebit);
-                get("economy", EconomyApi::getEconomyPluginInformation);
+                if (endpointCategoryEnabled("economy")) {
+                    post("economy/pay", EconomyApi::playerPay);
+                    post("economy/debit", EconomyApi::playerDebit);
+                    get("economy", EconomyApi::getEconomyPluginInformation);
+                }
 
                 // Plugin routes
-                get("plugins", PluginApi::listPlugins);
-                post("plugins", PluginApi::installPlugin);
+                if (endpointCategoryEnabled("plugins")) {
+                    get("plugins", PluginApi::listPlugins);
+                    post("plugins", PluginApi::installPlugin);
+                }
 
                 // PAPI Routes
-                post("placeholders/replace", PAPIApi::replacePlaceholders);
+                if (endpointCategoryEnabled("placeholders")) {
+                    post("placeholders/replace", PAPIApi::replacePlaceholders);
+                }
 
                 // Websocket handler
-                ws("ws/console", WebsocketHandler::events);
+                if (endpointCategoryEnabled("websocket-console")) {
+                    ws("ws/console", WebsocketHandler::events);
+                }
 
                 // Advancement routes
-                get("advancements", AdvancementsApi::getAdvancements);
+                if (endpointCategoryEnabled("advancements")) {
+                    get("advancements", AdvancementsApi::getAdvancements);
+                }
             });
         });
 
         getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
+    }
+
+    private boolean endpointCategoryEnabled(String categoryName) {
+        return getConfig().getBoolean(String.format("enabled-endpoint-categories.%s", categoryName), true);
     }
 
     @Override
@@ -281,5 +309,4 @@ public class PluginEntrypoint extends JavaPlugin {
                             openApiInfo.setDescription(this.getDescription().getDescription());
                         }));
     }
-
 }

@@ -33,3 +33,27 @@ corsOrigins:
 # Number of console log lines to send when websocket connections are opened
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
+
+# Enable or disable certain groups of endpoints.
+# See the Swagger UI at http://your-server:4567/swagger
+enabled-endpoint-categories:
+  ping: true
+  server: true
+  worlds: true
+  scoreboard: true
+  chat: true
+  players: true
+  economy: true
+  plugins: true
+  placeholders: true
+  websocket-console: true
+  advancements: true
+
+# If you do not wish to show the swagger UI you can disable it here
+disable-swagger: false
+
+# If you do not want to disable full categories you can blacklist certain paths.
+# Use the full paths including the API Version as shown in Swagger UI!
+blocked-paths:
+# - /v1/ping
+# - /v1/plugins
