@@ -643,7 +643,11 @@ public class ServerApi {
         }
 
         String timeRaw = ctx.formParam("time");
-        AtomicLong time = new AtomicLong(timeRaw != null ? Long.parseLong(timeRaw) : 0);
+        if (StringUtils.isBlank(timeRaw)) {
+            timeRaw = "0";
+        }
+
+        AtomicLong time = new AtomicLong(Long.parseLong(timeRaw));
         if (time.get() < 0) time.set(0);
 
         ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
