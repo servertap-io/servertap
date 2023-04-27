@@ -34,26 +34,13 @@ corsOrigins:
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
 
-# Enable or disable certain groups of endpoints.
-# See the Swagger UI at http://your-server:4567/swagger
-enabled-endpoint-categories:
-  ping: true
-  server: true
-  worlds: true
-  scoreboard: true
-  chat: true
-  players: true
-  economy: true
-  plugins: true
-  placeholders: true
-  websocket-console: true
-  advancements: true
-
 # If you do not wish to show the swagger UI you can disable it here
 disable-swagger: false
 
-# If you do not want to disable full categories you can blacklist certain paths.
-# Use the full paths including the API Version as shown in Swagger UI!
+# Use this feature to configure paths that will be blocked.
+# You can use * as wildcard placeholders to match anything you like.
+# The placeholders from Swagger UI like {uuid} are handled the same way as a *.
 blocked-paths:
 # - /v1/ping
-# - /v1/plugins
+# - /v1/players/{uuid}
+# - /v1/server/*

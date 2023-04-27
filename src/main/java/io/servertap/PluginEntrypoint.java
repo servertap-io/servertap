@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -36,6 +38,7 @@ public class PluginEntrypoint extends JavaPlugin {
     private static final java.util.logging.Logger log = Bukkit.getLogger();
     private EconomyWrapper economyWrapper;
     private static Javalin app = null;
+    private List<Pattern> blockedPathRegexPatterns;
 
     public static final String SERVERTAP_KEY_HEADER = "key";
     public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
@@ -80,6 +83,19 @@ public class PluginEntrypoint extends JavaPlugin {
                 log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
             }
         }
+
+        // Convert blocked paths to regex patterns for faster matching
+        blockedPathRegexPatterns = bukkitConfig.getStringList("blocked-paths").stream()
+                // Replace Placeholders with regex patterns
+                .map(path -> path
+                        // Replace Config wildcards (*) with a Regex Wildcard
+                        .replace("*", ".*")
+                        // Replace {placeholders} with Not-A-Slash Regex
+                        .replaceAll("\\{.*}",  "[^/]*")
+                        // Escape all / characters for Regex
+                        .replace("/", "\\/"))
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
 
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
         rootLogger.addFilter(new ConsoleListener(this));
@@ -142,11 +158,13 @@ public class PluginEntrypoint extends JavaPlugin {
 
                 // Create an accessManager to verify the path is a swagger call, or has the correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
-                    if (getConfig().getStringList("blocked-paths").contains(ctx.path())) {
+                    String path = ctx.req().getPathInfo();
+
+                    // If the path is blocked, return 403
+                    if (blockedPathRegexPatterns.stream().anyMatch(pattern -> pattern.matcher(path).matches())) {
                         ctx.status(403).result("Forbidden");
                         return;
                     }
-                    String path = ctx.req().getPathInfo();
 
                     // If auth is not enabled just serve it all
                     if (!this.authEnabled) {
@@ -208,85 +226,59 @@ public class PluginEntrypoint extends JavaPlugin {
             // Routes for v1 of the API
             path(Constants.API_V1, () -> {
                 // Pings
-                if (endpointCategoryEnabled("ping")) {
-                    get("ping", ServerApi::ping);
-                }
+                get("ping", ServerApi::ping);
 
                 // Server routes
-                if (endpointCategoryEnabled("server")) {
-                    get("server", ServerApi::serverGet);
-                    post("server/exec", ServerApi::postCommand);
-                    get("server/ops", ServerApi::getOps);
-                    post("server/ops", ServerApi::opPlayer);
-                    delete("server/ops", ServerApi::deopPlayer);
-                    get("server/whitelist", ServerApi::whitelistGet);
-                    post("server/whitelist", ServerApi::whitelistPost);
-                    delete("server/whitelist", ServerApi::whitelistDelete);
-                }
+                get("server", ServerApi::serverGet);
+                post("server/exec", ServerApi::postCommand);
+                get("server/ops", ServerApi::getOps);
+                post("server/ops", ServerApi::opPlayer);
+                delete("server/ops", ServerApi::deopPlayer);
+                get("server/whitelist", ServerApi::whitelistGet);
+                post("server/whitelist", ServerApi::whitelistPost);
+                delete("server/whitelist", ServerApi::whitelistDelete);
 
-                if (endpointCategoryEnabled("worlds")) {
-                    get("worlds", WorldApi::worldsGet);
-                    post("worlds/save", WorldApi::saveAllWorlds);
-                    get("worlds/download", WorldApi::downloadWorlds);
-                    get("worlds/{uuid}", WorldApi::worldGet);
-                    post("worlds/{uuid}/save", WorldApi::saveWorld);
-                    get("worlds/{uuid}/download", WorldApi::downloadWorld);
-                }
+                get("worlds", WorldApi::worldsGet);
+                post("worlds/save", WorldApi::saveAllWorlds);
+                get("worlds/download", WorldApi::downloadWorlds);
+                get("worlds/{uuid}", WorldApi::worldGet);
+                post("worlds/{uuid}/save", WorldApi::saveWorld);
+                get("worlds/{uuid}/download", WorldApi::downloadWorld);
 
-                if (endpointCategoryEnabled("scoreboard")) {
-                    get("scoreboard", ServerApi::scoreboardGet);
-                    get("scoreboard/{name}", ServerApi::objectiveGet);
-                }
+                get("scoreboard", ServerApi::scoreboardGet);
+                get("scoreboard/{name}", ServerApi::objectiveGet);
 
                 // Chat
-                if (endpointCategoryEnabled("chat")) {
-                    post("chat/broadcast", ServerApi::broadcastPost);
-                    post("chat/tell", ServerApi::tellPost);
-                }
+                post("chat/broadcast", ServerApi::broadcastPost);
+                post("chat/tell", ServerApi::tellPost);
 
                 // Player routes
-                if (endpointCategoryEnabled("players")) {
-                    get("players", PlayerApi::playersGet);
-                    get("players/all", PlayerApi::offlinePlayersGet);
-                    get("players/{uuid}", PlayerApi::playerGet);
-                    get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
-                }
+                get("players", PlayerApi::playersGet);
+                get("players/all", PlayerApi::offlinePlayersGet);
+                get("players/{uuid}", PlayerApi::playerGet);
+                get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
 
                 // Economy routes
-                if (endpointCategoryEnabled("economy")) {
-                    post("economy/pay", EconomyApi::playerPay);
-                    post("economy/debit", EconomyApi::playerDebit);
-                    get("economy", EconomyApi::getEconomyPluginInformation);
-                }
+                post("economy/pay", EconomyApi::playerPay);
+                post("economy/debit", EconomyApi::playerDebit);
+                get("economy", EconomyApi::getEconomyPluginInformation);
 
                 // Plugin routes
-                if (endpointCategoryEnabled("plugins")) {
-                    get("plugins", PluginApi::listPlugins);
-                    post("plugins", PluginApi::installPlugin);
-                }
+                get("plugins", PluginApi::listPlugins);
+                post("plugins", PluginApi::installPlugin);
 
                 // PAPI Routes
-                if (endpointCategoryEnabled("placeholders")) {
-                    post("placeholders/replace", PAPIApi::replacePlaceholders);
-                }
+                post("placeholders/replace", PAPIApi::replacePlaceholders);
 
                 // Websocket handler
-                if (endpointCategoryEnabled("websocket-console")) {
-                    ws("ws/console", WebsocketHandler::events);
-                }
+                ws("ws/console", WebsocketHandler::events);
 
                 // Advancement routes
-                if (endpointCategoryEnabled("advancements")) {
-                    get("advancements", AdvancementsApi::getAdvancements);
-                }
+                get("advancements", AdvancementsApi::getAdvancements);
             });
         });
 
         getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
-    }
-
-    private boolean endpointCategoryEnabled(String categoryName) {
-        return getConfig().getBoolean(String.format("enabled-endpoint-categories.%s", categoryName), true);
     }
 
     @Override
