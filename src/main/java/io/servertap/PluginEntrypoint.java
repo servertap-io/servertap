@@ -2,7 +2,6 @@ package io.servertap;
 
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
-import io.javalin.openapi.OpenApiContact;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
@@ -12,6 +11,8 @@ import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.metrics.Metrics;
+import io.servertap.plugin.api.ServerTapWebserverService;
+import io.servertap.plugin.api.ServerTapWebserverServiceImpl;
 import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonJsonMapper;
 import org.apache.logging.log4j.LogManager;
@@ -19,28 +20,24 @@ import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
-public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpointApi {
+public class PluginEntrypoint extends JavaPlugin {
 
     public static PluginEntrypoint instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
-    private EconomyWrapper economyWrapper;
     private static Javalin app = null;
 
     public static final String SERVERTAP_KEY_HEADER = "key";
@@ -67,7 +64,7 @@ public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpo
     @Override
     public void onEnable() {
         // Tell bStats what plugin this is
-        Metrics metrics = new Metrics(this, 9492);
+        new Metrics(this, 9492);
 
         // Initialize config file + set defaults
         saveDefaultConfig();
@@ -174,13 +171,13 @@ public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpo
 
                     // Auth is turned on, make sure there is a header called "key"
                     String authKey = bukkitConfig.getString("key", "change_me");
-                    if (ctx.header(SERVERTAP_KEY_HEADER) != null && ctx.header(SERVERTAP_KEY_HEADER).equals(authKey)) {
+                    if (ctx.header(SERVERTAP_KEY_HEADER) != null && Objects.equals(ctx.header(SERVERTAP_KEY_HEADER), authKey)) {
                         handler.handle(ctx);
                         return;
                     }
 
                     // If the request is still not handled, check for a cookie (websockets use cookies for auth)
-                    if (ctx.cookie(SERVERTAP_KEY_COOKIE) != null && ctx.cookie(SERVERTAP_KEY_COOKIE).equals(authKey)) {
+                    if (ctx.cookie(SERVERTAP_KEY_COOKIE) != null && Objects.equals(ctx.cookie(SERVERTAP_KEY_COOKIE), authKey)) {
                         handler.handle(ctx);
                         return;
                     }
@@ -259,6 +256,8 @@ public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpo
         });
 
         getServer().getPluginManager().registerEvents(new WebhookEventListener(this), this);
+
+        getServer().getServicesManager().register(ServerTapWebserverService.class, new ServerTapWebserverServiceImpl(this), this, ServicePriority.Normal);
     }
 
     @Override
@@ -282,7 +281,6 @@ public class PluginEntrypoint extends JavaPlugin implements ServerTapCustomEndpo
                         }));
     }
 
-    @Override
     public Javalin getJavalin() {
         return app;
     }
