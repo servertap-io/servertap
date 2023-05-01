@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 public class WebhookEventListener implements Listener {
     private List<RegisteredWebhook> registeredWebhooks;
     private final Plugin plugin;
+    private static final java.util.logging.Logger log = Bukkit.getLogger();
 
     public WebhookEventListener(Plugin plugin) {
         this.plugin = plugin;
@@ -226,7 +227,7 @@ public class WebhookEventListener implements Listener {
         p.setUuid(player.getUniqueId().toString());
         p.setDisplayName(player.getDisplayName());
 
-        p.setAddress(player.getAddress().getHostName());
+        p.setAddress(player.getAddress().getHostString());
         p.setPort(player.getAddress().getPort());
 
         p.setExhaustion(player.getExhaustion());
