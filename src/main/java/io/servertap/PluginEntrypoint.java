@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -39,6 +41,7 @@ public class PluginEntrypoint extends JavaPlugin {
     public static PluginEntrypoint instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
     private static Javalin app = null;
+    private List<Pattern> blockedPathRegexPatterns;
 
     public static final String SERVERTAP_KEY_HEADER = "key";
     public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
@@ -83,6 +86,19 @@ public class PluginEntrypoint extends JavaPlugin {
                 log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
             }
         }
+
+        // Convert blocked paths to regex patterns for faster matching
+        blockedPathRegexPatterns = bukkitConfig.getStringList("blocked-paths").stream()
+                // Replace Placeholders with regex patterns
+                .map(path -> path
+                        // Replace Config wildcards (*) with a Regex Wildcard
+                        .replace("*", ".*")
+                        // Replace {placeholders} with Not-A-Slash Regex
+                        .replaceAll("\\{.*}",  "[^/]*")
+                        // Escape all / characters for Regex
+                        .replace("/", "\\/"))
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
 
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
         rootLogger.addFilter(new ConsoleListener(this));
@@ -147,6 +163,12 @@ public class PluginEntrypoint extends JavaPlugin {
                 config.accessManager((handler, ctx, permittedRoles) -> {
                     String path = ctx.req().getPathInfo();
 
+                    // If the path is blocked, return 403
+                    if (blockedPathRegexPatterns.stream().anyMatch(pattern -> pattern.matcher(path).matches())) {
+                        ctx.status(403).result("Forbidden");
+                        return;
+                    }
+
                     // If auth is not enabled just serve it all
                     if (!this.authEnabled) {
                         handler.handle(ctx);
@@ -186,11 +208,13 @@ public class PluginEntrypoint extends JavaPlugin {
                     ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
                 });
 
-                config.plugins.register(new OpenApiPlugin(getOpenApiConfig()));
+                if (!bukkitConfig.getBoolean("disable-swagger", false)) {
+                    config.plugins.register(new OpenApiPlugin(getOpenApiConfig()));
 
-                SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
-                swaggerConfiguration.setDocumentationPath("/swagger-docs");
-                config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+                    SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
+                    swaggerConfiguration.setDocumentationPath("/swagger-docs");
+                    config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+                }
             });
         }
 
@@ -216,12 +240,14 @@ public class PluginEntrypoint extends JavaPlugin {
                 get("server/whitelist", ServerApi::whitelistGet);
                 post("server/whitelist", ServerApi::whitelistPost);
                 delete("server/whitelist", ServerApi::whitelistDelete);
+
                 get("worlds", WorldApi::worldsGet);
                 post("worlds/save", WorldApi::saveAllWorlds);
                 get("worlds/download", WorldApi::downloadWorlds);
                 get("worlds/{uuid}", WorldApi::worldGet);
                 post("worlds/{uuid}/save", WorldApi::saveWorld);
                 get("worlds/{uuid}/download", WorldApi::downloadWorld);
+
                 get("scoreboard", ServerApi::scoreboardGet);
                 get("scoreboard/{name}", ServerApi::objectiveGet);
 

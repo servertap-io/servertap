@@ -33,3 +33,14 @@ corsOrigins:
 # Number of console log lines to send when websocket connections are opened
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
+
+# If you do not wish to show the swagger UI you can disable it here
+disable-swagger: false
+
+# Use this feature to configure paths that will be blocked.
+# You can use * as wildcard placeholders to match anything you like.
+# The placeholders from Swagger UI like {uuid} are handled the same way as a *.
+blocked-paths:
+# - /v1/ping
+# - /v1/players/{uuid}
+# - /v1/server/*
