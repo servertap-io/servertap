@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.3
+
+### New Features
+
+* You can now disable swagger by setting `disable-swagger` to `true`
+in your config (default false)
+* You can now block individual paths in your config (thanks @Velyn-N)
+
+### Internals/Bugfixes
+
+* Fixed errant reverse lookup on player join (fixes #68)
+
 ## v0.5.2
 
 ### New Features
