@@ -26,7 +26,7 @@ Join the Discord to talk about this plugin https://discord.gg/fefHbTFAkj
 - [Websockets](#websockets)
   - [Authenticating Websockets](#authenticating-websockets)
 - [Using the Developer API](#using-the-developer-api)
-- [Developing](#developing)
+- [Contributing to ServerTap](#contributing-to-servertap)
 
 # Usage
 
@@ -270,6 +270,24 @@ this.ws.onopen = function() {
 # Using the Developer API
 
 ServerTap provides a Developer API allowing you to register your own Request Handlers and Websockets from your Plugin!
+
+To get ServerTap Builds you can use [Jitpack](https://jitpack.io). First, add the Jitpack Repository to your `pom.xml`:
+```xml
+<repository>
+  <id>jitpack.io</id>
+  <url>https://jitpack.io</url>
+</repository>
+```
+Then you can add the following Dependency:
+```xml
+<dependency>
+  <groupId>com.github.phybros</groupId>
+  <artifactId>servertap</artifactId>
+  <version>vX.X.X</version>
+  <scope>provided</scope>
+</dependency>
+```
+Replace the Version with the latest available Releases Version Number.
 
 You can retrieve the API using Bukkits ServiceProvider:
 ```java
