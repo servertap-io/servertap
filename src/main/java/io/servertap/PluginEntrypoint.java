@@ -300,10 +300,6 @@ public class PluginEntrypoint extends JavaPlugin {
     }
 
     private OpenApiPluginConfiguration getOpenApiConfig() {
-        Security security = new Security(null);
-        
-        SecurityComponentConfiguration securityComponentConfiguration = new SecurityComponentConfiguration();
-        securityComponentConfiguration.
         return new OpenApiPluginConfiguration()
                 .withDocumentationPath("/swagger-docs")
                 .withDefinitionConfiguration((version, definition) -> definition
@@ -317,6 +313,6 @@ public class PluginEntrypoint extends JavaPlugin {
                             openApiInfo.setContact(contact);
                             
                         })
-                        .withSecurity());
+                );
     }
 }
