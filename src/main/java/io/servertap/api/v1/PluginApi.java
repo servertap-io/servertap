@@ -24,6 +24,7 @@ public class PluginApi {
 
     @OpenApi(
             path = "/v1/plugins",
+            operationId = "getPlugins",
             methods = {HttpMethod.GET},
             summary = "Get a list of installed plugins",
             description = "Responds with an array of objects containing keys name and enabled.",
@@ -58,6 +59,7 @@ public class PluginApi {
 
     @OpenApi(
             path = "/v1/plugins",
+            operationId = "installPlugin",
             methods = {HttpMethod.POST},
             summary = "Download and install a plugin from a URL (URL MUST be urlencoded)",
             tags = {"Plugins"},

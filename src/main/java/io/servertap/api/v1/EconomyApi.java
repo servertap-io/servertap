@@ -25,6 +25,7 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy",
+            operationId = "getEconomyPluginInfo",
             methods = {HttpMethod.GET},
             summary = "Economy plugin information",
             tags = {"Economy"},
@@ -58,6 +59,7 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy/pay",
+            operationId = "payPlayer",
             methods = {HttpMethod.POST},
             summary = "Pay a player",
             description = "Deposits the provided amount into the player's Vault",
@@ -88,6 +90,7 @@ public class EconomyApi {
 
     @OpenApi(
             path = "/v1/economy/debit",
+            operationId = "debitPlayer",
             methods = {HttpMethod.POST},
             summary = "Debit a player",
             description = "Withdraws the provided amount out of the player's Vault",

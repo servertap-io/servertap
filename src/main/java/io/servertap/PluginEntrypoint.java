@@ -3,8 +3,10 @@ package io.servertap;
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
 import io.javalin.openapi.OpenApiContact;
+import io.javalin.openapi.Security;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
+import io.javalin.openapi.plugin.SecurityComponentConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.servertap.api.v1.*;
@@ -298,6 +300,10 @@ public class PluginEntrypoint extends JavaPlugin {
     }
 
     private OpenApiPluginConfiguration getOpenApiConfig() {
+        Security security = new Security(null);
+        
+        SecurityComponentConfiguration securityComponentConfiguration = new SecurityComponentConfiguration();
+        securityComponentConfiguration.
         return new OpenApiPluginConfiguration()
                 .withDocumentationPath("/swagger-docs")
                 .withDefinitionConfiguration((version, definition) -> definition
@@ -309,6 +315,8 @@ public class PluginEntrypoint extends JavaPlugin {
                             contact.setName("ServerTap Discord");
                             contact.setUrl("https://discord.gg/fefHbTFAkj");
                             openApiInfo.setContact(contact);
-                        }));
+                            
+                        })
+                        .withSecurity());
     }
 }

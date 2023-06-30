@@ -6,7 +6,6 @@ import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiResponse;
 import io.servertap.api.v1.models.Advancement;
-import io.servertap.api.v1.models.Player;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ public class AdvancementsApi {
 
     @OpenApi(
             path = "/v1/advancements",
+            operationId = "getAdvancements",
             summary = "Gets all server advancements",
             tags = {"Advancement"},
             headers = {

@@ -19,14 +19,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class WorldApi {
 
@@ -34,6 +30,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds/save",
+            operationId = "saveAllWorlds",
             summary = "Triggers a world save of all worlds",
             methods = {HttpMethod.POST},
             tags = {"Server"},
@@ -68,6 +65,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds/{uuid}/save",
+            operationId = "saveWorld",
             summary = "Triggers a world save",
             methods = {HttpMethod.POST},
             tags = {"Server"},
@@ -146,6 +144,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds/{uuid}/download",
+            operationId = "downloadWorld",
             summary = "Downloads a ZIP compressed archive of the world's folder",
             methods = {HttpMethod.GET},
             tags = {"Server"},
@@ -191,6 +190,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds/download",
+            operationId = "downloadAllWorlds",
             summary = "Downloads a ZIP compressed archive of all the worlds' folders",
             methods = {HttpMethod.GET},
             tags = {"Server"},
@@ -234,6 +234,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds",
+            operationId = "getAllWorlds",
             summary = "Get information about all worlds",
             tags = {"Server"},
             headers = {
@@ -252,6 +253,7 @@ public class WorldApi {
 
     @OpenApi(
             path = "/v1/worlds/{uuid}",
+            operationId = "getWorld",
             summary = "Get information about a specific world",
             tags = {"Server"},
             headers = {
