@@ -2,6 +2,7 @@ package io.servertap;
 
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
+import io.javalin.openapi.OpenApiContact;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
@@ -57,7 +58,8 @@ public class PluginEntrypoint extends JavaPlugin {
         }
     }
 
-    public PluginEntrypoint(@NotNull JavaPluginLoader loader, @NotNull PluginDescriptionFile description, @NotNull File dataFolder, @NotNull File file) {
+    public PluginEntrypoint(@NotNull JavaPluginLoader loader, @NotNull PluginDescriptionFile description,
+            @NotNull File dataFolder, @NotNull File file) {
         super(loader, description, dataFolder, file);
     }
 
@@ -91,7 +93,7 @@ public class PluginEntrypoint extends JavaPlugin {
                         // Replace Config wildcards (*) with a Regex Wildcard
                         .replace("*", ".*")
                         // Replace {placeholders} with Not-A-Slash Regex
-                        .replaceAll("\\{.*}",  "[^/]*")
+                        .replaceAll("\\{.*}", "[^/]*")
                         // Escape all / characters for Regex
                         .replace("/", "\\/"))
                 .map(Pattern::compile)
@@ -117,10 +119,12 @@ public class PluginEntrypoint extends JavaPlugin {
                         String keystorePath = bukkitConfig.getString("tls.keystore", "keystore.jks");
                         String keystorePassword = bukkitConfig.getString("tls.keystorePassword", "");
 
-                        final String fullKeystorePath = getDataFolder().getAbsolutePath() + File.separator + keystorePath;
+                        final String fullKeystorePath = getDataFolder().getAbsolutePath() + File.separator
+                                + keystorePath;
 
                         if (!Files.exists(Paths.get(fullKeystorePath))) {
-                            log.warning(String.format("[ServerTap] TLS is enabled but %s doesn't exist. TLS disabled.", fullKeystorePath));
+                            log.warning(String.format("[ServerTap] TLS is enabled but %s doesn't exist. TLS disabled.",
+                                    fullKeystorePath));
                         } else {
                             // register the SSL plugin
                             SSLPlugin plugin = new SSLPlugin(conf -> {
@@ -156,7 +160,8 @@ public class PluginEntrypoint extends JavaPlugin {
                     }
                 }));
 
-                // Create an accessManager to verify the path is a swagger call, or has the correct authentication
+                // Create an accessManager to verify the path is a swagger call, or has the
+                // correct authentication
                 config.accessManager((handler, ctx, permittedRoles) -> {
                     String path = ctx.req().getPathInfo();
 
@@ -195,7 +200,8 @@ public class PluginEntrypoint extends JavaPlugin {
                         return;
                     }
 
-                    // If the request is still not handled, check for a cookie (websockets use cookies for auth)
+                    // If the request is still not handled, check for a cookie (websockets use
+                    // cookies for auth)
                     if (ctx.cookie(SERVERTAP_KEY_COOKIE) != null && ctx.cookie(SERVERTAP_KEY_COOKIE).equals(authKey)) {
                         handler.handle(ctx);
                         return;
@@ -299,6 +305,10 @@ public class PluginEntrypoint extends JavaPlugin {
                             openApiInfo.setTitle(this.getDescription().getName());
                             openApiInfo.setVersion(this.getDescription().getVersion());
                             openApiInfo.setDescription(this.getDescription().getDescription());
+                            OpenApiContact contact = new OpenApiContact();
+                            contact.setName("ServerTap Discord");
+                            contact.setUrl("https://discord.gg/fefHbTFAkj");
+                            openApiInfo.setContact(contact);
                         }));
     }
 }
