@@ -8,7 +8,7 @@ Head over to https://github.com/phybros/servertap/releases/latest to grab the la
 
 # Discord
 
-Join the Discord to talk about this plugin https://discord.gg/fefHbTFAkj
+Join the Discord to talk about this plugin https://discord.gg/nSWRYzBMfp
 
 # Usage
 
