@@ -9,14 +9,14 @@ import org.junit.jupiter.api.*;
 
 public class TestPluginClass {
     private static ServerMock server;
-    private static PluginEntrypoint plugin;
+    private static ServerTapMain plugin;
 
     private static final String TEST_URL_BASE = "http://localhost:4567";
 
     @BeforeAll
     public static void setUp() {
         server = MockBukkit.mock();
-        plugin = MockBukkit.load(PluginEntrypoint.class);
+        plugin = MockBukkit.load(ServerTapMain.class);
     }
 
     @AfterAll

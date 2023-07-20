@@ -1,8 +1,8 @@
 name: ServerTap
-main: io.servertap.PluginEntrypoint
+main: io.servertap.ServerTapMain
 version: 0.5.4-SNAPSHOT
 description: ServerTap is a REST API for Bukkit/Spigot/PaperMC Minecraft servers.
-authors: [phybros, ATechAdventurer, c1oneman, Earlh21, Scarsz, au5ton, Aberdeener, Hedlund01, matteoturini, Diddyy]
+authors: [phybros, ATechAdventurer, c1oneman, Earlh21, Scarsz, au5ton, Aberdeener, Hedlund01, matteoturini, Diddyy, Velyn-N, srmullaney]
 load: STARTUP
 website: https://servertap.io
 api-version: 1.16

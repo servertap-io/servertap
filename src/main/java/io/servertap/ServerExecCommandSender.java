@@ -28,7 +28,7 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
 
     public CompletableFuture<String> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
         Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
-                Bukkit.getPluginManager().getPlugin("ServerTap"),
+                ServerTapMain.instance,
                 () -> Bukkit.dispatchCommand(this, command)
         );
 

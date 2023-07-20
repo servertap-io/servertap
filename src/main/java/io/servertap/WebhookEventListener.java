@@ -16,7 +16,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,15 +29,13 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class WebhookEventListener implements Listener {
-    private List<RegisteredWebhook> registeredWebhooks;
-    private final Plugin plugin;
-    private static final java.util.logging.Logger log = Bukkit.getLogger();
+    private final List<RegisteredWebhook> registeredWebhooks;
+    private final ServerTapMain main;
 
-    public WebhookEventListener(Plugin plugin) {
-        this.plugin = plugin;
-        FileConfiguration bukkitConfig = plugin.getConfig();
-        Logger logger = Bukkit.getLogger();
-        String pluginName = plugin.getDescription().getName();
+    public WebhookEventListener(ServerTapMain main, Logger logger) {
+        this.main = main;
+        FileConfiguration bukkitConfig = main.getConfig();
+        String pluginName = main.getDescription().getName();
 
         registeredWebhooks = new ArrayList<>();
 
@@ -121,7 +118,7 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new PostRequestTask(eventModel, webhook.getListenerUrl()));
+            Bukkit.getScheduler().runTaskAsynchronously(main, new PostRequestTask(eventModel, webhook.getListenerUrl()));
         }
     }
 
@@ -144,7 +141,7 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new PostRequestTask(eventModel, webhook.getListenerUrl()));
+            Bukkit.getScheduler().runTaskAsynchronously(main, new PostRequestTask(eventModel, webhook.getListenerUrl()));
         }
     }
 
@@ -164,7 +161,7 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new PostRequestTask(eventModel, webhook.getListenerUrl()));
+            Bukkit.getScheduler().runTaskAsynchronously(main, new PostRequestTask(eventModel, webhook.getListenerUrl()));
         }
     }
 
@@ -184,7 +181,7 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new PostRequestTask(eventModel, webhook.getListenerUrl()));
+            Bukkit.getScheduler().runTaskAsynchronously(main, new PostRequestTask(eventModel, webhook.getListenerUrl()));
         }
     }
 
@@ -204,7 +201,7 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, new PostRequestTask(eventModel, webhook.getListenerUrl()));
+            Bukkit.getScheduler().runTaskAsynchronously(main, new PostRequestTask(eventModel, webhook.getListenerUrl()));
         }
     }
 
@@ -242,7 +239,7 @@ public class WebhookEventListener implements Listener {
 
     private String normalizeMessage(String message) {
         try {
-            if (!this.plugin.getConfig().getBoolean("normalizeMessages")) {
+            if (!this.main.getConfig().getBoolean("normalizeMessages")) {
                 return message;
             }
             return ChatColor.stripColor(message);

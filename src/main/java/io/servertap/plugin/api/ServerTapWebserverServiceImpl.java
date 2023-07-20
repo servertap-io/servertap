@@ -3,45 +3,46 @@ package io.servertap.plugin.api;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
 import io.javalin.websocket.WsConfig;
-import io.servertap.PluginEntrypoint;
+import io.servertap.ServerTapMain;
+import io.servertap.WebServer;
 
 import java.util.function.Consumer;
 
 public class ServerTapWebserverServiceImpl implements ServerTapWebserverService {
 
-    private final Javalin javalin;
+    private final WebServer webServer;
 
-    public ServerTapWebserverServiceImpl(PluginEntrypoint main) {
-        this.javalin = main.getJavalin();
+    public ServerTapWebserverServiceImpl(ServerTapMain main) {
+        this.webServer = main.getWebServer();
     }
 
     @Override
     public Javalin getWebserver() {
-        return javalin;
+        return webServer.getJavalin();
     }
 
     @Override
     public void get(String path, Handler handler) {
-        javalin.get(path, handler);
+        webServer.get(path, handler);
     }
 
     @Override
     public void post(String path, Handler handler) {
-        javalin.post(path, handler);
+        webServer.post(path, handler);
     }
 
     @Override
     public void put(String path, Handler handler) {
-        javalin.put(path, handler);
+        webServer.put(path, handler);
     }
 
     @Override
     public void delete(String path, Handler handler) {
-        javalin.delete(path, handler);
+        webServer.delete(path, handler);
     }
 
     @Override
     public void websocket(String path, Consumer<WsConfig> handler) {
-        javalin.ws(path, handler);
+        webServer.ws(path, handler);
     }
 }
