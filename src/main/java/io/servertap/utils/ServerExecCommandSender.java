@@ -1,5 +1,7 @@
-package io.servertap;
+package io.servertap.utils;
 
+import io.servertap.Constants;
+import io.servertap.ServerTapMain;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
