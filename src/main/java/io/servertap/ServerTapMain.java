@@ -6,6 +6,8 @@ import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
 import io.servertap.plugin.api.ServerTapWebserverServiceImpl;
 import io.servertap.utils.EconomyWrapper;
+import io.servertap.utils.Lag;
+import io.servertap.webhooks.WebhookEventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
@@ -78,7 +80,7 @@ public class ServerTapMain extends JavaPlugin {
 
         WebServerRoutes.addV1Routes(app);
 
-        getServer().getPluginManager().registerEvents(new WebhookEventListener(this, log), this);
+        getServer().getPluginManager().registerEvents(new WebhookEventListener(this, bukkitConfig, log), this);
 
         getServer().getServicesManager().register(ServerTapWebserverService.class, new ServerTapWebserverServiceImpl(this), this, ServicePriority.Normal);
     }
