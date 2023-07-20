@@ -2,6 +2,7 @@ package io.servertap;
 
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.api.v1.websockets.ConsoleListener;
+import io.servertap.commands.ServerTapCommand;
 import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
 import io.servertap.plugin.api.ServerTapWebserverServiceImpl;
@@ -20,18 +21,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ServerTapMain extends JavaPlugin {
 
     public static ServerTapMain instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
-    private static WebServer app = null;
+    private WebServer app;
 
     Logger rootLogger = (Logger) LogManager.getRootLogger();
 
-    public ArrayList<ConsoleLine> consoleBuffer = new ArrayList<>();
-    public int maxConsoleBufferSize = 1000;
-    public boolean authEnabled = true;
+    private final List<ConsoleLine> consoleBuffer = new ArrayList<>();
+    private int maxConsoleBufferSize = 1000;
+    private WebhookEventListener webhookEventListener;
 
     public ServerTapMain() {
         super();
@@ -56,45 +58,57 @@ public class ServerTapMain extends JavaPlugin {
 
         // Initialize config file + set defaults
         saveDefaultConfig();
+
         FileConfiguration bukkitConfig = getConfig();
-
-        authEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
-
-        // Warn about default auth key
-        if (authEnabled && "change_me".equals(bukkitConfig.getString("key", "change_me"))) {
-            log.warning("[ServerTap] AUTH KEY IS SET TO DEFAULT \"change_me\"");
-            log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
-            log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
-        }
-
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
         rootLogger.addFilter(new ConsoleListener(this));
 
-        // Instantiate the web server (which will now load using the plugin's class loader).
-        if (app == null) {
-            app = new WebServer(this, bukkitConfig, log);
-        }
+        setupWebServer(bukkitConfig);
 
-        // Don't create a new instance if the plugin is reloaded
-        app.start(bukkitConfig.getInt("port", 4567));
+        new ServerTapCommand(this);
 
-        WebServerRoutes.addV1Routes(app);
-
-        getServer().getPluginManager().registerEvents(new WebhookEventListener(this, bukkitConfig, log), this);
+        webhookEventListener = new WebhookEventListener(this, bukkitConfig, log);
+        getServer().getPluginManager().registerEvents(webhookEventListener, this);
 
         getServer().getServicesManager().register(ServerTapWebserverService.class, new ServerTapWebserverServiceImpl(this), this, ServicePriority.Normal);
+    }
+
+    private void setupWebServer(FileConfiguration bukkitConfig) {
+        app = new WebServer(this, bukkitConfig, log);
+        app.start(bukkitConfig.getInt("port", 4567));
+        WebServerRoutes.addV1Routes(app);
+    }
+
+    public void reload() {
+        if (app != null) {
+            app.stop();
+        }
+        log.info("[ServerTap] ServerTap reloading...");
+        reloadConfig();
+        FileConfiguration bukkitConfig = getConfig();
+        maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
+        setupWebServer(bukkitConfig);
+        webhookEventListener.loadWebhooksFromConfig(bukkitConfig);
+        log.info("[ServerTap] ServerTap reloaded successfully!");
     }
 
     @Override
     public void onDisable() {
         log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
-        // Release port so that /reload will work
         if (app != null) {
             app.stop();
         }
     }
 
+    public int getMaxConsoleBufferSize() {
+        return this.maxConsoleBufferSize;
+    }
+
+    public List<ConsoleLine> getConsoleBuffer() {
+        return this.consoleBuffer;
+    }
+
     public WebServer getWebServer() {
-        return app;
+        return this.app;
     }
 }

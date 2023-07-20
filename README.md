@@ -33,6 +33,9 @@ Join the Discord to talk about this plugin https://discord.gg/nSWRYzBMfp
 Install this plugin by dropping the jar into the `plugins/` directory on your
 server.
 
+The Permission for the `/servertap` Command is `servertap.admin`.
+The Command lets you reload the plugin and display information about it.
+
 Then, you can query the server using `curl` or Postman, or anything that speaks
 HTTP.
 

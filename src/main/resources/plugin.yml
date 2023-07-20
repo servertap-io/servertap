@@ -9,3 +9,7 @@ api-version: 1.16
 softdepend:
   - Vault
   - PlaceholderAPI
+commands:
+  servertap:
+    description: ServerTap Management Command
+    permission: servertap.admin

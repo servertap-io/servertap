@@ -10,7 +10,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 public class WebsocketHandler {
 
@@ -20,7 +19,7 @@ public class WebsocketHandler {
         ws.onConnect(ctx -> {
             subscribers.put(clientHash(ctx), ctx);
 
-            for (ConsoleLine line : ServerTapMain.instance.consoleBuffer) {
+            for (ConsoleLine line : ServerTapMain.instance.getConsoleBuffer()) {
                 ctx.send(line);
             }
         });

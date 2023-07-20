@@ -19,8 +19,8 @@ public class ConsoleListener implements Filter {
 
     @Override
     public Result filter(LogEvent logEvent) {
-        if (plugin.maxConsoleBufferSize > 0 && plugin.consoleBuffer.size() >= plugin.maxConsoleBufferSize) {
-            plugin.consoleBuffer.remove(0);
+        if (plugin.getMaxConsoleBufferSize() > 0 && plugin.getConsoleBuffer().size() >= plugin.getMaxConsoleBufferSize()) {
+            plugin.getConsoleBuffer().remove(0);
         }
 
         ConsoleLine line = new ConsoleLine();
@@ -30,8 +30,8 @@ public class ConsoleListener implements Filter {
         line.setMessage(logEvent.getMessage().getFormattedMessage());
         line.setLoggerName(logEvent.getLoggerName());
 
-        if (plugin.maxConsoleBufferSize > 0) {
-            plugin.consoleBuffer.add(line);
+        if (plugin.getMaxConsoleBufferSize() > 0) {
+            plugin.getConsoleBuffer().add(line);
         }
 
         WebsocketHandler.broadcast(line);

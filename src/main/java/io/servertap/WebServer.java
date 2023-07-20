@@ -73,6 +73,11 @@ public class WebServer {
         configureTLS(config, main);
         configureCors(config);
 
+        if (isAuthEnabled && "change_me".equals(authKey)) {
+            log.warning("[ServerTap] AUTH KEY IS SET TO DEFAULT \"change_me\"");
+            log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
+            log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
+        }
         config.accessManager(this::manageAccess);
 
         if (!disableSwagger) {
