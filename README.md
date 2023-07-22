@@ -15,9 +15,13 @@ Head over to https://github.com/phybros/servertap/releases/latest to grab the la
 
 Join the Discord to talk about this plugin https://discord.gg/nSWRYzBMfp
 
+**Note:** If you have a question please post in the support forum on our discord instead of just asking in general chat.
+This helps us keep track of issues and questions more effectively and answer your questions quicker.
+
 # Contents
 
 - [Usage](#usage)
+- [ServerTap Command](#servertap-command)
 - [Current Endpoints](#current-endpoints)
 - [TLS](#tls)
 - [Authentication](#authentication)
@@ -31,12 +35,7 @@ Join the Discord to talk about this plugin https://discord.gg/nSWRYzBMfp
 # Usage
 
 Install this plugin by dropping the jar into the `plugins/` directory on your
-server.
-
-The Permission for the `/servertap` Command is `servertap.admin`.
-The Command lets you reload the plugin and display information about it.
-
-Then, you can query the server using `curl` or Postman, or anything that speaks
+server. Then, you can query the server using `curl` or Postman, or anything that speaks
 HTTP.
 
 For example, query for information about the server itself:
@@ -89,6 +88,12 @@ $ curl http://localhost:4567/v1/players
   }
 ]
 ```
+# ServerTap Command
+
+ServerTap currently supports only one management command in game. The supported subcommands are `realod` & 'info'
+which as their names imply let you reload the plugin and display information basic info about it (version, author, etc).
+
+**Note**: The Permission for the `/servertap` Command is `servertap.admin`.
 
 # Current Endpoints
 
