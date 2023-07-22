@@ -1,5 +1,7 @@
-package io.servertap;
+package io.servertap.utils;
 
+import io.servertap.Constants;
+import io.servertap.ServerTapMain;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -28,7 +30,7 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
 
     public CompletableFuture<String> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
         Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
-                Bukkit.getPluginManager().getPlugin("ServerTap"),
+                ServerTapMain.instance,
                 () -> Bukkit.dispatchCommand(this, command)
         );
 

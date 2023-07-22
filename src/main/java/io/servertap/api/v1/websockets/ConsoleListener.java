@@ -1,8 +1,7 @@
 package io.servertap.api.v1.websockets;
 
-import io.servertap.PluginEntrypoint;
+import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.ConsoleLine;
-import io.servertap.api.v1.websockets.WebsocketHandler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.Filter;
@@ -12,16 +11,16 @@ import org.apache.logging.log4j.message.Message;
 
 public class ConsoleListener implements Filter {
 
-    private PluginEntrypoint plugin;
+    private final ServerTapMain plugin;
 
-    public ConsoleListener(PluginEntrypoint plugin) {
+    public ConsoleListener(ServerTapMain plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public Result filter(LogEvent logEvent) {
-        if (plugin.maxConsoleBufferSize > 0 && plugin.consoleBuffer.size() >= plugin.maxConsoleBufferSize) {
-            plugin.consoleBuffer.remove(0);
+        if (plugin.getMaxConsoleBufferSize() > 0 && plugin.getConsoleBuffer().size() >= plugin.getMaxConsoleBufferSize()) {
+            plugin.getConsoleBuffer().remove(0);
         }
 
         ConsoleLine line = new ConsoleLine();
@@ -31,8 +30,8 @@ public class ConsoleListener implements Filter {
         line.setMessage(logEvent.getMessage().getFormattedMessage());
         line.setLoggerName(logEvent.getLoggerName());
 
-        if (plugin.maxConsoleBufferSize > 0) {
-            plugin.consoleBuffer.add(line);
+        if (plugin.getMaxConsoleBufferSize() > 0) {
+            plugin.getConsoleBuffer().add(line);
         }
 
         WebsocketHandler.broadcast(line);

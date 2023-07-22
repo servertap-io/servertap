@@ -5,7 +5,7 @@ import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
-import io.servertap.PluginEntrypoint;
+import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.Plugin;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -80,7 +80,7 @@ public class PluginApi {
             }
     )
     public static void installPlugin(Context ctx) {
-        String stagingPath = PluginEntrypoint.instance.getDataFolder().getPath() + File.separator + "downloads";
+        String stagingPath = ServerTapMain.instance.getDataFolder().getPath() + File.separator + "downloads";
         File holdingArea = new File(stagingPath);
         URL url = null;
 
@@ -116,7 +116,7 @@ public class PluginApi {
                 String msg = String.format("Downloaded plugin in %.2f seconds", elapsed / 1000.0);
                 log.info("[ServerTap]" + msg);
 
-                String targetFilename = PluginEntrypoint.instance.getDataFolder().getAbsoluteFile().getParent() + File.separator + FilenameUtils.getName(url.getPath());
+                String targetFilename = ServerTapMain.instance.getDataFolder().getAbsoluteFile().getParent() + File.separator + FilenameUtils.getName(url.getPath());
                 boolean success = downloadedFile.renameTo(new File(targetFilename));
                 if (!success) {
                     throw new InternalServerErrorResponse("Error moving plugin to plugins dir");

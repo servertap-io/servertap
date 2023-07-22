@@ -25,12 +25,16 @@ Join the Discord to talk about this plugin https://discord.gg/nSWRYzBMfp
 - [Webhooks](#webhooks)
 - [Websockets](#websockets)
   - [Authenticating Websockets](#authenticating-websockets)
-- [Developing](#developing)
+- [Using the Developer API](#using-the-developer-api)
+- [Contributing to ServerTap](#contributing-to-servertap)
 
 # Usage
 
 Install this plugin by dropping the jar into the `plugins/` directory on your
 server.
+
+The Permission for the `/servertap` Command is `servertap.admin`.
+The Command lets you reload the plugin and display information about it.
 
 Then, you can query the server using `curl` or Postman, or anything that speaks
 HTTP.
@@ -265,6 +269,48 @@ this.ws.onopen = function() {
 ```
 
 ### Note: If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the internet (bad idea).
+
+# Using the Developer API
+
+ServerTap provides a Developer API allowing you to register your own Request Handlers and Websockets from your Plugin!
+
+To get ServerTap Builds you can use [Jitpack](https://jitpack.io). First, add the Jitpack Repository to your `pom.xml`:
+```xml
+<repository>
+  <id>jitpack.io</id>
+  <url>https://jitpack.io</url>
+</repository>
+```
+Then you can add the following Dependency:
+```xml
+<dependency>
+  <groupId>com.github.phybros</groupId>
+  <artifactId>servertap</artifactId>
+  <version>vX.X.X</version>
+  <scope>provided</scope>
+</dependency>
+```
+Replace the Version with the latest available Releases Version Number.
+
+You can retrieve the API using Bukkits ServiceProvider:
+```java
+// In your Main Class extended from JavaPlugin, for example in the onEnable() Method
+ServerTapWebserverService webserverService = this.getServer().getServicesManager().load(ServerTapWebserverService.class);
+```
+
+The Interface provides you with methods to directly add Endpoints to the Webserver:
+```java
+webserverService.get("/test/ping", ctx -> ctx.status(200).result("Pong!"));
+webserverService.get("/test/ws", websocketConfig -> {
+    websocketConfig.onMessage(wsMessageContext -> System.out.println(wsMessageContext.message()));
+});
+```
+Your Endpoints (HTTP & WebSocket) are protected the same way all other Endpoints in the Server are.
+
+The API provides the `getWebserver()` Method that will return the internal [Javalin](https://javalin.io) Instance.
+This will give you deep access to the Webserver providing you every ability possible.
+Be careful not to break ServerTaps Functionality (e.g. the AccessManager checking Security)!
+Use this only if necessary.
 
 # Contributing to ServerTap
 
