@@ -16,8 +16,14 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class PlayerApi {
+    private final Logger log;
+
+    public PlayerApi(Logger log) {
+        this.log = log;
+    }
 
     @OpenApi(
             path = "/v1/players",
@@ -30,12 +36,10 @@ public class PlayerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
             }
     )
-    public static void playersGet(Context ctx) {
+    public void playersGet(Context ctx) {
         ArrayList<Player> players = new ArrayList<>();
 
-        Bukkit.getOnlinePlayers().forEach((player -> {
-            players.add(getPlayer(player));
-        }));
+        Bukkit.getOnlinePlayers().forEach(player -> players.add(getPlayer(player)));
 
         ctx.json(players);
     }
@@ -55,21 +59,19 @@ public class PlayerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
             }
     )
-    public static void playerGet(Context ctx) {
-        if (ctx.pathParam("uuid").isEmpty()) {
-            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
-        }
+    public void playerGet(Context ctx) {
+        String uuid = ctx.pathParam("uuid");
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
+        if (uuid.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
+
+        UUID playerUUID = ValidationUtils.safeUUID(uuid);
         if (playerUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
 
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
 
-        if (player == null) {
-            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
-        }
+        if (player == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
 
         ctx.json(getPlayer(player));
     }
@@ -80,7 +82,7 @@ public class PlayerApi {
      * @param player The Bukkit player
      * @return The ServerTap player
      */
-    private static Player getPlayer(org.bukkit.entity.Player player) {
+    private Player getPlayer(org.bukkit.entity.Player player) {
         Player p = new Player();
         p.setUuid(player.getUniqueId().toString());
         p.setDisplayName(player.getDisplayName());
@@ -131,27 +133,26 @@ public class PlayerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class))
             }
     )
-    public static void offlinePlayersGet(Context ctx) {
+    public void offlinePlayersGet(Context ctx) {
 
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
 
         OfflinePlayer[] offlinePlayers = Bukkit.getOfflinePlayers();
 
-        for (int i = 0; i < offlinePlayers.length; i++) {
+        for (OfflinePlayer offlinePlayer : offlinePlayers) {
             io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-            OfflinePlayer player = offlinePlayers[i];
 
-            p.setDisplayName(player.getName());
-            p.setUuid(player.getUniqueId().toString());
-            p.setWhitelisted(player.isWhitelisted());
-            p.setBanned(player.isBanned());
-            p.setOp(player.isOp());
+            p.setDisplayName(offlinePlayer.getName());
+            p.setUuid(offlinePlayer.getUniqueId().toString());
+            p.setWhitelisted(offlinePlayer.isWhitelisted());
+            p.setBanned(offlinePlayer.isBanned());
+            p.setOp(offlinePlayer.isOp());
 
             if (EconomyWrapper.getInstance().getEconomy() != null) {
-                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(offlinePlayers[i]));
+                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(offlinePlayer));
             }
 
-            p.setLastPlayed(player.getLastPlayed());
+            p.setLastPlayed(offlinePlayer.getLastPlayed());
 
             players.add(p);
         }
@@ -175,21 +176,23 @@ public class PlayerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class))
             }
     )
-    public static void getPlayerInv(Context ctx) {
-        if (ctx.pathParam("playerUuid").isEmpty() || ctx.pathParam("worldUuid").isEmpty()) {
+    public void getPlayerInv(Context ctx) {
+        String playerUUIDStr = ctx.pathParam("playerUuid");
+        String worldUUIDStr = ctx.pathParam("worldUuid");
+        if (playerUUIDStr.isEmpty() || worldUUIDStr.isEmpty()) {
             throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
         }
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.pathParam("playerUuid"));
+        UUID playerUUID = ValidationUtils.safeUUID(playerUUIDStr);
         if (playerUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
-        UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("worldUuid"));
+        UUID worldUUID = ValidationUtils.safeUUID(worldUUIDStr);
         if (worldUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
 
-        ArrayList<ItemStack> inv = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> inv = new ArrayList<>();
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
         if (player != null) {
             player.updateInventory();
@@ -240,7 +243,7 @@ public class PlayerApi {
                 // Pass any javalin exceptions up the chain
                 throw e;
             } catch (Exception e) {
-                Bukkit.getLogger().warning(e.getMessage());
+                log.warning(e.getMessage());
                 throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
             }
         }

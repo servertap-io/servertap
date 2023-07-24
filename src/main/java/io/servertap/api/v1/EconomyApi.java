@@ -6,6 +6,7 @@ import io.javalin.http.HttpResponseException;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
+import io.servertap.ServerTapMain;
 import io.servertap.utils.EconomyWrapper;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -13,11 +14,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class EconomyApi {
+    private final org.bukkit.Server bukkitServer = Bukkit.getServer();
+
+    public EconomyApi() {}
 
     private enum TransactionType {
         PAY, DEBIT
@@ -36,12 +42,12 @@ public class EconomyApi {
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void getEconomyPluginInformation(Context ctx) {
+    public void getEconomyPluginInformation(Context ctx) {
         Plugin econPlugin;
         if (EconomyWrapper.getInstance().getEconomy() == null) {
             throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         } else {
-            RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
+            RegisteredServiceProvider<Economy> rsp = bukkitServer.getServicesManager().getRegistration(Economy.class);
             if (rsp == null) {
                 throw new InternalServerErrorResponse(Constants.ECONOMY_PLUGIN_MISSING);
             }
@@ -82,7 +88,7 @@ public class EconomyApi {
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void playerPay(Context ctx) {
+    public void playerPay(Context ctx) {
         accountManager(ctx, TransactionType.PAY);
     }
 
@@ -112,12 +118,15 @@ public class EconomyApi {
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void playerDebit(Context ctx) {
+    public void playerDebit(Context ctx) {
         accountManager(ctx, TransactionType.DEBIT);
     }
 
-    private static void accountManager(Context ctx, TransactionType action) {
-        if (ctx.formParam("uuid") == null || ctx.formParam("amount") == null) {
+    private void accountManager(Context ctx, TransactionType action) {
+        String uuid = ctx.formParam("uuid");
+        String amount = ctx.formParam("amount");
+
+        if (uuid == null || amount == null) {
             throw new BadRequestResponse(Constants.VAULT_MISSING_PAY_PARAMS);
         }
 
@@ -125,24 +134,24 @@ public class EconomyApi {
             throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         }
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("uuid"));
+        UUID playerUUID = ValidationUtils.safeUUID(uuid);
         if (playerUUID == null) {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
         OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
 
-        double amount = Double.parseDouble(ctx.formParam("amount"));
+        double amountNum = Double.parseDouble(amount);
 
-        if (amount <= 0) { // Make sure pay amount is more than zero
+        if (amountNum <= 0) { // Make sure pay amount is more than zero
             throw new BadRequestResponse(Constants.VAULT_GREATER_THAN_ZERO);
         }
 
         EconomyResponse response;
 
         if (action == TransactionType.PAY) {
-            response = EconomyWrapper.getInstance().getEconomy().depositPlayer(player, amount);
+            response = EconomyWrapper.getInstance().getEconomy().depositPlayer(player, amountNum);
         } else {
-            response = EconomyWrapper.getInstance().getEconomy().withdrawPlayer(player, amount);
+            response = EconomyWrapper.getInstance().getEconomy().withdrawPlayer(player, amountNum);
         }
 
         if (response.type != EconomyResponse.ResponseType.SUCCESS) {

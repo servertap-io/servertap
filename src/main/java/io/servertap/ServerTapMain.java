@@ -1,7 +1,7 @@
 package io.servertap;
 
 import io.servertap.api.v1.models.ConsoleLine;
-import io.servertap.api.v1.websockets.ConsoleListener;
+import io.servertap.utils.ConsoleListener;
 import io.servertap.commands.ServerTapCommand;
 import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
@@ -12,6 +12,7 @@ import io.servertap.webhooks.WebhookEventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.ServicePriority;
@@ -28,21 +29,25 @@ public class ServerTapMain extends JavaPlugin {
     public static ServerTapMain instance;
     private static final java.util.logging.Logger log = Bukkit.getLogger();
     private WebServer app;
+    private final Server server;
 
     Logger rootLogger = (Logger) LogManager.getRootLogger();
 
     private final List<ConsoleLine> consoleBuffer = new ArrayList<>();
     private int maxConsoleBufferSize = 1000;
     private WebhookEventListener webhookEventListener;
+    private ConsoleListener consoleListener;
 
     public ServerTapMain() {
         super();
         instance = this;
+        server = getServer();
     }
 
     public ServerTapMain(@NotNull JavaPluginLoader loader, @NotNull PluginDescriptionFile description, @NotNull File dataFolder, @NotNull File file) {
         super(loader, description, dataFolder, file);
         instance = this;
+        server = getServer();
     }
 
     @Override
@@ -61,22 +66,23 @@ public class ServerTapMain extends JavaPlugin {
 
         FileConfiguration bukkitConfig = getConfig();
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
-        rootLogger.addFilter(new ConsoleListener(this));
+        consoleListener = new ConsoleListener(this);
+        rootLogger.addFilter(consoleListener);
 
         setupWebServer(bukkitConfig);
 
         new ServerTapCommand(this);
 
         webhookEventListener = new WebhookEventListener(this, bukkitConfig, log);
-        getServer().getPluginManager().registerEvents(webhookEventListener, this);
+        server.getPluginManager().registerEvents(webhookEventListener, this);
 
-        getServer().getServicesManager().register(ServerTapWebserverService.class, new ServerTapWebserverServiceImpl(this), this, ServicePriority.Normal);
+        server.getServicesManager().register(ServerTapWebserverService.class, new ServerTapWebserverServiceImpl(this), this, ServicePriority.Normal);
     }
 
     private void setupWebServer(FileConfiguration bukkitConfig) {
         app = new WebServer(this, bukkitConfig, log);
         app.start(bukkitConfig.getInt("port", 4567));
-        WebServerRoutes.addV1Routes(app);
+        WebServerRoutes.addV1Routes(this, log, app, consoleListener);
     }
 
     public void reload() {
@@ -87,6 +93,7 @@ public class ServerTapMain extends JavaPlugin {
         reloadConfig();
         FileConfiguration bukkitConfig = getConfig();
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");
+        consoleListener.resetListeners();
         setupWebServer(bukkitConfig);
         webhookEventListener.loadWebhooksFromConfig(bukkitConfig);
         log.info("[ServerTap] ServerTap reloaded successfully!");

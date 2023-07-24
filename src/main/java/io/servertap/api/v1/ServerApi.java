@@ -6,11 +6,11 @@ import io.javalin.http.NotFoundResponse;
 import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
+import io.servertap.ServerTapMain;
 import io.servertap.utils.Lag;
 import io.servertap.utils.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
-import io.servertap.mojang.api.models.NameChange;
 import io.servertap.utils.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
 import org.apache.commons.lang.StringUtils;
@@ -31,8 +31,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class ServerApi {
+    private final Logger log;
+    private final org.bukkit.Server bukkitServer = Bukkit.getServer();
+    private final ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
 
-    private static final Logger log = Bukkit.getLogger();
+    public ServerApi(Logger log) {
+        this.log = log;
+    }
 
     @OpenApi(
             path = "/v1/ping",
@@ -45,7 +50,7 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void ping(Context ctx) {
+    public void ping(Context ctx) {
         ctx.json("pong");
     }
 
@@ -60,9 +65,8 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Server.class))
             }
     )
-    public static void serverGet(Context ctx) {
+    public void serverGet(Context ctx) {
         Server server = new Server();
-        org.bukkit.Server bukkitServer = Bukkit.getServer();
         server.setName(bukkitServer.getName());
         server.setMotd(bukkitServer.getMotd());
         server.setVersion(bukkitServer.getVersion());
@@ -149,11 +153,10 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void broadcastPost(Context ctx) {
-        if (ctx.formParam("message").isEmpty()) {
-            throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
-        }
-        Bukkit.broadcastMessage(ctx.formParam("message"));
+    public void broadcastPost(Context ctx) {
+        String msg = ctx.formParam("message");
+        if (msg != null && msg.isEmpty()) throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
+        Bukkit.broadcastMessage(msg);
         ctx.json("success");
     }
 
@@ -181,24 +184,18 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void tellPost(Context ctx) {
-        if (ctx.formParam("message").isEmpty()) {
-            throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
-        }
-        if (ctx.formParam("playerUuid").isEmpty()) {
-            throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
-        }
+    public void tellPost(Context ctx) {
+        String msg = ctx.formParam("message");
+        String uuid = ctx.formParam("playerUuid");
+        if (msg != null && msg.isEmpty()) throw new BadRequestResponse(Constants.CHAT_MISSING_MESSAGE);
+        if (uuid != null && uuid.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
-        if (playerUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        UUID playerUUID = ValidationUtils.safeUUID(uuid);
+        if (playerUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
-        if (player == null) {
-            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
-        }
-        player.sendMessage(ctx.formParam("message"));
+        if (player == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+        player.sendMessage(msg);
 
         ctx.json("success");
     }
@@ -215,9 +212,8 @@ public class ServerApi {
             }
     )
 
-    public static void scoreboardGet(Context ctx) {
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+    public void scoreboardGet(Context ctx) {
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
         Scoreboard scoreboardModel = new Scoreboard();
         Set<String> objectives = new HashSet<>();
 
@@ -245,22 +241,18 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
             }
     )
-    public static void objectiveGet(Context ctx) {
+    public void objectiveGet(Context ctx) {
         String objectiveName = ctx.pathParam("name");
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
         org.bukkit.scoreboard.Objective objective = gameScoreboard.getObjective(objectiveName);
 
-        if (objective == null) {
-            throw new NotFoundResponse();
-        }
+        if (objective == null) throw new NotFoundResponse();
 
         ctx.json(fromBukkitObjective(objective));
     }
 
-    private static Objective fromBukkitObjective(org.bukkit.scoreboard.Objective objective) {
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        org.bukkit.scoreboard.Scoreboard gameScoreboard = manager.getMainScoreboard();
+    private Objective fromBukkitObjective(org.bukkit.scoreboard.Objective objective) {
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
 
         Objective o = new Objective();
         o.setCriterion(objective.getCriteria());
@@ -289,11 +281,9 @@ public class ServerApi {
         return o;
     }
 
-    private static Set<Whitelist> getWhitelist() {
-        Set<Whitelist> whitelist = new HashSet<Whitelist>();
-        Bukkit.getServer().getWhitelistedPlayers().forEach((OfflinePlayer player) -> {
-            whitelist.add(new Whitelist().offlinePlayer(player));
-        });
+    private Set<Whitelist> getWhitelist() {
+        Set<Whitelist> whitelist = new HashSet<>();
+        bukkitServer.getWhitelistedPlayers().forEach((OfflinePlayer player) -> whitelist.add(new Whitelist().offlinePlayer(player)));
         return whitelist;
     }
 
@@ -309,8 +299,8 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class))
             }
     )
-    public static void whitelistGet(Context ctx) {
-        if (!Bukkit.getServer().hasWhitelist()) {
+    public void whitelistGet(Context ctx) {
+        if (bukkitServer.hasWhitelist()) {
             // TODO: Handle Errors better
             ctx.json("error: The server has whitelist disabled");
             return;
@@ -343,8 +333,7 @@ public class ServerApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void whitelistPost(Context ctx) {
-        final org.bukkit.Server bukkitServer = Bukkit.getServer();
+    public void whitelistPost(Context ctx) {
         if (!bukkitServer.hasWhitelist()) {
             ctx.json("No whitelist");
             return;
@@ -353,9 +342,7 @@ public class ServerApi {
         String uuid = ctx.formParam("uuid");
         String name = ctx.formParam("name");
 
-        if (uuid == null && name == null) {
-            throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
-        }
+        if (uuid == null && name == null) throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
 
         //Check Mojang API for missing param
         if (uuid == null) {
@@ -366,16 +353,7 @@ public class ServerApi {
             } catch (IOException ignored) {
                 throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
-        } else if (name == null) {
-            try {
-                List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
-                name = nameHistory.get(nameHistory.size() - 1).getName();
-            } catch (IllegalArgumentException ignored) {
-                throw new NotFoundResponse(Constants.WHITELIST_UUID_NOT_FOUND);
-            } catch (IOException ignored) {
-                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
-            }
-        }
+        } // **MojangApiService.getNameHistory was deprecated and then removed**
 
         //Whitelist file doesn't accept UUIDs without dashes
         uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
@@ -429,8 +407,7 @@ public class ServerApi {
             ),
             responses = {@OpenApiResponse(status = "200")}
     )
-    public static void whitelistDelete(Context ctx) {
-        final org.bukkit.Server bukkitServer = Bukkit.getServer();
+    public void whitelistDelete(Context ctx) {
         if (!bukkitServer.hasWhitelist()) {
             ctx.json("No whitelist");
             return;
@@ -439,9 +416,7 @@ public class ServerApi {
         String uuid = ctx.formParam("uuid");
         String name = ctx.formParam("name");
 
-        if (uuid == null && name == null) {
-            throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
-        }
+        if (uuid == null && name == null) throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
 
         //Check Mojang API for missing param
         if (uuid == null) {
@@ -452,16 +427,7 @@ public class ServerApi {
             } catch (IOException ignored) {
                 throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
             }
-        } else if (name == null) {
-            try {
-                List<NameChange> nameHistory = MojangApiService.getNameHistory(uuid);
-                name = nameHistory.get(nameHistory.size() - 1).getName();
-            } catch (IllegalArgumentException ignored) {
-                throw new NotFoundResponse(Constants.WHITELIST_UUID_NOT_FOUND);
-            } catch (IOException ignored) {
-                throw new ServiceUnavailableResponse(Constants.WHITELIST_MOJANG_API_FAIL);
-            }
-        }
+        } // **MojangApiService.getNameHistory was deprecated and then removed**
 
         //Whitelist file doesn't accept UUIDs without dashes
         uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
@@ -510,20 +476,17 @@ public class ServerApi {
             responses = {
                     @OpenApiResponse(status = "200")
             })
-    public static void opPlayer(Context ctx) {
-        if (ctx.formParam("playerUuid").isEmpty()) {
-            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
-        }
+    public void opPlayer(Context ctx) {
+        String uuid = ctx.formParam("playerUuid");
+        String name = ctx.formParam("name");
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
-        if (playerUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        if (name.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
+
+        UUID playerUUID = ValidationUtils.safeUUID(uuid);
+        if (playerUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
         org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
-        if (player == null) {
-            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
-        }
+        if (player == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         player.setOp(true);
         ctx.json("success");
     }
@@ -549,20 +512,16 @@ public class ServerApi {
             ),
             responses = {@OpenApiResponse(status = "200")}
     )
-    public static void deopPlayer(Context ctx) {
-        if (ctx.formParam("playerUuid").isEmpty()) {
-            throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
-        }
+    public void deopPlayer(Context ctx) {
+        String uuid = ctx.formParam("playerUuid");
 
-        UUID playerUUID = ValidationUtils.safeUUID(ctx.formParam("playerUuid"));
-        if (playerUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        if (uuid.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
+
+        UUID playerUUID = ValidationUtils.safeUUID(uuid);
+        if (playerUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
         org.bukkit.OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
-        if (player == null) {
-            throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
-        }
+        if (player == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
         player.setOp(false);
         ctx.json("success");
     }
@@ -584,9 +543,9 @@ public class ServerApi {
                     )
             }
     )
-    public static void getOps(Context ctx) {
+    public void getOps(Context ctx) {
         Set<org.bukkit.OfflinePlayer> players = Bukkit.getOperators();
-        ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<io.servertap.api.v1.models.OfflinePlayer>();
+        ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<>();
         for (org.bukkit.OfflinePlayer player : players) {
             if (!player.isOp()) {
                 continue;
@@ -636,13 +595,12 @@ public class ServerApi {
                     )
             }
     )
-    public static void postCommand(Context ctx) {
+    public void postCommand(Context ctx) {
         String command = ctx.formParam("command");
-        if (StringUtils.isBlank(command)) {
-            throw new BadRequestResponse(Constants.COMMAND_PAYLOAD_MISSING);
-        }
-
         String timeRaw = ctx.formParam("time");
+
+        if (StringUtils.isBlank(command)) throw new BadRequestResponse(Constants.COMMAND_PAYLOAD_MISSING);
+
         if (StringUtils.isBlank(timeRaw)) {
             timeRaw = "0";
         }
@@ -664,8 +622,7 @@ public class ServerApi {
                 }));
     }
 
-    private static CompletableFuture<String> runCommandAsync(String command, long time) {
+    private CompletableFuture<String> runCommandAsync(String command, long time) {
         return new ServerExecCommandSender().executeCommand(command, time, TimeUnit.MILLISECONDS);
     }
-
 }

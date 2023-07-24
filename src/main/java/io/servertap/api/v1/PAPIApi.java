@@ -11,6 +11,7 @@ import org.bukkit.OfflinePlayer;
 import java.util.UUID;
 
 public class PAPIApi {
+    public PAPIApi() {}
 
     @OpenApi(
             path = "/v1/placeholders/replace",
@@ -38,7 +39,7 @@ public class PAPIApi {
                     @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void replacePlaceholders(Context ctx) {
+    public void replacePlaceholders(Context ctx) {
         OfflinePlayer player = null;
 
         String passedUuid = ctx.formParam("uuid");

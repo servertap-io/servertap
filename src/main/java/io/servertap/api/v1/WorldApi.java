@@ -6,6 +6,7 @@ import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
+import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.World;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -25,8 +26,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class WorldApi {
+    private final Logger log;
+    private final ServerTapMain main;
+    private final org.bukkit.Server bukkitServer = Bukkit.getServer();
 
-    private static final Logger log = Bukkit.getLogger();
+    public WorldApi(ServerTapMain main, Logger log) {
+        this.log = log;
+        this.main = main;
+    }
 
     @OpenApi(
             path = "/v1/worlds/save",
@@ -40,14 +47,10 @@ public class WorldApi {
                     @OpenApiResponse(status = "200")
             }
     )
-    public static void saveAllWorlds(Context ctx) {
-        org.bukkit.Server bukkitServer = Bukkit.getServer();
-
-        Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
-
-        if (pluginInstance != null) {
+    public void saveAllWorlds(Context ctx) {
+        if (main != null) {
             // Run the saves on the main thread, can't use sync methods from here otherwise
-            bukkitServer.getScheduler().scheduleSyncDelayedTask(pluginInstance, () -> {
+            bukkitServer.getScheduler().scheduleSyncDelayedTask(main, () -> {
                 for (org.bukkit.World world : Bukkit.getWorlds()) {
                     try {
                         world.save();
@@ -77,23 +80,16 @@ public class WorldApi {
                     @OpenApiResponse(status = "200")
             }
     )
-    public static void saveWorld(Context ctx) {
-        org.bukkit.Server bukkitServer = Bukkit.getServer();
-
+    public void saveWorld(Context ctx) {
         UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
-        if (worldUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        if (worldUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
         org.bukkit.World world = bukkitServer.getWorld(worldUUID);
 
         if (world != null) {
-            Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
-
-            if (pluginInstance != null) {
+            if (main != null) {
                 // Run the saves on the main thread, can't use sync methods from here otherwise
-                bukkitServer.getScheduler().scheduleSyncDelayedTask(pluginInstance, () -> {
-
+                bukkitServer.getScheduler().scheduleSyncDelayedTask(main, () -> {
                     try {
                         world.save();
                     } catch (Exception e) {
@@ -107,7 +103,7 @@ public class WorldApi {
         ctx.json("success");
     }
 
-    private static void addFolderToTarGz(File folder, TarArchiveOutputStream tar, String baseName, String rootName) throws IOException {
+    private void addFolderToTarGz(File folder, TarArchiveOutputStream tar, String baseName, String rootName) throws IOException {
         File[] files = folder.listFiles();
         assert files != null;
         for (File file : files) {
@@ -155,13 +151,9 @@ public class WorldApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/zip")),
             }
     )
-    public static void downloadWorld(Context ctx) throws IOException {
-        org.bukkit.Server bukkitServer = Bukkit.getServer();
-
+    public void downloadWorld(Context ctx) throws IOException {
         UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
-        if (worldUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        if (worldUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
         org.bukkit.World world = bukkitServer.getWorld(worldUUID);
 
@@ -180,9 +172,7 @@ public class WorldApi {
             tar.close();
             gzOut.close();
             buffOut.close();
-        } else {
-            throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
-        }
+        } else throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
     }
 
     @OpenApi(
@@ -197,11 +187,7 @@ public class WorldApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/zip")),
             }
     )
-    public static void downloadWorlds(Context ctx) throws IOException {
-        org.bukkit.Server bukkitServer = Bukkit.getServer();
-
-        Plugin pluginInstance = bukkitServer.getPluginManager().getPlugin("ServerTap");
-
+    public void downloadWorlds(Context ctx) throws IOException {
         ctx.header("Content-Disposition", "attachment; filename=\"worlds.tar.gz\"");
         ctx.header("Content-Type", "application/zip");
 
@@ -239,9 +225,9 @@ public class WorldApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
             }
     )
-    public static void worldsGet(Context ctx) {
+    public void worldsGet(Context ctx) {
         List<World> worlds = new ArrayList<>();
-        Bukkit.getServer().getWorlds().forEach(world -> worlds.add(fromBukkitWorld(world)));
+        bukkitServer.getWorlds().forEach(world -> worlds.add(fromBukkitWorld(world)));
 
         ctx.json(worlds);
     }
@@ -260,14 +246,11 @@ public class WorldApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
             }
     )
-    public static void worldGet(Context ctx) {
-
+    public void worldGet(Context ctx) {
         UUID worldUUID = ValidationUtils.safeUUID(ctx.pathParam("uuid"));
-        if (worldUUID == null) {
-            throw new BadRequestResponse(Constants.INVALID_UUID);
-        }
+        if (worldUUID == null) throw new BadRequestResponse(Constants.INVALID_UUID);
 
-        org.bukkit.World bukkitWorld = Bukkit.getServer().getWorld(worldUUID);
+        org.bukkit.World bukkitWorld = bukkitServer.getWorld(worldUUID);
 
         // 404 if no world found
         if (bukkitWorld == null) throw new NotFoundResponse();
@@ -275,7 +258,7 @@ public class WorldApi {
         ctx.json(fromBukkitWorld(bukkitWorld));
     }
 
-    private static World fromBukkitWorld(org.bukkit.World bukkitWorld) {
+    private World fromBukkitWorld(org.bukkit.World bukkitWorld) {
         World world = new World();
 
         world.setName(bukkitWorld.getName());

@@ -32,21 +32,6 @@ public class MojangApiService {
         return gson.fromJson(apiResponse.getContent(), PlayerInfo.class).getId();
     }
 
-    public static List<NameChange> getNameHistory(String uuid) throws IOException {
-        Type listType = new TypeToken<List<NameChange>>() {
-        }.getType();
-        Gson gson = GsonSingleton.getInstance();
-
-        //This API call doesn't accept UUIDS with dashes
-        ApiResponse apiResponse = getApiResponse(String.format(getNameHistoryResource, uuid).replace("-", ""));
-        if (apiResponse.getHttpStatus() == HttpURLConnection.HTTP_BAD_REQUEST ||
-                apiResponse.getHttpStatus() == HttpURLConnection.HTTP_NO_CONTENT) {
-            throw new IllegalArgumentException("The given uuid was not found by the Mojang API.");
-        }
-
-        return gson.fromJson(apiResponse.getContent(), listType);
-    }
-
     private static ApiResponse getApiResponse(String resource) throws IOException {
         try {
             String responseContent;

@@ -4,22 +4,32 @@ import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
 import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.ConsoleLine;
+import io.servertap.utils.ConsoleListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class WebsocketHandler {
+    private final Map<String, WsContext> subscribers;
+    private final ServerTapMain main;
+    private final Logger log;
 
-    private final static Map<String, WsContext> subscribers = new ConcurrentHashMap<>();
+    public WebsocketHandler(ServerTapMain main, Logger log, ConsoleListener consoleListener) {
+        subscribers = new ConcurrentHashMap<>();
+        this.main = main;
+        this.log = log;
 
-    public static void events(WsConfig ws) {
+        consoleListener.addListener(this::broadcast);
+    }
+
+    public void events(WsConfig ws) {
         ws.onConnect(ctx -> {
             subscribers.put(clientHash(ctx), ctx);
 
-            for (ConsoleLine line : ServerTapMain.instance.getConsoleBuffer()) {
+            for (ConsoleLine line : main.getConsoleBuffer()) {
                 ctx.send(line);
             }
         });
@@ -41,18 +51,16 @@ public class WebsocketHandler {
                 }
 
                 final String command = cmd;
-                Plugin pluginInstance = ServerTapMain.instance;
-
-                if (pluginInstance != null) {
+                if (main != null) {
                     // Run the command on the main thread
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(pluginInstance, () -> {
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(main, () -> {
 
                         try {
                             CommandSender sender = Bukkit.getServer().getConsoleSender();
                             Bukkit.dispatchCommand(sender, command);
                         } catch (Exception e) {
                             // Just warn about the issue
-                            Bukkit.getLogger().warning("Couldn't execute command over websocket");
+                            log.warning("Couldn't execute command over websocket");
                         }
                     });
                 }
@@ -65,7 +73,7 @@ public class WebsocketHandler {
      *
      * @param message Object can be any Jackson/JSON serializable object
      */
-    public static void broadcast(Object message) {
+    public void broadcast(Object message) {
         subscribers.values().stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> session.send(message));
     }
 
@@ -75,7 +83,7 @@ public class WebsocketHandler {
      * @param ctx The WebSocket Context
      * @return String the hash
      */
-    private static String clientHash(WsContext ctx) {
+    private String clientHash(WsContext ctx) {
         return String.format("sub-%s-%s", ctx.host(), ctx.getSessionId());
     }
 }
