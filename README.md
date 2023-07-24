@@ -90,7 +90,7 @@ $ curl http://localhost:4567/v1/players
 ```
 # ServerTap Command
 
-ServerTap currently supports only one management command in game. The supported subcommands are `realod` & 'info'
+ServerTap currently supports only one management command in game. The supported subcommands are `reload` & 'info'
 which as their names imply let you reload the plugin and display information basic info about it (version, author, etc).
 
 **Note**: The Permission for the `/servertap` Command is `servertap.admin`.
@@ -306,7 +306,7 @@ ServerTapWebserverService webserverService = this.getServer().getServicesManager
 The Interface provides you with methods to directly add Endpoints to the Webserver:
 ```java
 webserverService.get("/test/ping", ctx -> ctx.status(200).result("Pong!"));
-webserverService.get("/test/ws", websocketConfig -> {
+webserverService.websocket("/test/ws", websocketConfig -> {
     websocketConfig.onMessage(wsMessageContext -> System.out.println(wsMessageContext.message()));
 });
 ```
