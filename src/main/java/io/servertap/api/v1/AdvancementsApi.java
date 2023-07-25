@@ -5,18 +5,12 @@ import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiResponse;
-import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.Advancement;
-import io.servertap.api.v1.models.Player;
 import org.bukkit.Bukkit;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class AdvancementsApi {
-    public AdvancementsApi() {}
-
     @OpenApi(
             path = "/v1/advancements",
             summary = "Gets all server advancements",

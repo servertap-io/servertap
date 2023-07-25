@@ -6,7 +6,7 @@ import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
-import io.servertap.utils.EconomyWrapper;
+import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -19,9 +19,11 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class PlayerApi {
+    private final EconomyWrapper economy;
     private final Logger log;
 
-    public PlayerApi(Logger log) {
+    public PlayerApi(Logger log, EconomyWrapper economy) {
+        this.economy = economy;
         this.log = log;
     }
 
@@ -97,8 +99,8 @@ public class PlayerApi {
         p.setBanned(player.isBanned());
         p.setOp(player.isOp());
 
-        if (EconomyWrapper.getInstance().getEconomy() != null) {
-            p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
+        if (economy.isAvailable()) {
+            p.setBalance(economy.getPlayerBalance(player));
         }
 
         p.setHunger(player.getFoodLevel());
@@ -148,8 +150,8 @@ public class PlayerApi {
             p.setBanned(offlinePlayer.isBanned());
             p.setOp(offlinePlayer.isOp());
 
-            if (EconomyWrapper.getInstance().getEconomy() != null) {
-                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(offlinePlayer));
+            if (economy.isAvailable()) {
+                p.setBalance(economy.getPlayerBalance(offlinePlayer));
             }
 
             p.setLastPlayed(offlinePlayer.getLastPlayed());

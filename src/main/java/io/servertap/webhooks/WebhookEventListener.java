@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
-import io.servertap.api.v1.models.events.*;
-import io.servertap.utils.EconomyWrapper;
+import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
+import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
+import io.servertap.webhooks.models.events.*;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -34,11 +35,13 @@ import java.util.logging.Logger;
 public class WebhookEventListener implements Listener {
     private final Logger log;
     private final ServerTapMain main;
+    private final EconomyWrapper economyWrapper;
     private List<Webhook> webhooks;
 
-    public WebhookEventListener(ServerTapMain main, FileConfiguration bukkitConfig, Logger logger) {
+    public WebhookEventListener(ServerTapMain main, FileConfiguration bukkitConfig, Logger logger, EconomyWrapper economyWrapper) {
         this.main = main;
         this.log = logger;
+        this.economyWrapper = economyWrapper;
 
         loadWebhooksFromConfig(bukkitConfig);
     }
@@ -173,8 +176,8 @@ public class WebhookEventListener implements Listener {
     private Player fromBukkitPlayer(org.bukkit.entity.Player player) {
         Player p = new Player();
 
-        if (EconomyWrapper.getInstance().getEconomy() != null) {
-            p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
+        if (economyWrapper.isAvailable()) {
+            p.setBalance(economyWrapper.getPlayerBalance(player));
         }
 
         p.setUuid(player.getUniqueId().toString());

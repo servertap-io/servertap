@@ -7,11 +7,11 @@ import io.javalin.http.ServiceUnavailableResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.ServerTapMain;
-import io.servertap.utils.Lag;
+import io.servertap.utils.LagDetector;
 import io.servertap.utils.ServerExecCommandSender;
 import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
-import io.servertap.utils.EconomyWrapper;
+import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.BanList;
@@ -32,11 +32,17 @@ import java.util.logging.Logger;
 
 public class ServerApi {
     private final Logger log;
+    private final ServerTapMain main;
+    private final EconomyWrapper economy;
     private final org.bukkit.Server bukkitServer = Bukkit.getServer();
     private final ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+    private final LagDetector lagDetector;
 
-    public ServerApi(Logger log) {
+    public ServerApi(ServerTapMain main, Logger log, LagDetector lagDetector, EconomyWrapper economy) {
         this.log = log;
+        this.main = main;
+        this.economy = economy;
+        this.lagDetector = lagDetector;
     }
 
     @OpenApi(
@@ -76,7 +82,7 @@ public class ServerApi {
         server.setOnlinePlayers(bukkitServer.getOnlinePlayers().size());
 
         // Possibly add 5m and 15m in the future?
-        server.setTps(Lag.getTPSString());
+        server.setTps(lagDetector.getTPSString());
 
         // Get the list of IP bans
         Set<ServerBan> bannedIps = new HashSet<>();
@@ -557,8 +563,8 @@ public class ServerApi {
             p.setBanned(player.isBanned());
             p.setOp(player.isOp());
 
-            if (EconomyWrapper.getInstance().getEconomy() != null) {
-                p.setBalance(EconomyWrapper.getInstance().getEconomy().getBalance(player));
+            if (economy.isAvailable()) {
+                p.setBalance(economy.getPlayerBalance(player));
             }
 
             opedPlayers.add(p);
@@ -595,6 +601,7 @@ public class ServerApi {
                     )
             }
     )
+
     public void postCommand(Context ctx) {
         String command = ctx.formParam("command");
         String timeRaw = ctx.formParam("time");
@@ -609,7 +616,8 @@ public class ServerApi {
         if (time.get() < 0) time.set(0);
 
         ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
-                        output -> {
+                        ret -> {
+                            String output = String.join("\n", ret);
                             if ("application/json".equalsIgnoreCase(ctx.contentType())) {
                                 ctx.json(output);
                             } else {
@@ -622,7 +630,7 @@ public class ServerApi {
                 }));
     }
 
-    private CompletableFuture<String> runCommandAsync(String command, long time) {
-        return new ServerExecCommandSender().executeCommand(command, time, TimeUnit.MILLISECONDS);
+    private CompletableFuture<List<String>> runCommandAsync(String command, long time) {
+        return new ServerExecCommandSender(main).executeCommand(command, time, TimeUnit.MILLISECONDS);
     }
 }

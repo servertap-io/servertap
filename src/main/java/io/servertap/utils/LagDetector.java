@@ -1,11 +1,11 @@
 package io.servertap.utils;
 
-public class Lag implements Runnable {
+public class LagDetector implements Runnable {
 
-    private static final long[] TICKS = new long[600];
-    private static int TICK_COUNT = 0;
+    private final long[] TICKS = new long[600];
+    private int TICK_COUNT = 0;
 
-    public static String getTPSString() {
+    public String getTPSString() {
         try {
             double tpsDouble = getTPS();
             if (tpsDouble > 19.5) tpsDouble = 20;
@@ -16,11 +16,11 @@ public class Lag implements Runnable {
         }
     }
 
-    public static double getTPS() {
+    public double getTPS() {
         return getTPS(100);
     }
 
-    public static double getTPS(int ticks) {
+    public double getTPS(int ticks) {
         if (TICK_COUNT < ticks) return 20;
         int target = (TICK_COUNT - 1 - ticks) % TICKS.length;
         long elapsed = System.currentTimeMillis() - TICKS[target];

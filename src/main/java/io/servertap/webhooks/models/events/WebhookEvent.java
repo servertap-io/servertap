@@ -1,4 +1,4 @@
-package io.servertap.api.v1.models.events;
+package io.servertap.webhooks.models.events;
 
 import com.google.gson.annotations.Expose;
 

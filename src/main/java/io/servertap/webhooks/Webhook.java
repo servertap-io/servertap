@@ -1,6 +1,6 @@
 package io.servertap.webhooks;
 
-import io.servertap.api.v1.models.events.WebhookEvent;
+import io.servertap.webhooks.models.events.WebhookEvent;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.net.MalformedURLException;

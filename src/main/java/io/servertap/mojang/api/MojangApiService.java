@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 public class MojangApiService {
     private static final String getUuidResource = "https://api.mojang.com/users/profiles/minecraft/%s";
-    private static final String getNameHistoryResource = "https://api.mojang.com/user/profiles/%s/names";
 
     public static String getUuid(String username) throws IOException {
         Gson gson = GsonSingleton.getInstance();
@@ -43,9 +42,7 @@ public class MojangApiService {
 
             http.connect();
 
-            if (http.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                return new ApiResponse("", http.getResponseCode());
-            }
+            if (http.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) return new ApiResponse("", http.getResponseCode());
 
             try (InputStream is = http.getInputStream()) {
                 responseContent = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining("\n"));

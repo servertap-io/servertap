@@ -4,6 +4,8 @@ import io.javalin.http.Handler;
 import io.javalin.websocket.WsConfig;
 import io.servertap.api.v1.*;
 import io.servertap.utils.ConsoleListener;
+import io.servertap.utils.LagDetector;
+import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
 
 import static io.servertap.Constants.*;
 
@@ -14,10 +16,11 @@ public final class WebServerRoutes {
 
     private WebServerRoutes() {}
 
-    public static void addV1Routes(ServerTapMain main, Logger log, WebServer webServer, ConsoleListener consoleListener) {
+    public static void addV1Routes(ServerTapMain main, Logger log, LagDetector lagDetector, WebServer webServer,
+                                   ConsoleListener consoleListener, ExternalPluginWrapperRepo externalPluginWrapperRepo) {
         PrefixedRouteBuilder pr = new PrefixedRouteBuilder(API_V1, webServer);
 
-        ServerTapApiV1 api = new ServerTapApiV1(main, log, consoleListener);
+        ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo);
 
         pr.get("ping", api.getServerApi()::ping);
 

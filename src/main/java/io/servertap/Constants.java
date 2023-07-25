@@ -4,7 +4,6 @@ public class Constants {
 
     public static final String API_V1 = "v1";
 
-
     // Economy Related Messages
     public static final String VAULT_MISSING = "Vault not found or you are missing an economy plugin. Related functionality disabled";
     public static final String VAULT_MISSING_PAY_PARAMS = "Missing uuid and/or amount";

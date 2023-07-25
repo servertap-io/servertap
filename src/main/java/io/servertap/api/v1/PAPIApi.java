@@ -11,8 +11,6 @@ import org.bukkit.OfflinePlayer;
 import java.util.UUID;
 
 public class PAPIApi {
-    public PAPIApi() {}
-
     @OpenApi(
             path = "/v1/placeholders/replace",
             methods = {HttpMethod.POST},

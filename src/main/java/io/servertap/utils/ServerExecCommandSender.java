@@ -16,8 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -26,19 +27,25 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
     private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(1);
     private static final ConsoleCommandSender CONSOLE_COMMAND_SENDER = Bukkit.getConsoleSender();
 
-    private final StringJoiner messageBuffer = new StringJoiner("\n");
+    private final ServerTapMain main;
+    private final List<String> messageBuffer = new ArrayList<>();
 
-    public CompletableFuture<String> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
+    public ServerExecCommandSender(ServerTapMain main) {
+        this.main = main;
+    }
+
+    public CompletableFuture<List<String>> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
         Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
-                ServerTapMain.instance,
+                main,
                 () -> Bukkit.dispatchCommand(this, command)
         );
 
-        CompletableFuture<String> future = new CompletableFuture<>();
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+
         EXECUTOR.schedule(() -> {
             try {
                 commandFuture.get(5, TimeUnit.SECONDS);
-                future.complete(messageBuffer.toString());
+                future.complete(messageBuffer);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 future.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
             }
@@ -48,8 +55,7 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
 
     @Override
     public void sendMessage(@NotNull String message) {
-        //TODO should probably cover other control characters besides just section signs
-        messageBuffer.add(ChatColor.stripColor(message));
+        messageBuffer.add(main.getConfig().getBoolean("normalizeMessages") ? ChatColor.stripColor(message) : message);
     }
 
     @Override
