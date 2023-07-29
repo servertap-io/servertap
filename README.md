@@ -162,6 +162,7 @@ key: some-long-super-random-string
 ```
 
 Then include a Header called `key` with your specified key on every request to Authenticate.
+<br>**Note:** You can change the default header name in the ServerTap config file option `headerName`.
 
 We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info.
 
@@ -259,6 +260,7 @@ header `key` to authenticate like you can with regular API routes.
 
 Instead you must set a cookie called `x-servertap-key` on the page hosting
 the websocket connection.
+<br>**Note:** You can change the default cookie name in the ServerTap config file option `cookieName`. 
 
 Example:
 
