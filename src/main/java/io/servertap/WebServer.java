@@ -6,6 +6,7 @@ import io.javalin.config.JavalinConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
+import io.javalin.http.sse.SseHandler;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
@@ -208,6 +209,10 @@ public class WebServer {
 
     public void ws(String route, Consumer<WsConfig> wsConfig) {
         this.javalin.ws(route, wsConfig);
+    }
+
+    public void sse(String route, SseHandler sseHandler) {
+        this.javalin.sse(route, sseHandler);
     }
 
     public void start(int port) {

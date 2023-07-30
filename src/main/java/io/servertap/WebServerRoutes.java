@@ -1,6 +1,7 @@
 package io.servertap;
 
 import io.javalin.http.Handler;
+import io.javalin.http.sse.SseHandler;
 import io.javalin.websocket.WsConfig;
 import io.servertap.api.v1.*;
 import io.servertap.utils.ConsoleListener;
@@ -69,6 +70,9 @@ public final class WebServerRoutes {
         // Websocket handler
         pr.ws("ws/console", api.getWebsocketHandler()::events);
 
+        // ServerSideEvent Handler
+        pr.sse("sse", api.getServerSideEventsHandler().getHandler());
+
         // Advancement routes
         pr.get("advancements", api.getAdvancementsApi()::getAdvancements);
     }
@@ -100,6 +104,10 @@ public final class WebServerRoutes {
 
         public void ws(String route, Consumer<WsConfig> wsConfig) {
             webServer.ws(prefix + "/" + route, wsConfig);
+        }
+
+        public void sse(String route, SseHandler sseHandler) {
+            webServer.sse(route, sseHandler);
         }
     }
 }
