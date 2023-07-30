@@ -1,7 +1,9 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.scoreboard.ScoreboardManager;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Objective {
@@ -58,5 +60,35 @@ public class Objective {
 
     public void setDisplaySlot(String displaySlot) {
         this.displaySlot = displaySlot;
+    }
+
+    public static Objective fromBukkitObjective(org.bukkit.scoreboard.Objective objective, ScoreboardManager scoreboardManager) {
+        org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
+
+        Objective o = new Objective();
+        o.setCriterion(objective.getCriteria());
+        o.setDisplayName(objective.getDisplayName());
+        o.setName(objective.getName());
+
+        o.setDisplaySlot("");
+        if (objective.getDisplaySlot() != null) {
+            o.setDisplaySlot(objective.getDisplaySlot().toString().toLowerCase());
+        }
+
+        Set<Score> scores = new HashSet<>();
+        gameScoreboard.getEntries().forEach(entry -> {
+            org.bukkit.scoreboard.Score score = objective.getScore(entry);
+
+            if (score.isScoreSet()) {
+                Score s = new Score();
+                s.setEntry(entry);
+                s.setValue(score.getScore());
+
+                scores.add(s);
+            }
+        });
+        o.setScores(scores);
+
+        return o;
     }
 }

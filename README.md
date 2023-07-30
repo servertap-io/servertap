@@ -29,6 +29,10 @@ This helps us keep track of issues and questions more effectively and answer you
 - [Webhooks](#webhooks)
 - [Websockets](#websockets)
   - [Authenticating Websockets](#authenticating-websockets)
+- [Server Side Events](#server-side-events)
+  - [Authenticating Server Side Events](#authenticating-server-side-events)
+  - [Special Events & Extra Features](#special-events--extra-features)
+- [Reverse Polling](#reverse-polling)
 - [Using the Developer API](#using-the-developer-api)
 - [Contributing to ServerTap](#contributing-to-servertap)
 
@@ -276,6 +280,97 @@ this.ws.onopen = function() {
 ```
 
 ### Note: If you don't have authentication enabled, you are basically opening a remote admin console to your server up to the internet (bad idea).
+
+# Server Side Events
+ServerTap has a mono-directional Server Side Events (SSE) interface which allows you to listen to and receive dynamically
+updated server data from any one of the predefined events listed below. Each event does something different and only sends
+data to connected clients when changes to different aspects of the Minecraft Server are detected. This functionality removes
+the need for polling ServerTap for basic info like who's online or changes to world data.
+
+The available events are currently:
+- `playerJoin` \[**Fired:** When a player joins the game | **Transmits:** A PlayerJoined object]
+- `playerQuit` \[**Fired:** When a player leaves the game | **Transmits:** A PlayerQuit object]
+- `playerKicked` \[**Fired:** When a player is kicked from the game | **Transmits:** A PlayerKicked object]
+- `updateOnlinePlayersList` \[**Fired:** Updates when a player joins and leaves | **Transmits:** An array of Player objects]
+- `updateAllPlayersList` \[**Fired:** When a player joins the server | **Transmits:** An array of OfflinePlayer objects]
+- `updateWorldsData` \[**Fired:** When the in game weather changes or when a gamerule is updated | **Transmits:** An array of World objects]
+- `updateServerData` \[**Fired:** When the server whitelist, bans list, or IP-Bans lists are updated | **Transmits:** A Server object]
+- `updateWhitelistList` \[**Fired:** When the whitelist is updated | **Transmits:** An array of Player objects]
+- `updateOperatorsList` \[**Fired:** When the ops list is updated | **Transmits:** An array of OfflinePlayer objects]
+
+All events can be configured in the `sse` section of the ServerTap config and SSE can be disabled entirely their as well.
+To enable or disable an event simply add it to the `enabledEvents` list in the config. To disabled SSE simply set `enabled`
+to false in the SSE section. 
+
+**Please note:** Most of the transmitted arrays and objects are the same as the ones received through our api routes.
+For example, the data transmitted by the `updateOnlinePlayersList` event would be the same the data received if you made
+a `get` request to `/v1/players`. On a different note, while most of the events are triggered when updates to any of their 
+data members are detected, some things like changes to the Server objects `tps` field or changes to the `health` field of
+the Player objects found in the online player list.
+
+**Compatibility Notice:** The `updateWhitelistList`, `updateOperatorsList`, & `updateServerData` depend on your server
+using the vanilla implementation of bans, ip-ban, whitelist operations, and op list operations. ServerTap uses a custom
+FileWatcher to detect changes to the JSON files that keep track of this type of data and triggers internal events accordingly.
+If your server uses some type of database or different files or locations for any of the aforementioned data storage our
+system won't be able to detect any changes and the events that depend solely on these updates won't work.
+
+### Special Events & Extra Features
+In addition to the regular events supported by ServerTaps SSE implementation, we also support one special event and one
+extra feature which cuts the need for polling down even further. The events and features are separate from the main SSE section
+because they fire often and will push a lot of data to the client over short periods of time. While these events and features
+won't have a direct impact on performance or network speeds there is the possibility with enough plays online there could
+be some negative effects so we elected to make this its own section.
+
+The available events are currently:
+- `InsertPlayerUUID.updateInventory` \[**Fires:** When a players inventory is updated | **Transmits:** An array of ItemStack objects]
+
+**Please note:** For these events to work parts of the event names are dynamic and to listen to them on the client side you
+have to replace the `insertPlayerUUID` with the players UUID. If you don't your EventSource listener won't process the event
+and your client `onEvent` code will not be executed.
+
+The available extra features are currently:
+- `Online Player List Player Location Updates` \[This feature allows you to enable updates to the location of players listed in the `updateOnlinePlayersList` event]
+
+**Please note:** Both the special events and extra features can be enabled through the ServerTap config and are disabled
+by default.
+
+### Authenticating Server Side Events
+
+Since you can't set headers on SSE connections, you can't use the
+header `key` to authenticate like you can with regular API routes.
+
+Instead you must set a cookie called `x-servertap-key` on the page hosting the SSE connection.
+<br>**Note:** You can change the default cookie name in the ServerTap config file option `cookieName`.
+
+Example:
+
+```js
+// set cookie to authenticate the connection
+document.cookie = "x-servertap-key=change_me";
+
+this.sse = new EventSource("http://localhost:4567/sse");
+
+this.sse.onopen(msg => {
+    console.log("Opened connection");
+})
+```
+
+# Reverse Polling
+With the addition of SSE we decided to add this feature called reverse polling (needs a better name). Essentially this feature
+eliminates the need to poll for data that isn't updated by our SSE interface by allowing you select parts of our api to be
+periodically called and their responses transmitted asd events through an open SSE connection. The refresh rate for these calls is 
+in seconds and can have values as low as 0.1 (although we don't recommend this). This feature is disabled by default but
+can be fully configured in the ServerTap config under the `reversePolling` section. Each event has it own refresh rate
+and can be enabled or disabled interdependently of the others. 
+
+The available events are currently:
+- `updateServerData` - Sends an updated Server object to connected clients
+- `updateWorldsData`  Sends an array of updated World objects to connected clients
+- `updateScoreboardData`  Sends an array of updated Objective objects to connected clients
+- `updateAdvancementsData`  Sends an array of updated Advancement objects to connected clients
+
+**Please note:** SSE has to be enabled for this feature to work.
+
 
 # Using the Developer API
 

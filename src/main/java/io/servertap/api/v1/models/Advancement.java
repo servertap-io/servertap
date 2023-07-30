@@ -24,4 +24,11 @@ public class Advancement {
         this.criteria = criteria;
     }
 
+    public static Advancement fromBukkitAdvancement(org.bukkit.advancement.Advancement advancement) {
+        Advancement a = new Advancement();
+        a.setName(advancement.getKey().getKey());
+        a.setCriteria(advancement.getCriteria().stream().toList());
+        return a;
+    }
+
 }

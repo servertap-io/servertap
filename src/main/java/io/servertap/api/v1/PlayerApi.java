@@ -8,7 +8,6 @@ import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
@@ -39,11 +38,13 @@ public class PlayerApi {
             }
     )
     public void playersGet(Context ctx) {
+        ctx.json(getOninePlayers());
+    }
+
+    public ArrayList<Player> getOninePlayers() {
         ArrayList<Player> players = new ArrayList<>();
-
-        Bukkit.getOnlinePlayers().forEach(player -> players.add(getPlayer(player)));
-
-        ctx.json(players);
+        Bukkit.getOnlinePlayers().forEach(player -> players.add(Player.fromBukkitPlayer(player, economy)));
+        return players;
     }
 
     @OpenApi(
@@ -75,53 +76,7 @@ public class PlayerApi {
 
         if (player == null) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
 
-        ctx.json(getPlayer(player));
-    }
-
-    /**
-     * Internal method to convert a Bukkit player into a ServerTap player
-     *
-     * @param player The Bukkit player
-     * @return The ServerTap player
-     */
-    private Player getPlayer(org.bukkit.entity.Player player) {
-        Player p = new Player();
-        p.setUuid(player.getUniqueId().toString());
-        p.setDisplayName(player.getDisplayName());
-
-        p.setAddress(player.getAddress().getHostName());
-        p.setPort(player.getAddress().getPort());
-
-        p.setExhaustion(player.getExhaustion());
-        p.setExp(player.getExp());
-
-        p.setWhitelisted(player.isWhitelisted());
-        p.setBanned(player.isBanned());
-        p.setOp(player.isOp());
-
-        if (economy.isAvailable()) {
-            p.setBalance(economy.getPlayerBalance(player));
-        }
-
-        p.setHunger(player.getFoodLevel());
-        p.setHealth(player.getHealth());
-        p.setSaturation(player.getSaturation());
-
-        p.setDimension(player.getWorld().getEnvironment());
-
-        Location playerLocation = player.getLocation();
-        Double[] convertedLocation = new Double[3];
-        convertedLocation[0] = playerLocation.getX();
-        convertedLocation[1] = playerLocation.getY();
-        convertedLocation[2] = playerLocation.getZ();
-
-        p.setLocation(convertedLocation);
-
-        p.setGamemode(player.getGameMode());
-
-        p.setLastPlayed(player.getLastPlayed());
-
-        return p;
+        ctx.json(Player.fromBukkitPlayer(player, economy));
     }
 
     @OpenApi(
@@ -136,30 +91,15 @@ public class PlayerApi {
             }
     )
     public void offlinePlayersGet(Context ctx) {
+        ctx.json(getAllPlayers());
+    }
 
+    public ArrayList<io.servertap.api.v1.models.OfflinePlayer> getAllPlayers() {
         ArrayList<io.servertap.api.v1.models.OfflinePlayer> players = new ArrayList<>();
-
         OfflinePlayer[] offlinePlayers = Bukkit.getOfflinePlayers();
-
-        for (OfflinePlayer offlinePlayer : offlinePlayers) {
-            io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-
-            p.setDisplayName(offlinePlayer.getName());
-            p.setUuid(offlinePlayer.getUniqueId().toString());
-            p.setWhitelisted(offlinePlayer.isWhitelisted());
-            p.setBanned(offlinePlayer.isBanned());
-            p.setOp(offlinePlayer.isOp());
-
-            if (economy.isAvailable()) {
-                p.setBalance(economy.getPlayerBalance(offlinePlayer));
-            }
-
-            p.setLastPlayed(offlinePlayer.getLastPlayed());
-
-            players.add(p);
-        }
-
-        ctx.json(players);
+        for (OfflinePlayer offlinePlayer : offlinePlayers)
+            players.add(io.servertap.api.v1.models.OfflinePlayer.getFromBukkitOfflinePlayer(offlinePlayer, economy));
+        return players;
     }
 
     @OpenApi(
@@ -194,10 +134,13 @@ public class PlayerApi {
             throw new BadRequestResponse(Constants.INVALID_UUID);
         }
 
+        ctx.json(getPlayerInv(playerUUID, worldUUID));
+    }
+
+    public ArrayList<ItemStack> getPlayerInv(UUID playerUUID, UUID worldUUID) {
         ArrayList<ItemStack> inv = new ArrayList<>();
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
         if (player != null) {
-            player.updateInventory();
             Integer location = -1;
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
                 location++;
@@ -210,7 +153,7 @@ public class PlayerApi {
                     inv.add(itemObj);
                 }
             }
-            ctx.json(inv);
+            return inv;
         } else {
             try {
                 World bukWorld = Bukkit.getWorld(worldUUID);
@@ -223,7 +166,7 @@ public class PlayerApi {
                         "%s/%s/playerdata/%s.dat",
                         new File("./").getAbsolutePath(),
                         bukWorld.getName(),
-                        ctx.pathParam("playerUuid")
+                        playerUUID
                 );
                 File playerfile = new File(Paths.get(dataPath).toString());
                 if (!playerfile.exists()) {
@@ -239,11 +182,8 @@ public class PlayerApi {
                     inv.add(itemObj);
                 });
 
-                ctx.json(inv);
+                return inv;
 
-            } catch (HttpResponseException e) {
-                // Pass any javalin exceptions up the chain
-                throw e;
             } catch (Exception e) {
                 log.warning(e.getMessage());
                 throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);

@@ -42,21 +42,8 @@ public class PluginApi {
     )
     public void listPlugins(Context ctx) {
         ArrayList<Plugin> pluginList = new ArrayList<>();
-        for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-
-            io.servertap.api.v1.models.Plugin pl = new io.servertap.api.v1.models.Plugin();
-            pl.setName(plugin.getName());
-            pl.setEnabled(plugin.isEnabled());
-            pl.setVersion(plugin.getDescription().getVersion());
-            pl.setAuthors(plugin.getDescription().getAuthors());
-            pl.setDescription(plugin.getDescription().getDescription());
-            pl.setWebsite(plugin.getDescription().getWebsite());
-            pl.setDepends(plugin.getDescription().getDepend());
-            pl.setSoftDepends(plugin.getDescription().getSoftDepend());
-            pl.setApiVersion(plugin.getDescription().getAPIVersion());
-
-            pluginList.add(pl);
-        }
+        for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins())
+            pluginList.add(Plugin.fromBukkitPlugin(plugin));
 
         ctx.json(pluginList);
     }

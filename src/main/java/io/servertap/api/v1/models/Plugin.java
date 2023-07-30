@@ -119,4 +119,20 @@ public class Plugin {
     public void setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
     }
+
+    public static Plugin fromBukkitPlugin(org.bukkit.plugin.Plugin bukkitPlugin) {
+        Plugin plugin = new Plugin();
+
+        plugin.setName(bukkitPlugin.getName());
+        plugin.setEnabled(bukkitPlugin.isEnabled());
+        plugin.setVersion(bukkitPlugin.getDescription().getVersion());
+        plugin.setAuthors(bukkitPlugin.getDescription().getAuthors());
+        plugin.setDescription(bukkitPlugin.getDescription().getDescription());
+        plugin.setWebsite(bukkitPlugin.getDescription().getWebsite());
+        plugin.setDepends(bukkitPlugin.getDescription().getDepend());
+        plugin.setSoftDepends(bukkitPlugin.getDescription().getSoftDepend());
+        plugin.setApiVersion(bukkitPlugin.getDescription().getAPIVersion());
+
+        return plugin;
+    }
 }

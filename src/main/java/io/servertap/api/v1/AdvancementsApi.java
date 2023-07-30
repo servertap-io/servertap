@@ -23,16 +23,15 @@ public class AdvancementsApi {
             }
     )
     public void getAdvancements(Context ctx) {
+        ctx.json(getAdvancements());
+    }
+
+    public ArrayList<Advancement> getAdvancements() {
         final ArrayList<Advancement> advancements = new ArrayList<>();
 
-        Bukkit.advancementIterator().forEachRemaining(advancement -> {
-            Advancement a = new Advancement();
-            a.setName(advancement.getKey().getKey());
-            a.setCriteria(advancement.getCriteria().stream().toList());
-            advancements.add(a);
-        });
+        Bukkit.advancementIterator().forEachRemaining(advancement -> advancements.add(Advancement.fromBukkitAdvancement(advancement)));
 
-        ctx.json(advancements);
+        return advancements;
     }
 
 }

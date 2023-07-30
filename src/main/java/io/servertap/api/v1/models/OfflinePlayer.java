@@ -1,6 +1,7 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import io.servertap.utils.pluginwrappers.EconomyWrapper;
 
 /**
  * An offline player
@@ -140,5 +141,22 @@ public class OfflinePlayer {
 
     public void setLastPlayed(Long lastPlayed) {
         this.lastPlayed = lastPlayed;
+    }
+
+    public static OfflinePlayer getFromBukkitOfflinePlayer(org.bukkit.OfflinePlayer bukkitPlayer, EconomyWrapper economy) {
+        OfflinePlayer offlinePlayer = new OfflinePlayer();
+
+        offlinePlayer.setDisplayName(bukkitPlayer.getName());
+        offlinePlayer.setUuid(bukkitPlayer.getUniqueId().toString());
+        offlinePlayer.setWhitelisted(bukkitPlayer.isWhitelisted());
+        offlinePlayer.setBanned(bukkitPlayer.isBanned());
+        offlinePlayer.setOp(bukkitPlayer.isOp());
+
+        if (economy.isAvailable()) {
+            offlinePlayer.setBalance(economy.getPlayerBalance(bukkitPlayer));
+        }
+
+        offlinePlayer.setLastPlayed(offlinePlayer.getLastPlayed());
+        return offlinePlayer;
     }
 }

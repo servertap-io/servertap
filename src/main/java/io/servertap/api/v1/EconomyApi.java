@@ -6,12 +6,12 @@ import io.javalin.http.HttpResponseException;
 import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
+import io.servertap.api.v1.models.Plugin;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class EconomyApi {
             }
     )
     public void getEconomyPluginInformation(Context ctx) {
-        Plugin econPlugin;
+        org.bukkit.plugin.Plugin econPlugin;
         if (!economy.isAvailable()) {
             throw new HttpResponseException(424, Constants.VAULT_MISSING, new HashMap<>());
         } else {
@@ -53,13 +53,7 @@ public class EconomyApi {
             }
             econPlugin = rsp.getPlugin();
         }
-
-        io.servertap.api.v1.models.Plugin plugin = new io.servertap.api.v1.models.Plugin();
-        plugin.setName(econPlugin.getName());
-        plugin.setEnabled(econPlugin.isEnabled());
-        plugin.setVersion(econPlugin.getDescription().getVersion());
-
-        ctx.json(plugin);
+        ctx.json(Plugin.fromBukkitPlugin(econPlugin));
     }
 
     @OpenApi(
