@@ -1,10 +1,5 @@
 package io.servertap.api.v1.serverSideEvents;
 
-import io.servertap.api.v1.models.Player;
-import io.servertap.webhooks.models.events.PlayerJoinWebhookEvent;
-import io.servertap.webhooks.models.events.PlayerKickWebhookEvent;
-import io.servertap.webhooks.models.events.PlayerQuitWebhookEvent;
-import io.servertap.webhooks.models.events.WebhookEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
