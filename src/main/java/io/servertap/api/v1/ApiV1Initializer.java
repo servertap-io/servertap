@@ -7,6 +7,7 @@ import io.servertap.utils.ConsoleListener;
 import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.utils.LagDetector;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
+import org.bukkit.Bukkit;
 
 import java.util.logging.Logger;
 
@@ -34,6 +35,8 @@ public class ApiV1Initializer {
         this.playerApi = new PlayerApi(log, externalPluginWrapperRepo.getEconomyWrapper());
         this.worldApi = new WorldApi(main, log);
         this.papiApi = new PAPIApi();
+
+        Bukkit.getPluginManager().registerEvents(serverSideEventListener, main);
     }
 
     public ServerSideEventsHandler getServerSideEventsHandler() {

@@ -1,5 +1,8 @@
 package io.servertap.utils;
 
+import io.servertap.custom.events.ServerUpdatedEvent;
+import org.bukkit.Bukkit;
+
 public class LagDetector implements Runnable {
 
     private final long[] TICKS = new long[600];
@@ -28,6 +31,7 @@ public class LagDetector implements Runnable {
     }
 
     public void run() {
+        Bukkit.getPluginManager().callEvent(new ServerUpdatedEvent());
         TICKS[(TICK_COUNT % TICKS.length)] = System.currentTimeMillis();
         TICK_COUNT += 1;
     }

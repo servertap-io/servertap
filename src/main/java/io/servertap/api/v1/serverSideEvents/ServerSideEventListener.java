@@ -1,5 +1,9 @@
 package io.servertap.api.v1.serverSideEvents;
 
+import io.servertap.custom.events.OperatorListUpdatedEvent;
+import io.servertap.custom.events.ServerUpdatedEvent;
+import io.servertap.custom.events.WhitelistUpdatedEvent;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -12,27 +16,56 @@ public class ServerSideEventListener implements Listener {
         this.sse = sse;
     }
 
-    private void updateOnlinePlayers() {
-        sse.broadcast("updateOnlinePlayers", new Object());
+    private void updateOnlinePlayersList() {
+        sse.broadcast("updateOnlinePlayersList", new Object());
     }
 
-    private void updateAllPlayers() {
-        sse.broadcast("updateAllPlayers", new Object());
+    private void updateAllPlayersList() {
+        sse.broadcast("updateAllPlayersList", new Object());
+    }
+
+    private void updateServerInfo() {
+        sse.broadcast("updateServerInfo", new Object());
+    }
+
+    private void updateWhitelistList() {
+        sse.broadcast("updateWhitelistList", new Object());
+    }
+
+    private void updateOperatorsList() {
+        sse.broadcast("updateOperatorsList", new Object());
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        updateOnlinePlayers();
-        updateAllPlayers();
+        updateOnlinePlayersList();
+        updateAllPlayersList();
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        updateOnlinePlayers();
+        updateOnlinePlayersList();
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
-        updateOnlinePlayers();
+        updateOnlinePlayersList();
+    }
+
+    @EventHandler
+    public void onServerUpdated(ServerUpdatedEvent event) {
+        updateServerInfo();
+    }
+
+    @EventHandler
+    public void onWhitelistUpdated(WhitelistUpdatedEvent event) {
+        updateServerInfo();
+        updateWhitelistList();
+    }
+
+    @EventHandler
+    public void onOperatorListUpdated(OperatorListUpdatedEvent event) {
+        updateServerInfo();
+        updateOperatorsList();
     }
 }

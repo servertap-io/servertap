@@ -34,8 +34,8 @@ public class ServerApi {
     private final Logger log;
     private final ServerTapMain main;
     private final EconomyWrapper economy;
-    private final org.bukkit.Server bukkitServer = Bukkit.getServer();
-    private final ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+    private final org.bukkit.Server bukkitServer;
+    private final ScoreboardManager scoreboardManager;
     private final LagDetector lagDetector;
 
     public ServerApi(ServerTapMain main, Logger log, LagDetector lagDetector, EconomyWrapper economy) {
@@ -43,6 +43,8 @@ public class ServerApi {
         this.main = main;
         this.economy = economy;
         this.lagDetector = lagDetector;
+        this.bukkitServer = Bukkit.getServer();
+        this.scoreboardManager = bukkitServer.getScoreboardManager();
     }
 
     @OpenApi(
