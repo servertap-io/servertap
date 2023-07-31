@@ -9,11 +9,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.RegisteredListener;
+
+import java.util.Collection;
 
 public class ServerSideEventListener implements Listener {
     private final ServerSideEventsHandler sse;
     public ServerSideEventListener(ServerSideEventsHandler sse) {
         this.sse = sse;
+
+        initFileListeners();
     }
 
     private void updateOnlinePlayersList() {
@@ -34,6 +39,10 @@ public class ServerSideEventListener implements Listener {
 
     private void updateOperatorsList() {
         sse.broadcast("updateOperatorsList", new Object());
+    }
+
+    private void initFileListeners() {
+
     }
 
     @EventHandler
