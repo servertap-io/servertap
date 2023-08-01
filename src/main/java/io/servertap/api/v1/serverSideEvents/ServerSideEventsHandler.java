@@ -17,7 +17,7 @@ public class ServerSideEventsHandler {
         return new SseHandler(client -> {
             client.keepAlive();
             clients.add(client);
-            client.onClose(() -> clients.remove());
+            client.onClose(clients::remove);
         });
     }
 
