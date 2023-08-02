@@ -7,10 +7,10 @@ import io.servertap.api.v1.models.Player;
 import io.servertap.api.v1.models.events.PlayerJoinSseEvent;
 import io.servertap.api.v1.models.events.PlayerKickSseEvent;
 import io.servertap.api.v1.models.events.PlayerQuitSseEvent;
-import io.servertap.custom.events.BanListUpdatedEvent;
-import io.servertap.custom.events.IpBanListUpdatedEvent;
-import io.servertap.custom.events.OperatorListUpdatedEvent;
-import io.servertap.custom.events.WhitelistUpdatedEvent;
+import io.servertap.custom.events.BanListUpdatedAsyncEvent;
+import io.servertap.custom.events.IpBanListUpdatedAsyncEvent;
+import io.servertap.custom.events.OperatorListUpdatedAsyncEvent;
+import io.servertap.custom.events.WhitelistUpdatedAsyncEvent;
 import io.servertap.utils.NormalizeMessage;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 
@@ -218,26 +218,26 @@ public class ServerSideEventListener {
 
     private class updateServerDataListeners implements Listener {
         @EventHandler
-        public void onWhitelistUpdated(WhitelistUpdatedEvent event) { updateServerInfo(); }
+        public void onWhitelistUpdated(WhitelistUpdatedAsyncEvent event) { updateServerInfo(); }
 
         @EventHandler
-        public void onOperatorListUpdated(OperatorListUpdatedEvent event) { updateServerInfo(); }
+        public void onOperatorListUpdated(OperatorListUpdatedAsyncEvent event) { updateServerInfo(); }
 
         @EventHandler
-        public void onBanListUpdated(BanListUpdatedEvent event) { updateServerInfo(); }
+        public void onBanListUpdated(BanListUpdatedAsyncEvent event) { updateServerInfo(); }
 
         @EventHandler
-        public void onIpBanListUpdated(IpBanListUpdatedEvent event) { updateServerInfo(); }
+        public void onIpBanListUpdated(IpBanListUpdatedAsyncEvent event) { updateServerInfo(); }
     }
 
     private class updateWhitelistListListeners implements Listener {
         @EventHandler
-        public void onWhitelistUpdated(WhitelistUpdatedEvent event) { updateWhitelistList(); }
+        public void onWhitelistUpdated(WhitelistUpdatedAsyncEvent event) { updateWhitelistList(); }
     }
 
     private class updateOperatorsListListeners implements Listener {
         @EventHandler
-        public void onOperatorListUpdated(OperatorListUpdatedEvent event) { updateOperatorsList(); }
+        public void onOperatorListUpdated(OperatorListUpdatedAsyncEvent event) { updateOperatorsList(); }
     }
 
     private class updateInventoryListeners implements Listener {
