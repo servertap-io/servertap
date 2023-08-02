@@ -141,7 +141,6 @@ public class PlayerApi {
         ArrayList<ItemStack> inv = new ArrayList<>();
         org.bukkit.entity.Player player = Bukkit.getPlayer(playerUUID);
         if (player != null) {
-            player.updateInventory();
             Integer location = -1;
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
                 location++;

@@ -1,5 +1,6 @@
 package io.servertap.api.v1.serverSideEvents;
 
+import io.servertap.Constants;
 import io.servertap.ServerTapMain;
 import io.servertap.api.v1.ApiV1Initializer;
 import org.bukkit.Bukkit;
@@ -39,9 +40,9 @@ public class ReversePollingInitializer {
         int scoreboardRefreshRate = bukkitConfig.getInt("reversePolling.scoreboardPolling.refreshRate", 60);
         int advancementsRefreshRate = bukkitConfig.getInt("reversePolling.advancementsPolling.refreshRate", 60);
 
-        if(serverPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast("updateServerData", api.getServerApi().getServer()), 0, (advancementsRefreshRate > 0.1 ? serverRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(worldsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast("updateWorldsData", api.getWorldApi().getWorlds()), 0, (advancementsRefreshRate > 0.1 ? worldsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(scoreboardPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast("updateScoreboardData", api.getServerApi().getScoreboard()), 0, (advancementsRefreshRate > 0.1 ? scoreboardRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(advancementsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast("updateAdvancementsData", api.getAdvancementsApi().getAdvancements()), 0, (advancementsRefreshRate > 0.1 ? advancementsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
+        if(serverPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_SERVER_DATA_EVENT, api.getServerApi().getServer()), 0, (advancementsRefreshRate > 0.1 ? serverRefreshRate * 20L : DEFAULT_REFRESH_RATE));
+        if(worldsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_WORLD_DATA_EVENT, api.getWorldApi().getWorlds()), 0, (advancementsRefreshRate > 0.1 ? worldsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
+        if(scoreboardPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_SCOREBOARD_DATA_EVENT, api.getServerApi().getScoreboard()), 0, (advancementsRefreshRate > 0.1 ? scoreboardRefreshRate * 20L : DEFAULT_REFRESH_RATE));
+        if(advancementsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_ADVANCEMENTS_DATA_EVENT, api.getAdvancementsApi().getAdvancements()), 0, (advancementsRefreshRate > 0.1 ? advancementsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
     }
 }

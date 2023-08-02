@@ -40,4 +40,18 @@ public class Constants {
 
     // Plugin Errors
     public static final String PLUGIN_INVALID_URL = "Invalid URL submitted (malformed)";
+
+    // SSE & Reverse Polling Event Names
+    public static final String PLAYER_JOIN_EVENT = "playerJoin";
+    public static final String PLAYER_QUIT_EVENT = "playerQuit";
+    public static final String PLAYER_KICKED_EVENT = "playerKicked";
+    public static final String UPDATE_ONLINE_PLAYER_LIST_EVENT = "updateOnlinePlayersList";
+    public static final String UPDATE_ALL_PLAYER_LIST_EVENT = "updateAllPlayersList";
+    public static final String UPDATE_WORLD_DATA_EVENT = "updateWorldsData";
+    public static final String UPDATE_SERVER_DATA_EVENT = "updateServerData";
+    public static final String UPDATE_WHITELIST_EVENT = "updateWhitelistList";
+    public static final String UPDATE_OPS_LIST_EVENT = "updateOperatorsList";
+    public static final String UPDATE_PLAYER_INVENTORY_EVENT_POSTFIX = "updateInventory";
+    public static final String UPDATE_SCOREBOARD_DATA_EVENT = "updateScoreboardData";
+    public static final String UPDATE_ADVANCEMENTS_DATA_EVENT = "updateAdvancementsData";
 }
