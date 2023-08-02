@@ -40,6 +40,39 @@ corsOrigins:
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
 
+#Server Side Event (SSE) Config
+sse:
+  enabled: true
+  enabledEvents:
+    - playerJoin
+    - playerQuit
+    - playerKicked
+    - updateOnlinePlayersList
+    - updateAllPlayersList
+    - updateWorldsData
+    - updateServerData
+    - updateWhitelistList
+    - updateOperatorsList
+  enabledPlayerInventoryUpdates: false
+
+#Reverse Polling (Based on SSE)
+#Note the refresh rate unit is seconds. No values of less than 0.1 will be accepted.
+#In the case that a value less than 0.1 is used ServerTap will use the default of 60 secs.
+reversePolling:
+  enabled: false
+  serverPolling:
+    enabled: false
+    refreshRate: 60
+  worldsPolling:
+    enabled: false
+    refreshRate: 60
+  scoreboardPolling:
+    enabled: false
+    refreshRate: 60
+  advancementsPolling:
+    enabled: false
+    refreshRate: 60
+
 #Swagger Config
 # If you do not wish to show the swagger UI you can disable it here
 disable-swagger: false

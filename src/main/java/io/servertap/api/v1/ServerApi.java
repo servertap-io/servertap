@@ -14,9 +14,7 @@ import io.servertap.mojang.api.MojangApiService;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.io.File;
@@ -74,45 +72,14 @@ public class ServerApi {
             }
     )
     public void serverGet(Context ctx) {
-        Server server = new Server();
-        server.setName(bukkitServer.getName());
-        server.setMotd(bukkitServer.getMotd());
-        server.setVersion(bukkitServer.getVersion());
-        server.setBukkitVersion(bukkitServer.getBukkitVersion());
-        server.setWhitelistedPlayers(getWhitelist());
-        server.setMaxPlayers(bukkitServer.getMaxPlayers());
-        server.setOnlinePlayers(bukkitServer.getOnlinePlayers().size());
+        ctx.json(getServer());
+    }
+
+    public Server getServer() {
+        Server server = Server.fromBukkitServer(bukkitServer);
 
         // Possibly add 5m and 15m in the future?
         server.setTps(lagDetector.getTPSString());
-
-        // Get the list of IP bans
-        Set<ServerBan> bannedIps = new HashSet<>();
-        bukkitServer.getBanList(BanList.Type.IP).getBanEntries().forEach(banEntry -> {
-            ServerBan ban = new ServerBan();
-
-            ban.setSource(banEntry.getSource());
-            ban.setExpiration(banEntry.getExpiration());
-            ban.setReason(ban.getReason());
-            ban.setTarget(banEntry.getTarget());
-
-            bannedIps.add(ban);
-        });
-        server.setBannedIps(bannedIps);
-
-        // Get the list of player bans
-        Set<ServerBan> bannedPlayers = new HashSet<>();
-        bukkitServer.getBanList(BanList.Type.NAME).getBanEntries().forEach(banEntry -> {
-            ServerBan ban = new ServerBan();
-
-            ban.setSource(banEntry.getSource());
-            ban.setExpiration(banEntry.getExpiration());
-            ban.setReason(ban.getReason());
-            ban.setTarget(banEntry.getTarget());
-
-            bannedPlayers.add(ban);
-        });
-        server.setBannedPlayers(bannedPlayers);
 
         ServerHealth health = new ServerHealth();
 
@@ -133,8 +100,7 @@ public class ServerApi {
         health.setFreeMemory(memFree);
 
         server.setHealth(health);
-
-        ctx.json(server);
+        return server;
     }
 
 
@@ -221,6 +187,10 @@ public class ServerApi {
     )
 
     public void scoreboardGet(Context ctx) {
+        ctx.json(getScoreboard());
+    }
+
+    public Scoreboard getScoreboard() {
         org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
         Scoreboard scoreboardModel = new Scoreboard();
         Set<String> objectives = new HashSet<>();
@@ -232,7 +202,7 @@ public class ServerApi {
         scoreboardModel.setEntries(entries);
         scoreboardModel.setObjectives(objectives);
 
-        ctx.json(scoreboardModel);
+        return scoreboardModel;
     }
 
     @OpenApi(
@@ -256,43 +226,7 @@ public class ServerApi {
 
         if (objective == null) throw new NotFoundResponse();
 
-        ctx.json(fromBukkitObjective(objective));
-    }
-
-    private Objective fromBukkitObjective(org.bukkit.scoreboard.Objective objective) {
-        org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
-
-        Objective o = new Objective();
-        o.setCriterion(objective.getCriteria());
-        o.setDisplayName(objective.getDisplayName());
-        o.setName(objective.getName());
-
-        o.setDisplaySlot("");
-        if (objective.getDisplaySlot() != null) {
-            o.setDisplaySlot(objective.getDisplaySlot().toString().toLowerCase());
-        }
-
-        Set<Score> scores = new HashSet<>();
-        gameScoreboard.getEntries().forEach(entry -> {
-            org.bukkit.scoreboard.Score score = objective.getScore(entry);
-
-            if (score.isScoreSet()) {
-                Score s = new Score();
-                s.setEntry(entry);
-                s.setValue(score.getScore());
-
-                scores.add(s);
-            }
-        });
-        o.setScores(scores);
-
-        return o;
-    }
-
-    private Set<Whitelist> getWhitelist() {
-        Set<Whitelist> whitelist = new HashSet<>();
-        bukkitServer.getWhitelistedPlayers().forEach((OfflinePlayer player) -> whitelist.add(new Whitelist().offlinePlayer(player)));
-        return whitelist;
+        ctx.json(Objective.fromBukkitObjective(objective, scoreboardManager));
     }
 
     @OpenApi(
@@ -314,6 +248,12 @@ public class ServerApi {
             return;
         }
         ctx.json(getWhitelist());
+    }
+
+    public ArrayList<Whitelist> getWhitelist() {
+        ArrayList<Whitelist> whitelist = new ArrayList<>();
+        bukkitServer.getWhitelistedPlayers().forEach((org.bukkit.OfflinePlayer player) -> whitelist.add(new Whitelist().offlinePlayer(player)));
+        return whitelist;
     }
 
     @OpenApi(
@@ -369,7 +309,7 @@ public class ServerApi {
         final File directory = new File("./");
 
         final Whitelist newEntry = new Whitelist().uuid(uuid).name(name);
-        Set<Whitelist> whitelist = getWhitelist();
+        ArrayList<Whitelist> whitelist = getWhitelist();
         for (Whitelist player : whitelist) {
             if (player.equals(newEntry)) {
                 ctx.json("Error: duplicate entry");
@@ -441,7 +381,7 @@ public class ServerApi {
         uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
 
         final File directory = new File("./");
-        Set<Whitelist> whitelist = getWhitelist();
+        ArrayList<Whitelist> whitelist = getWhitelist();
 
         String finalUuid = uuid;
         whitelist.removeIf(entry -> entry.getUuid().toLowerCase().equals(finalUuid));
@@ -552,28 +492,13 @@ public class ServerApi {
             }
     )
     public void getOps(Context ctx) {
-        Set<org.bukkit.OfflinePlayer> players = Bukkit.getOperators();
-        ArrayList<io.servertap.api.v1.models.OfflinePlayer> opedPlayers = new ArrayList<>();
-        for (org.bukkit.OfflinePlayer player : players) {
-            if (!player.isOp()) {
-                continue;
-            }
-            io.servertap.api.v1.models.OfflinePlayer p = new io.servertap.api.v1.models.OfflinePlayer();
-            p.setDisplayName(player.getName());
-            p.setUuid(player.getUniqueId().toString());
-            p.setWhitelisted(player.isWhitelisted());
-            p.setBanned(player.isBanned());
-            p.setOp(player.isOp());
+        ctx.json(getOpsList());
+    }
 
-            if (economy.isAvailable()) {
-                p.setBalance(economy.getPlayerBalance(player));
-            }
-
-            opedPlayers.add(p);
-
-        }
-        ctx.json(opedPlayers);
-
+    public ArrayList<OfflinePlayer> getOpsList() {
+        ArrayList<OfflinePlayer> players = new ArrayList<>();
+        Bukkit.getOperators().forEach((offlinePlayer -> players.add(OfflinePlayer.getFromBukkitOfflinePlayer(offlinePlayer, economy))));
+        return players;
     }
 
     @OpenApi(

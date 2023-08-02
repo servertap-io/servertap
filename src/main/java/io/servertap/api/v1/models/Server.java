@@ -1,8 +1,10 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import org.bukkit.BanList;
+import org.bukkit.OfflinePlayer;
 
-import java.util.Set;
+import java.util.ArrayList;
 
 /**
  * A Bukkit/Spigot/Paper server
@@ -27,13 +29,13 @@ public class Server {
     private ServerHealth health = null;
 
     @Expose
-    private Set<ServerBan> bannedIps = null;
+    private ArrayList<ServerBan> bannedIps = null;
 
     @Expose
-    private Set<ServerBan> bannedPlayers = null;
+    private ArrayList<ServerBan> bannedPlayers = null;
 
     @Expose
-    private Set<Whitelist> whitelistedPlayers = null;
+    private ArrayList<Whitelist> whitelistedPlayers = null;
 
     @Expose
     private int maxPlayers = 0;
@@ -99,27 +101,27 @@ public class Server {
         this.bukkitVersion = bukkitVersion;
     }
 
-    public Set<ServerBan> getBannedIps() {
+    public ArrayList<ServerBan> getBannedIps() {
         return bannedIps;
     }
 
-    public void setBannedIps(Set<ServerBan> bannedIps) {
+    public void setBannedIps(ArrayList<ServerBan> bannedIps) {
         this.bannedIps = bannedIps;
     }
 
-    public Set<ServerBan> getBannedPlayers() {
+    public ArrayList<ServerBan> getBannedPlayers() {
         return bannedPlayers;
     }
 
-    public void setBannedPlayers(Set<ServerBan> bannedPlayers) {
+    public void setBannedPlayers(ArrayList<ServerBan> bannedPlayers) {
         this.bannedPlayers = bannedPlayers;
     }
 
-    public Set<Whitelist> getWhitelistedPlayers() {
+    public ArrayList<Whitelist> getWhitelistedPlayers() {
         return whitelistedPlayers;
     }
 
-    public void setWhitelistedPlayers(Set<Whitelist> whitelistPlayers) {
+    public void setWhitelistedPlayers(ArrayList<Whitelist> whitelistPlayers) {
         this.whitelistedPlayers = whitelistPlayers;
     }
 
@@ -137,5 +139,51 @@ public class Server {
 
     public void setOnlinePlayers(int onlinePlayers) {
         this.onlinePlayers = onlinePlayers;
+    }
+
+    private static ArrayList<Whitelist> getWhitelist(org.bukkit.Server bukkitServer) {
+        ArrayList<Whitelist> whitelist = new ArrayList<>();
+        bukkitServer.getWhitelistedPlayers().forEach((OfflinePlayer player) -> whitelist.add(new Whitelist().offlinePlayer(player)));
+        return whitelist;
+    }
+
+    public static Server fromBukkitServer(org.bukkit.Server bukkitServer) {
+        Server server = new Server();
+        server.setName(bukkitServer.getName());
+        server.setMotd(bukkitServer.getMotd());
+        server.setVersion(bukkitServer.getVersion());
+        server.setBukkitVersion(bukkitServer.getBukkitVersion());
+        server.setWhitelistedPlayers(getWhitelist(bukkitServer));
+        server.setMaxPlayers(bukkitServer.getMaxPlayers());
+        server.setOnlinePlayers(bukkitServer.getOnlinePlayers().size());
+
+        // Get the list of IP bans
+        ArrayList<ServerBan> bannedIps = new ArrayList<>();
+        bukkitServer.getBanList(BanList.Type.IP).getBanEntries().forEach(banEntry -> {
+            ServerBan ban = new ServerBan();
+
+            ban.setSource(banEntry.getSource());
+            ban.setExpiration(banEntry.getExpiration());
+            ban.setReason(ban.getReason());
+            ban.setTarget(banEntry.getTarget());
+
+            bannedIps.add(ban);
+        });
+        server.setBannedIps(bannedIps);
+
+        // Get the list of player bans
+        ArrayList<ServerBan> bannedPlayers = new ArrayList<>();
+        bukkitServer.getBanList(BanList.Type.NAME).getBanEntries().forEach(banEntry -> {
+            ServerBan ban = new ServerBan();
+
+            ban.setSource(banEntry.getSource());
+            ban.setExpiration(banEntry.getExpiration());
+            ban.setReason(ban.getReason());
+            ban.setTarget(banEntry.getTarget());
+
+            bannedPlayers.add(ban);
+        });
+        server.setBannedPlayers(bannedPlayers);
+        return server;
     }
 }

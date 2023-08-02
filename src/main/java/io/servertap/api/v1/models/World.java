@@ -2,9 +2,13 @@ package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.Difficulty;
+import org.bukkit.GameRule;
 import org.bukkit.World.Environment;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Minecraft world
@@ -42,6 +46,9 @@ public class World {
 
     @Expose
     private BigDecimal seed = null;
+
+    @Expose
+    private Map<String, Object> gameRules = new HashMap<>();
 
     /**
      * The name of the world
@@ -181,4 +188,34 @@ public class World {
         this.seed = seed;
     }
 
+    public void setGameRule(String rule, Object value) {
+        gameRules.put(rule, value);
+    }
+
+    public void setGameRules(Map gameRules) {
+        this.gameRules = gameRules;
+    }
+
+    public Map getGameRules() {
+        return gameRules;
+    }
+
+    public static World fromBukkitWorld(org.bukkit.World bukkitWorld) {
+        World world = new World();
+
+        world.setName(bukkitWorld.getName());
+        world.setUuid(bukkitWorld.getUID().toString());
+        world.setEnvironment(bukkitWorld.getEnvironment());
+        world.setTime(BigDecimal.valueOf(bukkitWorld.getTime()));
+        world.setAllowAnimals(bukkitWorld.getAllowAnimals());
+        world.setAllowMonsters(bukkitWorld.getAllowMonsters());
+        world.setGenerateStructures(bukkitWorld.canGenerateStructures());
+        world.setDifficulty(bukkitWorld.getDifficulty());
+        world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
+        world.setStorm(bukkitWorld.hasStorm());
+        world.setThundering(bukkitWorld.isThundering());
+        Arrays.stream(bukkitWorld.getGameRules()).forEach((rule) -> world.setGameRule(rule, bukkitWorld.getGameRuleValue(GameRule.getByName(rule))));
+
+        return world;
+    }
 }

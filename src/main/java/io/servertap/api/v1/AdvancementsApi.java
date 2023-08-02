@@ -23,6 +23,10 @@ public class AdvancementsApi {
             }
     )
     public void getAdvancements(Context ctx) {
+        ctx.json(getAdvancements());
+    }
+
+    public ArrayList<Advancement> getAdvancements() {
         final ArrayList<Advancement> advancements = new ArrayList<>();
 
         Bukkit.advancementIterator().forEachRemaining(advancement -> {
@@ -32,7 +36,7 @@ public class AdvancementsApi {
             advancements.add(a);
         });
 
-        ctx.json(advancements);
+        return advancements;
     }
 
 }

@@ -18,9 +18,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -225,10 +223,13 @@ public class WorldApi {
             }
     )
     public void worldsGet(Context ctx) {
-        List<World> worlds = new ArrayList<>();
-        bukkitServer.getWorlds().forEach(world -> worlds.add(fromBukkitWorld(world)));
+        ctx.json(getWorlds());
+    }
 
-        ctx.json(worlds);
+    public ArrayList<World> getWorlds() {
+        ArrayList<World> worlds = new ArrayList<>();
+        bukkitServer.getWorlds().forEach(world -> worlds.add(World.fromBukkitWorld(world)));
+        return worlds;
     }
 
     @OpenApi(
@@ -254,24 +255,6 @@ public class WorldApi {
         // 404 if no world found
         if (bukkitWorld == null) throw new NotFoundResponse();
 
-        ctx.json(fromBukkitWorld(bukkitWorld));
-    }
-
-    private World fromBukkitWorld(org.bukkit.World bukkitWorld) {
-        World world = new World();
-
-        world.setName(bukkitWorld.getName());
-        world.setUuid(bukkitWorld.getUID().toString());
-        world.setEnvironment(bukkitWorld.getEnvironment());
-        world.setTime(BigDecimal.valueOf(bukkitWorld.getTime()));
-        world.setAllowAnimals(bukkitWorld.getAllowAnimals());
-        world.setAllowMonsters(bukkitWorld.getAllowMonsters());
-        world.setGenerateStructures(bukkitWorld.canGenerateStructures());
-        world.setDifficulty(bukkitWorld.getDifficulty());
-        world.setSeed(BigDecimal.valueOf(bukkitWorld.getSeed()));
-        world.setStorm(bukkitWorld.hasStorm());
-        world.setThundering(bukkitWorld.isThundering());
-
-        return world;
+        ctx.json(World.fromBukkitWorld(bukkitWorld));
     }
 }

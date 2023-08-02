@@ -1,7 +1,9 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 
 /**
@@ -320,5 +322,46 @@ public class Player {
 
     public void setLastPlayed(Long lastPlayed) {
         this.lastPlayed = lastPlayed;
+    }
+
+    public static Player fromBukkitPlayer(org.bukkit.entity.Player bukkitPlayer, EconomyWrapper economy) {
+        Player player = new Player();
+
+        player.setUuid(bukkitPlayer.getUniqueId().toString());
+        player.setDisplayName(bukkitPlayer.getDisplayName());
+
+        player.setAddress(bukkitPlayer.getAddress().getHostName());
+        player.setPort(bukkitPlayer.getAddress().getPort());
+
+        player.setExhaustion(bukkitPlayer.getExhaustion());
+        player.setExp(bukkitPlayer.getExp());
+
+        player.setWhitelisted(bukkitPlayer.isWhitelisted());
+        player.setBanned(bukkitPlayer.isBanned());
+        player.setOp(bukkitPlayer.isOp());
+
+        if (economy.isAvailable()) {
+            player.setBalance(economy.getPlayerBalance(bukkitPlayer));
+        }
+
+        player.setHunger(bukkitPlayer.getFoodLevel());
+        player.setHealth(bukkitPlayer.getHealth());
+        player.setSaturation(bukkitPlayer.getSaturation());
+
+        player.setDimension(bukkitPlayer.getWorld().getEnvironment());
+
+        Location playerLocation = bukkitPlayer.getLocation();
+        Double[] convertedLocation = new Double[3];
+        convertedLocation[0] = playerLocation.getX();
+        convertedLocation[1] = playerLocation.getY();
+        convertedLocation[2] = playerLocation.getZ();
+
+        player.setLocation(convertedLocation);
+
+        player.setGamemode(bukkitPlayer.getGameMode());
+
+        player.setLastPlayed(bukkitPlayer.getLastPlayed());
+
+        return player;
     }
 }

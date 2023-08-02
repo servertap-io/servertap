@@ -6,9 +6,8 @@ import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
-import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
 import io.servertap.webhooks.models.events.*;
-import net.md_5.bungee.api.ChatColor;
+import io.servertap.utils.NormalizeMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -23,7 +22,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -73,8 +71,8 @@ public class WebhookEventListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         PlayerChatWebhookEvent eventModel = new PlayerChatWebhookEvent();
 
-        eventModel.setPlayer(fromBukkitPlayer(event.getPlayer()));
-        eventModel.setMessage(normalizeMessage(event.getMessage()));
+        eventModel.setPlayer(Player.fromBukkitPlayer(event.getPlayer(), economyWrapper));
+        eventModel.setMessage(NormalizeMessage.normalize(event.getMessage(), main));
         eventModel.setPlayerName(event.getPlayer().getDisplayName());
 
         broadcastEvent(eventModel, WebhookEvent.EventType.PlayerChat);
@@ -84,13 +82,13 @@ public class WebhookEventListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         PlayerDeathWebhookEvent eventModel = new PlayerDeathWebhookEvent();
 
-        Player player = fromBukkitPlayer(event.getEntity());
+        Player player = Player.fromBukkitPlayer(event.getEntity(), economyWrapper);
         List<ItemStack> drops = new ArrayList<>();
         event.getDrops().forEach(itemStack -> drops.add(fromBukkitItemStack(itemStack)));
 
         eventModel.setPlayer(player);
         eventModel.setDrops(drops);
-        eventModel.setDeathMessage(normalizeMessage(event.getDeathMessage()));
+        eventModel.setDeathMessage(NormalizeMessage.normalize(event.getDeathMessage(), main));
 
         broadcastEvent(eventModel, WebhookEvent.EventType.PlayerDeath);
     }
@@ -107,10 +105,10 @@ public class WebhookEventListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         PlayerJoinWebhookEvent eventModel = new PlayerJoinWebhookEvent();
 
-        Player player = fromBukkitPlayer(event.getPlayer());
+        Player player = Player.fromBukkitPlayer(event.getPlayer(), economyWrapper);
 
         eventModel.setPlayer(player);
-        eventModel.setJoinMessage(normalizeMessage(event.getJoinMessage()));
+        eventModel.setJoinMessage(NormalizeMessage.normalize(event.getJoinMessage(), main));
 
         broadcastEvent(eventModel, WebhookEvent.EventType.PlayerJoin);
     }
@@ -119,10 +117,10 @@ public class WebhookEventListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         PlayerQuitWebhookEvent eventModel = new PlayerQuitWebhookEvent();
 
-        Player player = fromBukkitPlayer(event.getPlayer());
+        Player player = Player.fromBukkitPlayer(event.getPlayer(), economyWrapper);
 
         eventModel.setPlayer(player);
-        eventModel.setQuitMessage(normalizeMessage(event.getQuitMessage()));
+        eventModel.setQuitMessage(NormalizeMessage.normalize(event.getQuitMessage(), main));
 
         broadcastEvent(eventModel, WebhookEvent.EventType.PlayerQuit);
     }
@@ -131,10 +129,10 @@ public class WebhookEventListener implements Listener {
     public void onPlayerKick(PlayerKickEvent event) {
         PlayerKickWebhookEvent eventModel = new PlayerKickWebhookEvent();
 
-        Player player = fromBukkitPlayer(event.getPlayer());
+        Player player = Player.fromBukkitPlayer(event.getPlayer(), economyWrapper);
 
         eventModel.setPlayer(player);
-        eventModel.setReason(normalizeMessage(event.getReason()));
+        eventModel.setReason(NormalizeMessage.normalize(event.getReason(), main));
 
         broadcastEvent(eventModel, WebhookEvent.EventType.PlayerKick);
     }
@@ -171,42 +169,5 @@ public class WebhookEventListener implements Listener {
         } catch (MalformedURLException ignored) {
             //This branch should never be reached, since all listeners are validated in the constructor
         } catch (IOException ignored) {}
-    }
-
-    private Player fromBukkitPlayer(org.bukkit.entity.Player player) {
-        Player p = new Player();
-
-        if (economyWrapper.isAvailable()) {
-            p.setBalance(economyWrapper.getPlayerBalance(player));
-        }
-
-        p.setUuid(player.getUniqueId().toString());
-        p.setDisplayName(player.getDisplayName());
-
-        InetSocketAddress playerAddress = player.getAddress();
-        if (playerAddress != null) {
-            p.setAddress(playerAddress.getHostString());
-            p.setPort(playerAddress.getPort());
-        }
-
-        p.setExhaustion(player.getExhaustion());
-        p.setExp(player.getExp());
-
-        p.setWhitelisted(player.isWhitelisted());
-        p.setBanned(player.isBanned());
-        p.setOp(player.isOp());
-
-        return p;
-    }
-
-    private String normalizeMessage(String message) {
-        try {
-            if (!this.main.getConfig().getBoolean("normalizeMessages")) {
-                return message;
-            }
-            return ChatColor.stripColor(message);
-        } catch (Exception e) {
-            return message;
-        }
     }
 }
