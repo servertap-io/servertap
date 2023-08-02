@@ -7,6 +7,7 @@ import io.servertap.api.v1.*;
 import io.servertap.utils.ConsoleListener;
 import io.servertap.utils.LagDetector;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import static io.servertap.Constants.*;
 
@@ -22,6 +23,9 @@ public final class WebServerRoutes {
         PrefixedRouteBuilder pr = new PrefixedRouteBuilder(API_V1, webServer);
 
         ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo);
+
+        FileConfiguration bukkitConfig = main.getConfig();
+        boolean sseEnabled = bukkitConfig.getBoolean("sse.enabled", false);
 
         pr.get("ping", api.getServerApi()::ping);
 
@@ -71,7 +75,8 @@ public final class WebServerRoutes {
         pr.ws("ws/console", api.getWebsocketHandler()::events);
 
         // ServerSideEvent Handler
-        pr.sse("sse", api.getServerSideEventsHandler().getHandler());
+        if(sseEnabled)
+            pr.sse("sse", api.getServerSideEventsHandler().getHandler());
 
         // Advancement routes
         pr.get("advancements", api.getAdvancementsApi()::getAdvancements);

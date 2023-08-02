@@ -40,7 +40,9 @@ corsOrigins:
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
 
-#Server Side Event (SSE) Config
+# Server Side Event (SSE) Config
+# Supported Events can be found in the README.md
+# Note: Disabling SSE will also disable reverse polling
 sse:
   enabled: true
   enabledEvents:
@@ -55,9 +57,9 @@ sse:
     - updateOperatorsList
   enabledPlayerInventoryUpdates: false
 
-#Reverse Polling (Based on SSE)
-#Note the refresh rate unit is seconds. No values of less than 0.1 will be accepted.
-#In the case that a value less than 0.1 is used ServerTap will use the default of 60 secs.
+# Reverse Polling (Using SSE)
+# Note: the refresh rate unit is seconds. No values of less than 0.1 will be accepted.
+# In the case that a value less than 0.1 is used ServerTap will use the default of 60 secs.
 reversePolling:
   enabled: false
   serverPolling:

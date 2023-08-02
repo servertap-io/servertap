@@ -29,29 +29,27 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 public class ServerSideEventListener {
     private final ServerTapMain main;
-    private final Logger log;
     private final ApiV1Initializer api;
     private final EconomyWrapper economy;
     private final ServerSideEventsHandler sse;
     private final BukkitScheduler scheduler;
-    public ServerSideEventListener(ServerTapMain main, Logger log, ApiV1Initializer api, EconomyWrapper economy, ServerSideEventsHandler sse) {
+    private final FileConfiguration bukkitConfig;
+    private final boolean enabled;
+    public ServerSideEventListener(ServerTapMain main, ApiV1Initializer api, EconomyWrapper economy, ServerSideEventsHandler sse) {
         this.main = main;
-        this.log = log;
         this.api = api;
         this.economy = economy;
         this.sse = sse;
         this.scheduler = Bukkit.getServer().getScheduler();
+        this.bukkitConfig = main.getConfig();
+        this.enabled = bukkitConfig.getBoolean("sse.enabled", false);
         registerListeners();
     }
 
     private void registerListeners() {
-        FileConfiguration bukkitConfig = main.getConfig();
-        boolean enabled = bukkitConfig.getBoolean("sse.enabled", false);
-
         if(!enabled)
             return;
 

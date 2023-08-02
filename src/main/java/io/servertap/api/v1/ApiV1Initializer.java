@@ -24,8 +24,6 @@ public class ApiV1Initializer {
     private final ServerSideEventListener serverSideEventListener;
     private final WebsocketHandler websocketHandler;
     private final AdvancementsApi advancementsApi;
-    private final FileWatcher fileWatcher;
-
     private final EconomyApi economyApi;
     private final PluginApi pluginApi;
     private final ServerApi serverApi;
@@ -36,11 +34,10 @@ public class ApiV1Initializer {
     public ApiV1Initializer(ServerTapMain main, Logger log, LagDetector lagDetector, ConsoleListener consoleListener,
                             ExternalPluginWrapperRepo externalPluginWrapperRepo) {
         this.serverSideEventsHandler = new ServerSideEventsHandler();
-        this.reversePollingInitializer = new ReversePollingInitializer(main, this, serverSideEventsHandler);
-        this.serverSideEventListener = new ServerSideEventListener(main, log, this, externalPluginWrapperRepo.getEconomyWrapper(), serverSideEventsHandler);
+        this.reversePollingInitializer = new ReversePollingInitializer(main, log, this, serverSideEventsHandler);
+        this.serverSideEventListener = new ServerSideEventListener(main, this, externalPluginWrapperRepo.getEconomyWrapper(), serverSideEventsHandler);
         this.websocketHandler = new WebsocketHandler(main, log, consoleListener);
         this.advancementsApi = new AdvancementsApi();
-        this.fileWatcher = new FileWatcher(main, log);
         this.economyApi = new EconomyApi(externalPluginWrapperRepo.getEconomyWrapper());
         this.pluginApi = new PluginApi(main, log);
         this.serverApi = new ServerApi(main, log, lagDetector, externalPluginWrapperRepo.getEconomyWrapper());
@@ -48,8 +45,8 @@ public class ApiV1Initializer {
         this.worldApi = new WorldApi(main, log);
         this.papiApi = new PAPIApi();
 
-        // Setup File Watchers
         PluginManager pm = Bukkit.getPluginManager();
+        FileWatcher fileWatcher = new FileWatcher(main, log);
         fileWatcher.watch("ops.json", "../", () -> pm.callEvent(new OperatorListUpdatedAsyncEvent()));
         fileWatcher.watch("whitelist.json", "../", () -> pm.callEvent(new WhitelistUpdatedAsyncEvent()));
         fileWatcher.watch("banned-players.json", "../", () -> pm.callEvent(new BanListUpdatedAsyncEvent()));

@@ -29,12 +29,7 @@ public class AdvancementsApi {
     public ArrayList<Advancement> getAdvancements() {
         final ArrayList<Advancement> advancements = new ArrayList<>();
 
-        Bukkit.advancementIterator().forEachRemaining(advancement -> {
-            Advancement a = new Advancement();
-            a.setName(advancement.getKey().getKey());
-            a.setCriteria(advancement.getCriteria().stream().toList());
-            advancements.add(a);
-        });
+        Bukkit.advancementIterator().forEachRemaining(advancement -> advancements.add(Advancement.fromBukkitAdvancement(advancement)));
 
         return advancements;
     }
