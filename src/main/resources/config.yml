@@ -55,7 +55,8 @@ sse:
     - updateServerData
     - updateWhitelistList
     - updateOperatorsList
-  enabledPlayerInventoryUpdates: false
+  enablePlayerInventoryUpdates: false
+  enablePlayerLocationUpdates: false
 
 # Reverse Polling (Using SSE)
 # Note: the refresh rate unit is seconds. No values of less than 0.1 will be accepted.

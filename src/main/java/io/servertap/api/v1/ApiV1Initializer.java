@@ -47,10 +47,10 @@ public class ApiV1Initializer {
 
         PluginManager pm = Bukkit.getPluginManager();
         FileWatcher fileWatcher = new FileWatcher(main, log);
-        fileWatcher.watch("ops.json", "../", () -> pm.callEvent(new OperatorListUpdatedAsyncEvent()));
-        fileWatcher.watch("whitelist.json", "../", () -> pm.callEvent(new WhitelistUpdatedAsyncEvent()));
-        fileWatcher.watch("banned-players.json", "../", () -> pm.callEvent(new BanListUpdatedAsyncEvent()));
-        fileWatcher.watch("banned-ips.json", "../", () -> pm.callEvent(new IpBanListUpdatedAsyncEvent()));
+        fileWatcher.watch("ops.json", ".", () -> pm.callEvent(new OperatorListUpdatedAsyncEvent()));
+        fileWatcher.watch("whitelist.json", ".", () -> pm.callEvent(new WhitelistUpdatedAsyncEvent()));
+        fileWatcher.watch("banned-players.json", ".", () -> pm.callEvent(new BanListUpdatedAsyncEvent()));
+        fileWatcher.watch("banned-ips.json", ".", () -> pm.callEvent(new IpBanListUpdatedAsyncEvent()));
         fileWatcher.start();
     }
 

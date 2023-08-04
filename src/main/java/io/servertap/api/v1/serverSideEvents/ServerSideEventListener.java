@@ -21,7 +21,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -55,7 +55,8 @@ public class ServerSideEventListener {
 
         Map<String, Listener> eventListeners = mapListeners();
         List<String> events = bukkitConfig.getStringList("sse.enabledEvents");
-        boolean updatePlayerInventory = bukkitConfig.getBoolean("sse.enabledPlayerInventoryUpdates", false);
+        boolean updatePlayerInventory = bukkitConfig.getBoolean("sse.enablePlayerInventoryUpdates", false);
+        boolean updatePlayerLocation = bukkitConfig.getBoolean("sse.enablePlayerLocationUpdates", false);
 
         events.forEach((event) -> {
             if(eventListeners.containsKey(event))
@@ -65,6 +66,8 @@ public class ServerSideEventListener {
 
         if(updatePlayerInventory)
             registerListener(new updateInventoryListeners());
+        if(updatePlayerLocation)
+            registerListener(new updatePlayerLocationListeners());
     }
 
     // Event Maps
@@ -101,7 +104,7 @@ public class ServerSideEventListener {
 
         eventModel.setPlayer(player);
         eventModel.setJoinMessage(NormalizeMessage.normalize(event.getJoinMessage(), main));
-        sse.broadcast(Constants.PLAYER_JOIN_EVENT, eventModel);
+        runOnNextTick(() -> sse.broadcast(Constants.PLAYER_JOIN_EVENT, eventModel));
     }
 
     private void onPlayerQuitHandler(PlayerQuitEvent event) {
@@ -110,7 +113,7 @@ public class ServerSideEventListener {
 
         eventModel.setPlayer(player);
         eventModel.setQuitMessage(NormalizeMessage.normalize(event.getQuitMessage(), main));
-        sse.broadcast(Constants.PLAYER_QUIT_EVENT, eventModel);
+        runOnNextTick(() -> sse.broadcast(Constants.PLAYER_QUIT_EVENT, eventModel));
     }
 
     private void onPlayerKickHandler(PlayerKickEvent event) {
@@ -119,25 +122,15 @@ public class ServerSideEventListener {
 
         eventModel.setPlayer(player);
         eventModel.setReason(NormalizeMessage.normalize(event.getReason(), main));
-        sse.broadcast(Constants.PLAYER_KICKED_EVENT, eventModel);
+        runOnNextTick(() -> sse.broadcast(Constants.PLAYER_KICKED_EVENT, eventModel));
     }
 
     private void updateOnlinePlayersList(PlayerEvent event) {
-        if(event.getEventName().equals("PlayerQuitEvent")) {
-            ArrayList<Player> players = new ArrayList<>();
-            UUID PlayerUUID = event.getPlayer().getUniqueId();
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                if (player.getUniqueId() != PlayerUUID)
-                    players.add(Player.fromBukkitPlayer(player, economy));
-            });
-            sse.broadcast(Constants.UPDATE_ONLINE_PLAYER_LIST_EVENT, players);
-        } else {
-            sse.broadcast(Constants.UPDATE_ONLINE_PLAYER_LIST_EVENT, api.getPlayerApi().getOninePlayers());
-        }
+        runOnNextTick(() -> sse.broadcast(Constants.UPDATE_ONLINE_PLAYER_LIST_EVENT, api.getPlayerApi().getOninePlayers()));
     }
 
     private void updateAllPlayersList() {
-        sse.broadcast(Constants.UPDATE_ALL_PLAYER_LIST_EVENT, api.getPlayerApi().getAllPlayers());
+        runOnNextTick(() -> sse.broadcast(Constants.UPDATE_ALL_PLAYER_LIST_EVENT, api.getPlayerApi().getAllPlayers()));
     }
 
     private void updateWorldsInfo() {
@@ -151,15 +144,15 @@ public class ServerSideEventListener {
     }
 
     private void updateServerInfo() {
-        sse.broadcast(Constants.UPDATE_SERVER_DATA_EVENT, api.getServerApi().getServer());
+        runOnNextTick(() -> sse.broadcast(Constants.UPDATE_SERVER_DATA_EVENT, api.getServerApi().getServer()));
     }
 
     private void updateWhitelistList() {
-        sse.broadcast(Constants.UPDATE_WHITELIST_EVENT, api.getServerApi().getWhitelist());
+        runOnNextTick(() -> sse.broadcast(Constants.UPDATE_WHITELIST_EVENT, api.getServerApi().getWhitelist()));
     }
 
     private void updateOperatorsList() {
-        sse.broadcast(Constants.UPDATE_OPS_LIST_EVENT, api.getServerApi().getOpsList());
+        runOnNextTick(() -> sse.broadcast(Constants.UPDATE_OPS_LIST_EVENT, api.getServerApi().getOpsList()));
     }
 
     // Bukkit Event Listeners
@@ -184,10 +177,25 @@ public class ServerSideEventListener {
     private class updateOnlinePlayersListListeners implements Listener {
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event) { updateOnlinePlayersList(event); }
-
         @EventHandler
         public void onPlayerQuit(PlayerQuitEvent event) { updateOnlinePlayersList(event); }
+        @EventHandler
+        public void onPlayerDeath(PlayerDeathEvent event) { updateOnlinePlayersList(null); }
+        @EventHandler
+        public void onOperatorListUpdated(OperatorListUpdatedAsyncEvent event) { updateOnlinePlayersList(null); }
+        @EventHandler
+        public void onPlayerChangedWorld(PlayerChangedWorldEvent event) { updateOnlinePlayersList(event); }
+        @EventHandler
+        public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) { updateOnlinePlayersList(event); }
+        @EventHandler
+        public void onEntityDamage(EntityDamageEvent event) { updateOnlinePlayersList(null); }
+        @EventHandler
+        public void onEntityRegainHealth(EntityRegainHealthEvent event) { updateOnlinePlayersList(null); }
+    }
 
+    private class updatePlayerLocationListeners implements Listener {
+        @EventHandler
+        public void onMove(PlayerMoveEvent event) { updateOnlinePlayersList(event); }
     }
 
     private class updateAllPlayersListListeners implements Listener {
@@ -204,6 +212,8 @@ public class ServerSideEventListener {
             String command = event.getMessage();
             if(command.contains("/gamerule") && (command.contains("true") || command.contains("false")))
                 updateWorldsInfo();
+            if(command.contains("/difficulty") && command.length() > 11)
+                updateWorldsInfo();
         }
 
         @EventHandler
@@ -211,15 +221,18 @@ public class ServerSideEventListener {
             String command = event.getCommand();
             if(command.contains("gamerule") && (command.contains("true") || command.contains("false")))
                 updateWorldsInfo();
+            if(command.contains("difficulty") && command.length() > 11)
+                updateWorldsInfo();
         }
     }
 
     private class updateServerDataListeners implements Listener {
         @EventHandler
-        public void onWhitelistUpdated(WhitelistUpdatedAsyncEvent event) { updateServerInfo(); }
-
+        public void onPlayerJoin(PlayerJoinEvent event) { updateServerInfo(); }
         @EventHandler
-        public void onOperatorListUpdated(OperatorListUpdatedAsyncEvent event) { updateServerInfo(); }
+        public void onPlayerQuit(PlayerQuitEvent event) { updateServerInfo(); }
+        @EventHandler
+        public void onWhitelistUpdated(WhitelistUpdatedAsyncEvent event) { updateServerInfo(); }
 
         @EventHandler
         public void onBanListUpdated(BanListUpdatedAsyncEvent event) { updateServerInfo(); }
