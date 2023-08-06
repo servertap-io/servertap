@@ -14,6 +14,7 @@ import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -88,10 +89,11 @@ public class ServerTapMain extends JavaPlugin {
     }
 
     public void reload() {
-        if (app != null) {
-            app.stop();
-        }
         log.info("[ServerTap] ServerTap reloading...");
+
+        if (app != null) app.stop();
+        HandlerList.unregisterAll(this);
+
         reloadConfig();
         FileConfiguration bukkitConfig = getConfig();
         maxConsoleBufferSize = bukkitConfig.getInt("websocketConsoleBuffer");

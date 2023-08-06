@@ -1,6 +1,7 @@
 package io.servertap.api.v1.models;
 
 import com.google.gson.annotations.Expose;
+import io.servertap.utils.NormalizeMessage;
 
 public class ItemStack {
 
@@ -50,5 +51,13 @@ public class ItemStack {
 
     public Integer getCount() {
         return this.count;
+    }
+
+    public static ItemStack fromBukkitItemStack(org.bukkit.inventory.ItemStack iS) {
+        ItemStack itemStack = new ItemStack();
+        itemStack.setId("minecraft:" + iS.getType().toString().toLowerCase());
+        itemStack.setCount(iS.getAmount());
+        itemStack.setSlot(-1);
+        return itemStack;
     }
 }

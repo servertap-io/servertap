@@ -4,12 +4,12 @@ import io.servertap.ServerTapMain;
 import io.servertap.api.v1.serverSideEvents.ReversePollingInitializer;
 import io.servertap.api.v1.serverSideEvents.ServerSideEventListener;
 import io.servertap.api.v1.serverSideEvents.ServerSideEventsHandler;
+import io.servertap.api.v1.websockets.WebSocket;
 import io.servertap.custom.events.BanListUpdatedAsyncEvent;
 import io.servertap.custom.events.IpBanListUpdatedAsyncEvent;
 import io.servertap.custom.events.OperatorListUpdatedAsyncEvent;
 import io.servertap.custom.events.WhitelistUpdatedAsyncEvent;
 import io.servertap.utils.ConsoleListener;
-import io.servertap.api.v1.websockets.WebsocketHandler;
 import io.servertap.utils.FileWatcher;
 import io.servertap.utils.LagDetector;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
@@ -22,7 +22,7 @@ public class ApiV1Initializer {
     private final ReversePollingInitializer reversePollingInitializer;
     private final ServerSideEventsHandler serverSideEventsHandler;
     private final ServerSideEventListener serverSideEventListener;
-    private final WebsocketHandler websocketHandler;
+    private final WebSocket websocketHandler;
     private final AdvancementsApi advancementsApi;
     private final EconomyApi economyApi;
     private final PluginApi pluginApi;
@@ -36,7 +36,7 @@ public class ApiV1Initializer {
         this.serverSideEventsHandler = new ServerSideEventsHandler();
         this.reversePollingInitializer = new ReversePollingInitializer(main, log, this, serverSideEventsHandler);
         this.serverSideEventListener = new ServerSideEventListener(main, this, externalPluginWrapperRepo.getEconomyWrapper(), serverSideEventsHandler);
-        this.websocketHandler = new WebsocketHandler(main, log, consoleListener);
+        this.websocketHandler = new WebSocket(main, log, consoleListener);
         this.advancementsApi = new AdvancementsApi();
         this.economyApi = new EconomyApi(externalPluginWrapperRepo.getEconomyWrapper());
         this.pluginApi = new PluginApi(main, log);
@@ -58,7 +58,7 @@ public class ApiV1Initializer {
         return serverSideEventsHandler;
     }
 
-    public WebsocketHandler getWebsocketHandler() {
+    public WebSocket getWebsocketHandler() {
         return websocketHandler;
     }
 

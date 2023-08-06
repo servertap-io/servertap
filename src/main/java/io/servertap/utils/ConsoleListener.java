@@ -11,11 +11,12 @@ import org.apache.logging.log4j.message.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ConsoleListener implements Filter {
     private final ServerTapMain plugin;
-    private final List<Consumer<ConsoleLine>> listeners = new ArrayList<>();
+    private final List<BiConsumer<String, ConsoleLine>> listeners = new ArrayList<>();
 
     public ConsoleListener(ServerTapMain main) {
         this.plugin = main;
@@ -38,12 +39,12 @@ public class ConsoleListener implements Filter {
             plugin.getConsoleBuffer().add(line);
         }
 
-        listeners.forEach(consoleLineConsumer -> consoleLineConsumer.accept(line));
+        listeners.forEach(consoleLineConsumer -> consoleLineConsumer.accept("newConsoleLine", line));
 
         return Result.NEUTRAL;
     }
 
-    public void addListener(Consumer<ConsoleLine> consoleLineConsumer) {
+    public void addListener(BiConsumer<String, ConsoleLine> consoleLineConsumer) {
         listeners.add(consoleLineConsumer);
     }
 
