@@ -72,7 +72,7 @@ public final class WebServerRoutes {
         pr.post("placeholders/replace", api.getPapiApi()::replacePlaceholders);
 
         // Websocket handler
-        pr.ws("ws/console", api.getWebsocketHandler()::events);
+        pr.ws("ws/console", api.getWebsocketHandler()::getHandler);
 
         // ServerSideEvent Handler
         if(sseEnabled)

@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -29,6 +30,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class ServerSideEventListener {
     private final ServerTapMain main;
@@ -58,33 +60,37 @@ public class ServerSideEventListener {
         boolean updatePlayerInventory = bukkitConfig.getBoolean("sse.enablePlayerInventoryUpdates", false);
         boolean updatePlayerLocation = bukkitConfig.getBoolean("sse.enablePlayerLocationUpdates", false);
 
-        events.forEach((event) -> {
-            if(eventListeners.containsKey(event))
-                registerListener(eventListeners.get(event));
-        });
-        eventListeners.clear();
+        events.stream()
+                .filter(eventListeners::containsKey)
+                .distinct()
+                .forEach((event) -> registerListener(eventListeners.get(event).get()));
 
         if(updatePlayerInventory)
-            registerListener(new updateInventoryListeners());
+            registerListener(new UpdateInventoryListeners());
         if(updatePlayerLocation)
-            registerListener(new updatePlayerLocationListeners());
+            registerListener(new UpdatePlayerLocationListeners());
     }
 
     // Event Maps
     // Mops events to their respective listeners
     // Used to figure out if the user has enabled an event in the config and register it
 
-    private Map<String, Listener> mapListeners() {
-        Map<String, Listener> listenerMap = new HashMap<>();
-        listenerMap.put(Constants.PLAYER_JOIN_EVENT, new playerJoinListener());
-        listenerMap.put(Constants.PLAYER_QUIT_EVENT, new playerQuitListener());
-        listenerMap.put(Constants.PLAYER_KICKED_EVENT, new playerKickedListener());
-        listenerMap.put(Constants.UPDATE_ONLINE_PLAYER_LIST_EVENT, new updateOnlinePlayersListListeners());
-        listenerMap.put(Constants.UPDATE_ALL_PLAYER_LIST_EVENT, new updateAllPlayersListListeners());
-        listenerMap.put(Constants.UPDATE_WORLD_DATA_EVENT, new updateWorldsDataListeners());
-        listenerMap.put(Constants.UPDATE_SERVER_DATA_EVENT, new updateServerDataListeners());
-        listenerMap.put(Constants.UPDATE_WHITELIST_EVENT, new updateWhitelistListListeners());
-        listenerMap.put(Constants.UPDATE_OPS_LIST_EVENT, new updateOperatorsListListeners());
+    /**
+     * Returns a Map Mops events to their respective listeners
+     * Used to figure out if the user has enabled an event in the config and register it
+     * @return ListenerMap
+     */
+    private Map<String, Supplier<Listener>> mapListeners() {
+        Map<String, Supplier<Listener>> listenerMap = new HashMap<>();
+        listenerMap.put(Constants.PLAYER_JOIN_EVENT, PlayerJoinListener::new);
+        listenerMap.put(Constants.PLAYER_QUIT_EVENT, PlayerQuitListener::new);
+        listenerMap.put(Constants.PLAYER_KICKED_EVENT, PlayerKickedListener::new);
+        listenerMap.put(Constants.UPDATE_ONLINE_PLAYER_LIST_EVENT, UpdateOnlinePlayersListListeners::new);
+        listenerMap.put(Constants.UPDATE_ALL_PLAYER_LIST_EVENT, UpdateAllPlayersListListeners::new);
+        listenerMap.put(Constants.UPDATE_WORLD_DATA_EVENT, UpdateWorldsDataListeners::new);
+        listenerMap.put(Constants.UPDATE_SERVER_DATA_EVENT, UpdateServerDataListeners::new);
+        listenerMap.put(Constants.UPDATE_WHITELIST_EVENT, UpdateWhitelistListListeners::new);
+        listenerMap.put(Constants.UPDATE_OPS_LIST_EVENT, UpdateOperatorsListListeners::new);
         return listenerMap;
     }
 
@@ -157,24 +163,24 @@ public class ServerSideEventListener {
 
     // Bukkit Event Listeners
 
-    private class playerJoinListener implements Listener {
+    private class PlayerJoinListener implements Listener {
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event) { onPlayerJoinHandler(event); }
     }
 
-    private class playerQuitListener implements Listener {
+    private class PlayerQuitListener implements Listener {
         @EventHandler
         public void onPlayerQuit(PlayerQuitEvent event) { onPlayerQuitHandler(event); }
     }
 
-    private class playerKickedListener implements Listener {
+    private class PlayerKickedListener implements Listener {
         @EventHandler
         public void onPlayerKick(PlayerKickEvent event) {
             onPlayerKickHandler(event);
         }
     }
 
-    private class updateOnlinePlayersListListeners implements Listener {
+    private class UpdateOnlinePlayersListListeners implements Listener {
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event) { updateOnlinePlayersList(event); }
         @EventHandler
@@ -193,17 +199,17 @@ public class ServerSideEventListener {
         public void onEntityRegainHealth(EntityRegainHealthEvent event) { updateOnlinePlayersList(null); }
     }
 
-    private class updatePlayerLocationListeners implements Listener {
+    private class UpdatePlayerLocationListeners implements Listener {
         @EventHandler
         public void onMove(PlayerMoveEvent event) { updateOnlinePlayersList(event); }
     }
 
-    private class updateAllPlayersListListeners implements Listener {
+    private class UpdateAllPlayersListListeners implements Listener {
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event) { updateAllPlayersList(); }
     }
 
-    private class updateWorldsDataListeners implements Listener {
+    private class UpdateWorldsDataListeners implements Listener {
         @EventHandler
         public void onWeatherChange(WeatherChangeEvent event) { updateWorldsInfo(); }
 
@@ -226,7 +232,7 @@ public class ServerSideEventListener {
         }
     }
 
-    private class updateServerDataListeners implements Listener {
+    private class UpdateServerDataListeners implements Listener {
         @EventHandler
         public void onPlayerJoin(PlayerJoinEvent event) { updateServerInfo(); }
         @EventHandler
@@ -241,17 +247,17 @@ public class ServerSideEventListener {
         public void onIpBanListUpdated(IpBanListUpdatedAsyncEvent event) { updateServerInfo(); }
     }
 
-    private class updateWhitelistListListeners implements Listener {
+    private class UpdateWhitelistListListeners implements Listener {
         @EventHandler
         public void onWhitelistUpdated(WhitelistUpdatedAsyncEvent event) { updateWhitelistList(); }
     }
 
-    private class updateOperatorsListListeners implements Listener {
+    private class UpdateOperatorsListListeners implements Listener {
         @EventHandler
         public void onOperatorListUpdated(OperatorListUpdatedAsyncEvent event) { updateOperatorsList(); }
     }
 
-    private class updateInventoryListeners implements Listener {
+    private class UpdateInventoryListeners implements Listener {
         @EventHandler
         public void onInventoryClickEvent(InventoryClickEvent event) {
             updatePlayerInventory(event.getView().getPlayer());

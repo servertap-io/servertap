@@ -40,19 +40,22 @@ public class ReversePollingInitializer {
             log.info("[ServerTap] Error starting reverse polling: SSE IS NOT enabled on this server!");
         }
 
-        boolean serverPollingEnabled = bukkitConfig.getBoolean("reversePolling.serverPolling.enabled", false);
-        boolean worldsPollingEnabled = bukkitConfig.getBoolean("reversePolling.worldsPolling.enabled", false);
-        boolean scoreboardPollingEnabled = bukkitConfig.getBoolean("reversePolling.scoreboardPolling.enabled", false);
-        boolean advancementsPollingEnabled = bukkitConfig.getBoolean("reversePolling.advancementsPolling.enabled", false);
+        setUpPollingFor("serverPolling", () -> sse.broadcast(Constants.UPDATE_SERVER_DATA_EVENT, api.getServerApi().getServer()));
+        setUpPollingFor("worldsPolling", () -> sse.broadcast(Constants.UPDATE_WORLD_DATA_EVENT, api.getWorldApi().getWorlds()));
+        setUpPollingFor("scoreboardPolling", () -> sse.broadcast(Constants.UPDATE_SCOREBOARD_DATA_EVENT, api.getServerApi().getScoreboard()));
+        setUpPollingFor("advancementsPolling", () -> sse.broadcast(Constants.UPDATE_ADVANCEMENTS_DATA_EVENT, api.getAdvancementsApi().getAdvancements()));
+    }
 
-        int serverRefreshRate = bukkitConfig.getInt("reversePolling.serverPolling.refreshRate", 60);
-        int worldsRefreshRate = bukkitConfig.getInt("reversePolling.worldsPolling.refreshRate", 60);
-        int scoreboardRefreshRate = bukkitConfig.getInt("reversePolling.scoreboardPolling.refreshRate", 60);
-        int advancementsRefreshRate = bukkitConfig.getInt("reversePolling.advancementsPolling.refreshRate", 60);
-
-        if(serverPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_SERVER_DATA_EVENT, api.getServerApi().getServer()), 0, (advancementsRefreshRate > 0.1 ? serverRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(worldsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_WORLD_DATA_EVENT, api.getWorldApi().getWorlds()), 0, (advancementsRefreshRate > 0.1 ? worldsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(scoreboardPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_SCOREBOARD_DATA_EVENT, api.getServerApi().getScoreboard()), 0, (advancementsRefreshRate > 0.1 ? scoreboardRefreshRate * 20L : DEFAULT_REFRESH_RATE));
-        if(advancementsPollingEnabled) scheduler.runTaskTimerAsynchronously(main, () -> sse.broadcast(Constants.UPDATE_ADVANCEMENTS_DATA_EVENT, api.getAdvancementsApi().getAdvancements()), 0, (advancementsRefreshRate > 0.1 ? advancementsRefreshRate * 20L : DEFAULT_REFRESH_RATE));
+    private void setUpPollingFor(String name, Runnable callback) {
+        boolean enabled = bukkitConfig.getBoolean(String.format("reversePolling.%s.enabled", name), false);
+        int configRefreshRate = bukkitConfig.getInt(String.format("reversePolling.%s.refreshRate", name), 60);
+        long refreshRate = (configRefreshRate > 0.1 ? configRefreshRate * 20L : DEFAULT_REFRESH_RATE);
+        if(enabled)
+            scheduler.runTaskTimerAsynchronously(
+                    main,
+                    callback,
+                    0,
+                    refreshRate
+            );
     }
 }
