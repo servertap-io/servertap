@@ -55,7 +55,7 @@ public class ServerSideEventListener {
         if(!enabled)
             return;
 
-        Map<String, Listener> eventListeners = mapListeners();
+        Map<String, Supplier<Listener>> eventListeners = mapListeners();
         List<String> events = bukkitConfig.getStringList("sse.enabledEvents");
         boolean updatePlayerInventory = bukkitConfig.getBoolean("sse.enablePlayerInventoryUpdates", false);
         boolean updatePlayerLocation = bukkitConfig.getBoolean("sse.enablePlayerLocationUpdates", false);
@@ -71,9 +71,6 @@ public class ServerSideEventListener {
             registerListener(new UpdatePlayerLocationListeners());
     }
 
-    // Event Maps
-    // Mops events to their respective listeners
-    // Used to figure out if the user has enabled an event in the config and register it
 
     /**
      * Returns a Map Mops events to their respective listeners

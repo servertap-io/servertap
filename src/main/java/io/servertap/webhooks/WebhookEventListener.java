@@ -18,6 +18,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.PluginManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,6 +56,14 @@ public class WebhookEventListener implements Listener {
 
     public void loadWebhooksFromConfig(FileConfiguration bukkitConfig) {
         webhooks = getWebhooksFromConfig(bukkitConfig);
+
+        Map<WebhookEvent.EventType, Supplier<Listener>> bukkitListeners = getWebhookMap();
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        webhooks.stream()
+                .flatMap(webhook -> webhook.getRegisteredEvents().stream())
+                .distinct()
+                .map(bukkitListeners::get)
+                .forEach(listener -> pluginManager.registerEvents(listener.get(), main));
     }
 
     private List<Webhook> getWebhooksFromConfig(FileConfiguration bukkitConfig) {
