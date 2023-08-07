@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 public class ConsoleListener implements Filter {
     private final ServerTapMain plugin;
-    private final List<BiConsumer<String, ConsoleLine>> listeners = new ArrayList<>();
+    private final List<Consumer<ConsoleLine>> listeners = new ArrayList<>();
 
     public ConsoleListener(ServerTapMain main) {
         this.plugin = main;
@@ -39,12 +39,12 @@ public class ConsoleListener implements Filter {
             plugin.getConsoleBuffer().add(line);
         }
 
-        listeners.forEach(consoleLineConsumer -> consoleLineConsumer.accept("newConsoleLine", line));
+        listeners.forEach(consoleLineConsumer -> consoleLineConsumer.accept(line));
 
         return Result.NEUTRAL;
     }
 
-    public void addListener(BiConsumer<String, ConsoleLine> consoleLineConsumer) {
+    public void addListener(Consumer<ConsoleLine> consoleLineConsumer) {
         listeners.add(consoleLineConsumer);
     }
 

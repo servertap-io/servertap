@@ -1,4 +1,4 @@
-package io.servertap.api.v1.models.events;
+package io.servertap.api.v1.websockets.models.events;
 
 import io.servertap.utils.GsonSingleton;
 
