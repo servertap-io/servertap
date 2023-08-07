@@ -11,6 +11,7 @@ import io.servertap.custom.events.BanListUpdatedAsyncEvent;
 import io.servertap.custom.events.IpBanListUpdatedAsyncEvent;
 import io.servertap.custom.events.OperatorListUpdatedAsyncEvent;
 import io.servertap.custom.events.WhitelistUpdatedAsyncEvent;
+import io.servertap.utils.ConsoleListener;
 import io.servertap.utils.NormalizeMessage;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 
@@ -36,14 +37,16 @@ public class ServerSideEventListener {
     private final ServerTapMain main;
     private final ApiV1Initializer api;
     private final EconomyWrapper economy;
+    private final ConsoleListener consoleListener;
     private final ServerSideEventsHandler sse;
     private final BukkitScheduler scheduler;
     private final FileConfiguration bukkitConfig;
     private final boolean enabled;
-    public ServerSideEventListener(ServerTapMain main, ApiV1Initializer api, EconomyWrapper economy, ServerSideEventsHandler sse) {
+    public ServerSideEventListener(ServerTapMain main, ApiV1Initializer api, EconomyWrapper economy, ConsoleListener consoleListener, ServerSideEventsHandler sse) {
         this.main = main;
         this.api = api;
         this.economy = economy;
+        this.consoleListener = consoleListener;
         this.sse = sse;
         this.scheduler = Bukkit.getServer().getScheduler();
         this.bukkitConfig = main.getConfig();
@@ -69,6 +72,8 @@ public class ServerSideEventListener {
             registerListener(new UpdateInventoryListeners());
         if(updatePlayerLocation)
             registerListener(new UpdatePlayerLocationListeners());
+        if(true)
+            consoleListener.addListener((consoleLine -> sse.broadcast("newConsoleLine", consoleLine)));
     }
 
 

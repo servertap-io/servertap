@@ -2,7 +2,7 @@ package io.servertap.api.v1.websockets;
 
 import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.ConsoleLine;
-import io.servertap.api.v1.models.Socket;
+import io.servertap.api.v1.websockets.models.Socket;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
