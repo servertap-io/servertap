@@ -145,50 +145,43 @@ public class PlayerApi {
             for (org.bukkit.inventory.ItemStack itemStack : player.getInventory().getContents()) {
                 location++;
                 if (itemStack != null) {
-                    ItemStack itemObj = new ItemStack();
-                    // TODO: handle item namespaces other than minecraft: It's fine right now as there seem to be no forge + Paper servers
-                    itemObj.setId("minecraft:" + itemStack.getType().toString().toLowerCase());
-                    itemObj.setCount(itemStack.getAmount());
+                    ItemStack itemObj = ItemStack.fromBukkitItemStack(itemStack);
                     itemObj.setSlot(location);
                     inv.add(itemObj);
                 }
             }
             return inv;
-        } else {
-            try {
-                World bukWorld = Bukkit.getWorld(worldUUID);
-
-                if (bukWorld == null) {
-                    throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
-                }
-
-                String dataPath = String.format(
-                        "%s/%s/playerdata/%s.dat",
-                        new File("./").getAbsolutePath(),
-                        bukWorld.getName(),
-                        playerUUID
-                );
-                File playerfile = new File(Paths.get(dataPath).toString());
-                if (!playerfile.exists()) {
-                    throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
-                }
-                NBTFile playerFile = new NBTFile(playerfile);
-
-                playerFile.getCompoundList("Inventory").forEach(item -> {
-                    ItemStack itemObj = new ItemStack();
-                    itemObj.setId(item.getString("id"));
-                    itemObj.setCount(item.getInteger("Count"));
-                    itemObj.setSlot(item.getInteger("Slot"));
-                    inv.add(itemObj);
-                });
-
-                return inv;
-
-            } catch (Exception e) {
-                log.warning(e.getMessage());
-                throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
-            }
         }
 
+        try {
+            World bukWorld = Bukkit.getWorld(worldUUID);
+
+            if (bukWorld == null) throw new NotFoundResponse(Constants.WORLD_NOT_FOUND);
+
+            String dataPath = String.format(
+                    "%s/%s/playerdata/%s.dat",
+                    new File("./").getAbsolutePath(),
+                    bukWorld.getName(),
+                    playerUUID
+            );
+
+            File playerfile = new File(Paths.get(dataPath).toString());
+            if (!playerfile.exists()) throw new NotFoundResponse(Constants.PLAYER_NOT_FOUND);
+            NBTFile playerFile = new NBTFile(playerfile);
+
+            playerFile.getCompoundList("Inventory").forEach(item -> {
+                ItemStack itemObj = new ItemStack();
+                itemObj.setId(item.getString("id"));
+                itemObj.setCount(item.getInteger("Count"));
+                itemObj.setSlot(item.getInteger("Slot"));
+                inv.add(itemObj);
+            });
+
+            return inv;
+
+        } catch (Exception e) {
+            log.warning(e.getMessage());
+            throw new InternalServerErrorResponse(Constants.PLAYER_INV_PARSE_FAIL);
+        }
     }
 }
