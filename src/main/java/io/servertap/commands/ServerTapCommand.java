@@ -30,6 +30,7 @@ public class ServerTapCommand implements CommandExecutor, TabCompleter {
             commandSender.sendMessage(String.format("%s[%sServerTap%s] %sYou do not have the permission to do that!", DARK_GRAY, BLUE, DARK_GRAY, AQUA));
             return false;
         }
+
         if (args.length == 1) {
             switch (args[0]) {
                 case "reload":

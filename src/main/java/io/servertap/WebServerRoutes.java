@@ -3,68 +3,74 @@ package io.servertap;
 import io.javalin.http.Handler;
 import io.javalin.websocket.WsConfig;
 import io.servertap.api.v1.*;
-import io.servertap.api.v1.websockets.WebsocketHandler;
-
-import java.util.function.Consumer;
+import io.servertap.utils.ConsoleListener;
+import io.servertap.utils.LagDetector;
+import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
 
 import static io.servertap.Constants.*;
+
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public final class WebServerRoutes {
 
     private WebServerRoutes() {}
 
-    public static void addV1Routes(WebServer webServer) {
+    public static void addV1Routes(ServerTapMain main, Logger log, LagDetector lagDetector, WebServer webServer,
+                                   ConsoleListener consoleListener, ExternalPluginWrapperRepo externalPluginWrapperRepo) {
         PrefixedRouteBuilder pr = new PrefixedRouteBuilder(API_V1, webServer);
 
-        pr.get("ping", ServerApi::ping);
+        ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo);
+
+        pr.get("ping", api.getServerApi()::ping);
 
         // Server routes
-        pr.get("server", ServerApi::serverGet);
-        pr.post("server/exec", ServerApi::postCommand);
-        pr.get("server/ops", ServerApi::getOps);
-        pr.post("server/ops", ServerApi::opPlayer);
-        pr.delete("server/ops", ServerApi::deopPlayer);
-        pr.get("server/whitelist", ServerApi::whitelistGet);
-        pr.post("server/whitelist", ServerApi::whitelistPost);
-        pr.delete("server/whitelist", ServerApi::whitelistDelete);
+        pr.get("server", api.getServerApi()::serverGet);
+        pr.post("server/exec", api.getServerApi()::postCommand);
+        pr.get("server/ops", api.getServerApi()::getOps);
+        pr.post("server/ops", api.getServerApi()::opPlayer);
+        pr.delete("server/ops", api.getServerApi()::deopPlayer);
+        pr.get("server/whitelist", api.getServerApi()::whitelistGet);
+        pr.post("server/whitelist", api.getServerApi()::whitelistPost);
+        pr.delete("server/whitelist", api.getServerApi()::whitelistDelete);
 
-        pr.get("worlds", WorldApi::worldsGet);
-        pr.post("worlds/save", WorldApi::saveAllWorlds);
-        pr.get("worlds/download", WorldApi::downloadWorlds);
-        pr.get("worlds/{uuid}", WorldApi::worldGet);
-        pr.post("worlds/{uuid}/save", WorldApi::saveWorld);
-        pr.get("worlds/{uuid}/download", WorldApi::downloadWorld);
+        pr.get("worlds", api.getWorldApi()::worldsGet);
+        pr.post("worlds/save", api.getWorldApi()::saveAllWorlds);
+        pr.get("worlds/download", api.getWorldApi()::downloadWorlds);
+        pr.get("worlds/{uuid}", api.getWorldApi()::worldGet);
+        pr.post("worlds/{uuid}/save", api.getWorldApi()::saveWorld);
+        pr.get("worlds/{uuid}/download", api.getWorldApi()::downloadWorld);
 
-        pr.get("scoreboard", ServerApi::scoreboardGet);
-        pr.get("scoreboard/{name}", ServerApi::objectiveGet);
+        pr.get("scoreboard", api.getServerApi()::scoreboardGet);
+        pr.get("scoreboard/{name}", api.getServerApi()::objectiveGet);
 
         // Chat
-        pr.post("chat/broadcast", ServerApi::broadcastPost);
-        pr.post("chat/tell", ServerApi::tellPost);
+        pr.post("chat/broadcast", api.getServerApi()::broadcastPost);
+        pr.post("chat/tell", api.getServerApi()::tellPost);
 
         // Player routes
-        pr.get("players", PlayerApi::playersGet);
-        pr.get("players/all", PlayerApi::offlinePlayersGet);
-        pr.get("players/{uuid}", PlayerApi::playerGet);
-        pr.get("players/{playerUuid}/{worldUuid}/inventory", PlayerApi::getPlayerInv);
+        pr.get("players", api.getPlayerApi()::playersGet);
+        pr.get("players/all", api.getPlayerApi()::offlinePlayersGet);
+        pr.get("players/{uuid}", api.getPlayerApi()::playerGet);
+        pr.get("players/{playerUuid}/{worldUuid}/inventory", api.getPlayerApi()::getPlayerInv);
 
         // Economy routes
-        pr.post("economy/pay", EconomyApi::playerPay);
-        pr.post("economy/debit", EconomyApi::playerDebit);
-        pr.get("economy", EconomyApi::getEconomyPluginInformation);
+        pr.post("economy/pay", api.getEconomyApi()::playerPay);
+        pr.post("economy/debit", api.getEconomyApi()::playerDebit);
+        pr.get("economy", api.getEconomyApi()::getEconomyPluginInformation);
 
         // Plugin routes
-        pr.get("plugins", PluginApi::listPlugins);
-        pr.post("plugins", PluginApi::installPlugin);
+        pr.get("plugins", api.getPluginApi()::listPlugins);
+        pr.post("plugins", api.getPluginApi()::installPlugin);
 
         // PAPI Routes
-        pr.post("placeholders/replace", PAPIApi::replacePlaceholders);
+        pr.post("placeholders/replace", api.getPapiApi()::replacePlaceholders);
 
         // Websocket handler
-        pr.ws("ws/console", WebsocketHandler::events);
+        pr.ws("ws/console", api.getWebsocketHandler()::events);
 
         // Advancement routes
-        pr.get("advancements", AdvancementsApi::getAdvancements);
+        pr.get("advancements", api.getAdvancementsApi()::getAdvancements);
     }
 
     private static class PrefixedRouteBuilder {

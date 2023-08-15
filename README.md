@@ -90,8 +90,8 @@ $ curl http://localhost:4567/v1/players
 ```
 # ServerTap Command
 
-ServerTap currently supports only one management command in game. The supported subcommands are `reload` & 'info'
-which as their names imply let you reload the plugin and display information basic info about it (version, author, etc).
+ServerTap currently supports only one management command in game. The supported subcommands are `reload` & `info`
+which as their names imply let you reload and display basic information about the plugin (version, author, etc).
 
 **Note**: The Permission for the `/servertap` Command is `servertap.admin`.
 

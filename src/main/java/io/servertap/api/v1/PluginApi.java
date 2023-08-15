@@ -19,8 +19,13 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class PluginApi {
+    private final Logger log;
+    private final ServerTapMain main;
 
-    private static final Logger log = Bukkit.getLogger();
+    public PluginApi(ServerTapMain main, Logger log) {
+        this.log = log;
+        this.main = main;
+    }
 
     @OpenApi(
             path = "/v1/plugins",
@@ -35,7 +40,7 @@ public class PluginApi {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void listPlugins(Context ctx) {
+    public void listPlugins(Context ctx) {
         ArrayList<Plugin> pluginList = new ArrayList<>();
         for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
 
@@ -79,8 +84,8 @@ public class PluginApi {
                     @OpenApiResponse(status = "201", content = @OpenApiContent(type = "application/json"))
             }
     )
-    public static void installPlugin(Context ctx) {
-        String stagingPath = ServerTapMain.instance.getDataFolder().getPath() + File.separator + "downloads";
+    public void installPlugin(Context ctx) {
+        String stagingPath = main.getDataFolder().getPath() + File.separator + "downloads";
         File holdingArea = new File(stagingPath);
         URL url = null;
 
@@ -116,7 +121,7 @@ public class PluginApi {
                 String msg = String.format("Downloaded plugin in %.2f seconds", elapsed / 1000.0);
                 log.info("[ServerTap]" + msg);
 
-                String targetFilename = ServerTapMain.instance.getDataFolder().getAbsoluteFile().getParent() + File.separator + FilenameUtils.getName(url.getPath());
+                String targetFilename = main.getDataFolder().getAbsoluteFile().getParent() + File.separator + FilenameUtils.getName(url.getPath());
                 boolean success = downloadedFile.renameTo(new File(targetFilename));
                 if (!success) {
                     throw new InternalServerErrorResponse("Error moving plugin to plugins dir");

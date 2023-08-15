@@ -1,4 +1,4 @@
-package io.servertap.api.v1.websockets;
+package io.servertap.utils;
 
 import io.servertap.ServerTapMain;
 import io.servertap.api.v1.models.ConsoleLine;
@@ -9,12 +9,16 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.message.Message;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 public class ConsoleListener implements Filter {
-
     private final ServerTapMain plugin;
+    private final List<Consumer<ConsoleLine>> listeners = new ArrayList<>();
 
-    public ConsoleListener(ServerTapMain plugin) {
-        this.plugin = plugin;
+    public ConsoleListener(ServerTapMain main) {
+        this.plugin = main;
     }
 
     @Override
@@ -34,9 +38,17 @@ public class ConsoleListener implements Filter {
             plugin.getConsoleBuffer().add(line);
         }
 
-        WebsocketHandler.broadcast(line);
+        listeners.forEach(consoleLineConsumer -> consoleLineConsumer.accept(line));
 
         return Result.NEUTRAL;
+    }
+
+    public void addListener(Consumer<ConsoleLine> consoleLineConsumer) {
+        listeners.add(consoleLineConsumer);
+    }
+
+    public void resetListeners() {
+        listeners.clear();
     }
 
     @Override
