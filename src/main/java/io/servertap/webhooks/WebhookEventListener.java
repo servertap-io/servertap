@@ -130,7 +130,11 @@ public class WebhookEventListener implements Listener {
 
             Player player = Player.fromBukkitPlayer(event.getEntity(), economyWrapper);
             List<ItemStack> drops = new ArrayList<>();
-            event.getDrops().forEach(itemStack -> drops.add(ItemStack.fromBukkitItemStack(itemStack)));
+            event.getDrops().forEach(itemStack -> {
+                ItemStack iS = ItemStack.fromBukkitItemStack(itemStack);
+                iS.setSlot(-1);
+                drops.add(iS);
+            });
 
             eventModel.setPlayer(player);
             eventModel.setDrops(drops);
