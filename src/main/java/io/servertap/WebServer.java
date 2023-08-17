@@ -23,9 +23,6 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public class WebServer {
-
-    public static final String SERVERTAP_KEY_HEADER = "key";
-    public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
     private static final String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs", "/webjars"};
 
     private final Logger log;
@@ -37,6 +34,8 @@ public class WebServer {
     private final boolean disableSwagger;
     private final boolean tlsEnabled;
     private final boolean sni;
+    private final String servertapKeyHeader;
+    private final String servertapKeyCookie;
     private final String keyStorePath;
     private final String keyStorePassword;
     private final String authKey;
@@ -52,6 +51,8 @@ public class WebServer {
         this.disableSwagger = bukkitConfig.getBoolean("disable-swagger", false);
         this.tlsEnabled = bukkitConfig.getBoolean("tls.enabled", false);
         this.sni = bukkitConfig.getBoolean("tls.sni", false);
+        this.servertapKeyHeader = bukkitConfig.getString("headerName", "key");
+        this.servertapKeyCookie = bukkitConfig.getString("cookieName", "x-servertap-key");
         this.keyStorePath = bukkitConfig.getString("tls.keystore", "keystore.jks");
         this.keyStorePassword = bukkitConfig.getString("tls.keystorePassword", "");
         this.authKey = bukkitConfig.getString("key", "change_me");
@@ -104,14 +105,14 @@ public class WebServer {
         }
 
         // Auth is turned on, make sure there is a header called "key"
-        String authHeader = ctx.header(SERVERTAP_KEY_HEADER);
+        String authHeader = ctx.header(servertapKeyHeader);
         if (authHeader != null && Objects.equals(authHeader, authKey)) {
             handler.handle(ctx);
             return;
         }
 
         // If the request is still not handled, check for a cookie (websockets use cookies for auth)
-        String authCookie = ctx.cookie(SERVERTAP_KEY_COOKIE);
+        String authCookie = ctx.cookie(servertapKeyCookie);
         if (authCookie != null && Objects.equals(authCookie, authKey)) {
             handler.handle(ctx);
             return;

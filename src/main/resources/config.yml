@@ -1,8 +1,12 @@
 port: 4567
 debug: false
+normalizeMessages: true
+
+# Auth Config
 useKeyAuth: true
 key: 'change_me'
-normalizeMessages: true
+headerName: 'key'
+cookieName: 'x-servertap-key'
 
 # TLS (a.k.a. SSL) options
 tls:
@@ -15,11 +19,12 @@ tls:
   # Enforce Server Name Indication (SNI) or not
   sni: false
 
+# Cores Config
 # Use this list to set allowed CORS Origins ("*" by default)
 corsOrigins:
   - "*"
 
-# Example webhook configuration
+# Webhook Config
 #webhooks:
 #  default:
 #    listener: "https://your-webhook-target.com/whatever"
@@ -30,13 +35,16 @@ corsOrigins:
 #      - PlayerDeath
 #      - PlayerChat
 
+# Websocket Config
 # Number of console log lines to send when websocket connections are opened
 # Set to 0 to effectively disable this
 websocketConsoleBuffer: 1000
 
+#Swagger Config
 # If you do not wish to show the swagger UI you can disable it here
 disable-swagger: false
 
+# Advanced Auth Config
 # Use this feature to configure paths that will be blocked. Put in the exact paths shown by swagger.
 blocked-paths:
 # - /v1/ping
