@@ -10,8 +10,10 @@ import io.servertap.api.v1.websockets.models.SocketID;
 import io.servertap.api.v1.websockets.models.events.ClientMessage;
 import io.servertap.utils.ConsoleListener;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -25,8 +27,9 @@ public class WebSocketHandler {
     public WebSocketHandler(ServerTapMain main, Logger log, ConsoleListener consoleListener) {
         this.main = main;
         this.log = log;
-        this.sockets = new ConcurrentHashMap<>();
-        this.rooms = new ConcurrentHashMap<>();
+        this.sockets = new HashMap<>();
+        this.rooms = new HashMap<>();
+
         createRoom("consoleListener", (socket -> {
             for (ConsoleLine line : main.getConsoleBuffer()) socket.emit("newConsoleLine", line);
         }));
@@ -35,7 +38,7 @@ public class WebSocketHandler {
 
     public void getHandler(WsConfig ws) {
         ws.onConnect((ctx) -> {
-            ctx.enableAutomaticPings();
+            ctx.enableAutomaticPings(30, TimeUnit.SECONDS);
             Socket socket = WebSocketConfig.configure(new Socket(ctx), main, log);
             sockets.put(socket.getID(), socket);
         });
@@ -69,7 +72,7 @@ public class WebSocketHandler {
             } catch (NullPointerException e) {
                 socket.emit("error", "That event doesn't exist!");
             } catch (Exception e) {
-                socket.emit("error", "Invalid JSON payload. Please check your code. [Did you call JSON.stringify() on the obj you are sending?");
+                socket.emit("error", "Invalid JSON payload. Please check your code. [Did you call JSON.stringify() on the obj you are sending?]");
             }
         });
 

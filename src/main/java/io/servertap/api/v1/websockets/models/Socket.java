@@ -19,7 +19,6 @@ public class Socket {
         this.id = new SocketID(ctx.getSessionId());
         this.ctx = ctx;
         this.events = new ConcurrentHashMap<>();
-        ctx.enableAutomaticPings(1000);
     }
 
     public void on(String event, Consumer<ClientMessage> callback) {

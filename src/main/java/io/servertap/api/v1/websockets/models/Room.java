@@ -32,6 +32,10 @@ public class Room {
         sockets.remove(id);
     }
     public void emit(String event, Object obj) {
-        sockets.forEach(socketID -> ws.to(socketID).emit(event, obj));
+        sockets.forEach(socketID -> {
+            Socket socket = ws.to(socketID);
+            if(socket != null)
+                socket.emit(event, obj);
+        });
     };
 }
