@@ -13,6 +13,7 @@ import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.javalin.security.RouteRole;
 import io.javalin.websocket.WsConfig;
 import io.servertap.utils.GsonJsonMapper;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
@@ -32,7 +33,7 @@ public class WebServer {
     private final Javalin javalin;
 
     private final boolean isDebug;
-    private final List<String> blockedPaths;
+    private final Object blockedPaths;
     private final boolean isAuthEnabled;
     private final boolean disableSwagger;
     private final boolean tlsEnabled;
@@ -47,7 +48,7 @@ public class WebServer {
         this.log = logger;
 
         this.isDebug = bukkitConfig.getBoolean("debug", false);
-        this.blockedPaths = bukkitConfig.getStringList("blocked-paths");
+        this.blockedPaths = bukkitConfig.isConfigurationSection("blocked-paths") ? bukkitConfig.getConfigurationSection("blocked-paths") : bukkitConfig.getStringList("blocked-paths");
         this.isAuthEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
         this.disableSwagger = bukkitConfig.getBoolean("disable-swagger", false);
         this.tlsEnabled = bukkitConfig.getBoolean("tls.enabled", false);
@@ -198,11 +199,33 @@ public class WebServer {
     public void addRoute(HandlerType httpMethod, String route, Handler handler) {
         // Checks to see if passed route is blocked in the config.
         // Note: The second check is for any blocked routes that start with a /
-        if (!(blockedPaths.contains(route) || blockedPaths.contains("/" + route))) {
-            this.javalin.addHandler(httpMethod, route, handler);
-        } else if (isDebug) {
-            log.info(String.format("Not adding Route '%s' because it is blocked in the config.", route));
+        if (blockedPaths instanceof ConfigurationSection) {
+            final ConfigurationSection confBlockedPath = (ConfigurationSection) blockedPaths;
+            List<String> allBlockedPath = confBlockedPath.getStringList("all");
+            List<String> blockedPathsByMethod = confBlockedPath.getStringList(httpMethod.toString().toLowerCase());
+
+            if (!allBlockedPath.isEmpty()) {
+                if (!(allBlockedPath.contains(route) || allBlockedPath.contains("/" + route))) {
+                    this.javalin.addHandler(httpMethod, route, handler);
+                } else if (isDebug) {
+                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.",httpMethod, route));
+                }
+            } else {
+                if (!(blockedPathsByMethod.contains(route) || blockedPathsByMethod.contains("/" + route))) {
+                    this.javalin.addHandler(httpMethod, route, handler);
+                } else if (isDebug) {
+                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.",httpMethod, route));
+                }
+            }
+        } else {
+            final List<String> listBlockedPath = (List<String>) blockedPaths;
+            if (!(listBlockedPath.contains(route) || listBlockedPath.contains("/" + route))) {
+                this.javalin.addHandler(httpMethod, route, handler);
+            } else if (isDebug) {
+                log.info(String.format("Not adding Route '%s' because it is blocked in the config.", route));
+            }
         }
+
     }
 
     public void ws(String route, Consumer<WsConfig> wsConfig) {
