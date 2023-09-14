@@ -26,7 +26,8 @@ public final class WebServerRoutes {
 
         // Server routes
         pr.get("server", api.getServerApi()::serverGet);
-        pr.post("server/exec", api.getServerApi()::postCommand);
+        pr.post("server/restart", api.getServerApi()::restartServer);
+        pr.post("server/forceVoteTop", api.getServerApi()::forceVoteTop);
         pr.get("server/ops", api.getServerApi()::getOps);
         pr.post("server/ops", api.getServerApi()::opPlayer);
         pr.delete("server/ops", api.getServerApi()::deopPlayer);
@@ -53,7 +54,9 @@ public final class WebServerRoutes {
         pr.get("players/all", api.getPlayerApi()::offlinePlayersGet);
         pr.get("players/{uuid}", api.getPlayerApi()::playerGet);
         pr.get("players/{playerUuid}/{worldUuid}/inventory", api.getPlayerApi()::getPlayerInv);
-
+        pr.post("players/action", api.getPlayerApi()::simpleAction);
+        pr.post("players/punishment", api.getPlayerApi()::playerPunishment);
+        pr.post("players/temp-punishment", api.getPlayerApi()::playerTempPunishment);
         // Economy routes
         pr.post("economy/pay", api.getEconomyApi()::playerPay);
         pr.post("economy/debit", api.getEconomyApi()::playerDebit);

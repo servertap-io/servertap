@@ -25,7 +25,7 @@ public class ApiV1Initializer {
         this.economyApi = new EconomyApi(externalPluginWrapperRepo.getEconomyWrapper());
         this.pluginApi = new PluginApi(main, log);
         this.serverApi = new ServerApi(main, log, lagDetector, externalPluginWrapperRepo.getEconomyWrapper());
-        this.playerApi = new PlayerApi(log, externalPluginWrapperRepo.getEconomyWrapper());
+        this.playerApi = new PlayerApi(main, log, externalPluginWrapperRepo.getEconomyWrapper());
         this.worldApi = new WorldApi(main, log);
         this.papiApi = new PAPIApi();
     }
