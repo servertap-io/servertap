@@ -158,7 +158,7 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
 
     @Override
     public boolean isConversing() {
-        return false;
+        return CONSOLE_COMMAND_SENDER.isConversing();
     }
 
     @Override
@@ -168,7 +168,7 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
 
     @Override
     public boolean beginConversation(@NotNull Conversation conversation) {
-        return false;
+        return CONSOLE_COMMAND_SENDER.beginConversation(conversation);
     }
 
     @Override
