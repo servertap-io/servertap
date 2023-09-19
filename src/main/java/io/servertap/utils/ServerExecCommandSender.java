@@ -199,4 +199,9 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
             return null;
         }
     }
+
+    @Override
+    public @NotNull Component name() {
+        return CONSOLE_COMMAND_SENDER.name();
+    }
 }
