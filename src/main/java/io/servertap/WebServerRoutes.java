@@ -22,6 +22,8 @@ public final class WebServerRoutes {
 
         ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo);
 
+        pr.post("login",api.getAuthApi()::login);
+
         pr.get("ping", api.getServerApi()::ping);
 
         // Server routes

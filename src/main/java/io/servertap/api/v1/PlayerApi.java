@@ -1,6 +1,9 @@
 package io.servertap.api.v1;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.tr7zw.nbtapi.NBTFile;
+import de.tr7zw.nbtapi.NBTGameProfile;
 import io.javalin.http.*;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
@@ -12,7 +15,10 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -25,6 +31,35 @@ public class PlayerApi {
     public PlayerApi(Logger log, EconomyWrapper economy) {
         this.economy = economy;
         this.log = log;
+    }
+
+    public static String getUUID(String name) {
+        String uuid = "";
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openStream()));
+            uuid = (((JsonObject) new JsonParser().parse(in)).get("id")).toString().replaceAll("\"", "");
+            uuid = uuid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
+            in.close();
+        } catch (Exception e) {
+            System.out.println("Unable to get UUID of: " + name + "!");
+            uuid = "";
+        }
+        return uuid;
+    }
+
+    public String getPLayerTextures(String mojangUuid) {
+        String textures = "";
+        try{
+            if(mojangUuid.matches("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})")){
+                String base_url = "https://sessionserver.mojang.com/session/minecraft/profile/" + mojangUuid;
+                BufferedReader in = new BufferedReader(new InputStreamReader(new URL(base_url).openStream()));
+                JsonObject jo = (JsonObject) new JsonParser().parse(in);
+                textures = jo.getAsJsonArray("properties").get(0).toString();
+            }
+        }catch (Exception e) {
+            System.out.println("Unable to get PLayer Textures of: " + mojangUuid + "!");
+        }
+        return textures;
     }
 
     @OpenApi(
@@ -87,6 +122,7 @@ public class PlayerApi {
     private Player getPlayer(org.bukkit.entity.Player player) {
         Player p = new Player();
         p.setUuid(player.getUniqueId().toString());
+        p.setMojangUuid(getUUID(player.getDisplayName()));
         p.setDisplayName(player.getDisplayName());
 
         p.setAddress(player.getAddress().getHostName());
@@ -120,6 +156,8 @@ public class PlayerApi {
         p.setGamemode(player.getGameMode());
 
         p.setLastPlayed(player.getLastPlayed());
+
+        p.setTextures(getPLayerTextures(p.getMojangUuid()));
 
         return p;
     }

@@ -12,6 +12,9 @@ public class Player {
     private String uuid = null;
 
     @Expose
+    private String mojang_uuid = null;
+
+    @Expose
     private String displayName = null;
 
     @Expose
@@ -59,6 +62,9 @@ public class Player {
     @Expose
     private Long lastPlayed = null;
 
+    @Expose
+    private String textures = null;
+
     public Player uuid(String uuid) {
         this.uuid = uuid;
         return this;
@@ -90,6 +96,14 @@ public class Player {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getMojangUuid() {
+        return mojang_uuid;
+    }
+
+    public void setMojangUuid(String mojangUuid) {
+        this.mojang_uuid = mojangUuid;
     }
 
     public Player displayName(String displayName) {
@@ -320,5 +334,13 @@ public class Player {
 
     public void setLastPlayed(Long lastPlayed) {
         this.lastPlayed = lastPlayed;
+    }
+
+    public void setTextures(String pLayerTextures) {
+        this.textures = pLayerTextures;
+    }
+
+    public String getTextures() {
+        return this.textures;
     }
 }

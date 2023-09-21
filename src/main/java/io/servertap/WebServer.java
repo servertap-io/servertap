@@ -1,33 +1,51 @@
 package io.servertap;
 
+import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
 import io.javalin.config.JavalinConfig;
-import io.javalin.http.Context;
-import io.javalin.http.Handler;
-import io.javalin.http.HandlerType;
+import io.javalin.http.*;
+import io.javalin.openapi.BasicAuth;
+import io.javalin.openapi.BearerAuth;
+import io.javalin.openapi.SecurityScheme;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.OpenApiPluginConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.javalin.security.RouteRole;
 import io.javalin.websocket.WsConfig;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.servertap.utils.GsonJsonMapper;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import javax.crypto.spec.SecretKeySpec;
+
 public class WebServer {
 
-    public static final String SERVERTAP_KEY_HEADER = "key";
-    public static final String SERVERTAP_KEY_COOKIE = "x-servertap-key";
-    private static final String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs", "/webjars"};
+    public static final String SERVERTAP_KEY_HEADER = "Authorization";
+    public static final String SERVERTAP_KEY_COOKIE = "x-servertap-authorization";
+    private static final String[] noAuthPaths = new String[]{"/swagger", "/swagger-docs", "/webjars", "/v1/login"};
 
     private final Logger log;
     private final Javalin javalin;
@@ -40,26 +58,35 @@ public class WebServer {
     private final boolean sni;
     private final String keyStorePath;
     private final String keyStorePassword;
-    private final String authKey;
+    private static String authKey = "";
     private final List<String> corsOrigin;
     private final int securePort;
+    private static List<Map<String, String>> users;
 
     public WebServer(ServerTapMain main, FileConfiguration bukkitConfig, Logger logger) {
         this.log = logger;
 
         this.isDebug = bukkitConfig.getBoolean("debug", false);
         this.blockedPaths = bukkitConfig.isConfigurationSection("blocked-paths") ? bukkitConfig.getConfigurationSection("blocked-paths") : bukkitConfig.getStringList("blocked-paths");
-        this.isAuthEnabled = bukkitConfig.getBoolean("useKeyAuth", true);
+        this.isAuthEnabled = bukkitConfig.getBoolean("enableAuth", true);
         this.disableSwagger = bukkitConfig.getBoolean("disable-swagger", false);
         this.tlsEnabled = bukkitConfig.getBoolean("tls.enabled", false);
         this.sni = bukkitConfig.getBoolean("tls.sni", false);
         this.keyStorePath = bukkitConfig.getString("tls.keystore", "keystore.jks");
         this.keyStorePassword = bukkitConfig.getString("tls.keystorePassword", "");
-        this.authKey = bukkitConfig.getString("key", "change_me");
+        authKey = bukkitConfig.getString("key", "change_me");
         this.corsOrigin = bukkitConfig.getStringList("corsOrigins");
         this.securePort = bukkitConfig.getInt("port", 4567);
-
         this.javalin = Javalin.create(config -> configureJavalin(config, main));
+
+        String usersFilePath = main.getDataFolder().getAbsolutePath() + File.separator + "users.yml";
+        Yaml yaml = new Yaml();
+        try (InputStream in = new FileInputStream(usersFilePath)) {
+            Map<String, List<Map<String, String>>> yamlData = yaml.load(in);
+            users = yamlData.get("users");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (bukkitConfig.getBoolean("debug")) {
             this.javalin.before(ctx -> log.info(ctx.req().getPathInfo()));
@@ -82,11 +109,42 @@ public class WebServer {
         config.accessManager(this::manageAccess);
 
         if (!disableSwagger) {
-            config.plugins.register(new OpenApiPlugin(getOpenApiConfig(main)));
+            OpenApiPluginConfiguration openApiConfig = getOpenApiConfig(main);
+            config.plugins.register(new OpenApiPlugin(openApiConfig));
             SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
             swaggerConfiguration.setDocumentationPath("/swagger-docs");
             config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
         }
+    }
+
+    private static String checkJWT(String authKey, String token) {
+        Key key = new SecretKeySpec(authKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+        Jws<Claims> claimsJws = Jwts.parserBuilder().build().parseClaimsJws(token);
+        Claims claims = claimsJws.getBody();
+        return claims.getSubject();
+    }
+
+    public static String generateJWT(String uuid) {
+        Key key = new SecretKeySpec(authKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+        return Jwts
+                .builder()
+                .setSubject(uuid)
+                .setExpiration(new Date(System.currentTimeMillis() + 30000))
+                .signWith(key)
+                .compact();
+    }
+
+    public static boolean validateCredentials(String username, String password) {
+        if (users != null) {
+            String pwd_hash = BCrypt.hashpw(password, BCrypt.gensalt(12));
+            System.out.println(pwd_hash);
+            for (Map<String, String> user : users) {
+                if (user.get("username").equals(username) && BCrypt.checkpw(password, user.get("password"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -106,20 +164,22 @@ public class WebServer {
 
         // Auth is turned on, make sure there is a header called "key"
         String authHeader = ctx.header(SERVERTAP_KEY_HEADER);
-        if (authHeader != null && Objects.equals(authHeader, authKey)) {
+        if (authHeader != null && WebServer.checkJWT(authKey, authHeader) != null) {    // TODO: does checkJWT return null if invalid jwt? is authHeader a valid token or does it contains the Bearer string part?
             handler.handle(ctx);
             return;
         }
 
         // If the request is still not handled, check for a cookie (websockets use cookies for auth)
         String authCookie = ctx.cookie(SERVERTAP_KEY_COOKIE);
-        if (authCookie != null && Objects.equals(authCookie, authKey)) {
+        if (authCookie != null && WebServer.checkJWT(authKey, authCookie) != null) {    // TODO: does checkJWT return null if invalid jwt? is authCookie a valid token or does it contains the Bearer string part?
             handler.handle(ctx);
             return;
         }
 
         // fall through, failsafe
-        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+        //ctx.status(401).result("Invalid token");
+        ctx.header(Header.WWW_AUTHENTICATE, "Basic");
+        throw new UnauthorizedResponse();
     }
 
     private static boolean isNoAuthPath(String requestPath) {
@@ -208,13 +268,13 @@ public class WebServer {
                 if (!(allBlockedPath.contains(route) || allBlockedPath.contains("/" + route))) {
                     this.javalin.addHandler(httpMethod, route, handler);
                 } else if (isDebug) {
-                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.",httpMethod, route));
+                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.", httpMethod, route));
                 }
             } else {
                 if (!(blockedPathsByMethod.contains(route) || blockedPathsByMethod.contains("/" + route))) {
                     this.javalin.addHandler(httpMethod, route, handler);
                 } else if (isDebug) {
-                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.",httpMethod, route));
+                    log.info(String.format("Not adding Route ['%s'] '%s' because it is blocked in the config.", httpMethod, route));
                 }
             }
         } else {
