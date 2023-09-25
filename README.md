@@ -1,15 +1,15 @@
 # ServerTap
 
-<a href="https://github.com/phybros/servertap/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/phybros/servertap/build.yml?branch=main"></a>
+<a href="https://github.com/servertap-io/servertap/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/servertap-io/servertap/build.yml?branch=main"></a>
 <img alt="bukkit version %3E%3D 1.16" src="https://img.shields.io/badge/bukkit%20version-%3E%3D1.16-brightgreen">
-<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/phybros/servertap/total?color=brightgreen">
+<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/servertap-io/servertap/total?color=brightgreen">
 <a href="https://discord.gg/nSWRYzBMfp"><img src="https://img.shields.io/discord/919982507271802890?logo=discord&label=discord&color=brightgreen" alt="chat on Discord"></a>
 
 ServerTap is a REST API for Bukkit, Spigot, and PaperMC Minecraft servers. It
 allows for server admins to query and interact with their servers using
 simple REST semantics.
 
-Head over to https://github.com/phybros/servertap/releases/latest to grab the latest and greatest plugin JAR.
+Head over to https://github.com/servertap-io/servertap/releases/latest to grab the latest and greatest plugin JAR.
 
 # Discord
 
@@ -163,7 +163,7 @@ key: some-long-super-random-string
 
 Then include a Header called `key` with your specified key on every request to Authenticate.
 
-We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info.
+We need help making this better! See https://github.com/servertap-io/servertap/issues/5 for more info.
 
 # CORS
 

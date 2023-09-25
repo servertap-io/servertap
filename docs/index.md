@@ -4,7 +4,7 @@ ServerTap is a REST API for Bukkit, Spigot, and PaperMC Minecraft servers. It
 allows for server admins to query and interact with their servers using
 simple REST semantics.
 
-Head over to https://github.com/phybros/servertap/releases/latest to grab the latest and greatest plugin JAR.
+Head over to https://github.com/servertap-io/servertap/releases/latest to grab the latest and greatest plugin JAR.
 
 # Discord
 
@@ -137,7 +137,7 @@ key: some-long-super-random-string
 
 Then include a Header called `key` with your specified key on every request to Authenticate.
 
-We need help making this better! See https://github.com/phybros/servertap/issues/5 for more info.
+We need help making this better! See https://github.com/servertap-io/servertap/issues/5 for more info.
 
 # CORS
 

@@ -7,7 +7,7 @@
     <version>0.5.4-SNAPSHOT</version>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@github.com/phybros/servertap.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/servertap-io/servertap.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 

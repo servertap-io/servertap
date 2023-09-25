@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * We can't simply reference Economy in ServerTapMain due to OpenApi annotation doing reflection, which can fail at
  * runtime due to the `scope` of the Vault API being `provided`.<br>
  * <br>
- * More details here: <a href="https://github.com/phybros/servertap/issues/175">https://github.com/phybros/servertap/issues/175</a>
+ * More details here: <a href="https://github.com/servertap-io/servertap/issues/175">https://github.com/servertap-io/servertap/issues/175</a>
  */
 public class EconomyWrapper {
 

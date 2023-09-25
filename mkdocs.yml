@@ -6,8 +6,8 @@ site_author: phybros
 site_url: https://servertap.io
 
 # Repository
-repo_name: phybros/servertap
-repo_url: https://github.com/phybros/servertap
+repo_name: servertap-io/servertap
+repo_url: https://github.com/servertap-io/servertap
 edit_uri: "edit/master/docs/"
 
 theme:
@@ -39,7 +39,7 @@ docs_dir: ./docs
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/phybros/servertap
+      link: https://github.com/servertap-io/servertap
     - icon: fontawesome/brands/discord
       link: https://discord.gg/fefHbTFAkj
 
