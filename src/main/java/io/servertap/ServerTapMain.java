@@ -1,6 +1,7 @@
 package io.servertap;
 
 import io.servertap.api.v1.models.ConsoleLine;
+import io.servertap.auth.RequestAuthProvider;
 import io.servertap.commands.ServerTapCommand;
 import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
@@ -37,6 +38,7 @@ public class ServerTapMain extends JavaPlugin {
     private final LagDetector lagDetector;
     private final Server server;
     private WebServer app;
+    private RequestAuthProvider authProvider;
 
     public ServerTapMain() {
         super();
@@ -123,5 +125,13 @@ public class ServerTapMain extends JavaPlugin {
 
     public WebServer getWebServer() {
         return this.app;
+    }
+
+    public RequestAuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(RequestAuthProvider authProvider) {
+        this.authProvider = authProvider;
     }
 }

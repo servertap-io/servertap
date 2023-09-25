@@ -92,6 +92,8 @@ public class WebServer {
      * Verifies the Path is a wagger call or has the correct authentication
      */
     private void manageAccess(Handler handler, Context ctx, Set<? extends RouteRole> routeRoles) throws Exception {
+        ServerTapMain.instance.getAuthProvider().authenticateRequest(handler, ctx);
+
         // If auth is not enabled just serve it all
         if (!this.isAuthEnabled) {
             handler.handle(ctx);
