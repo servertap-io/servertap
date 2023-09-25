@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.event.pull_request.head.repo.fork == false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
