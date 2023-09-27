@@ -11,13 +11,13 @@
 ### New Features
 
 * We have a new developer API! This means you can create plugins that extend servertap's functionality while taking 
-advantage of all the boilerplate that ServerTap provides (like auth, routing, security etc). Read more about it [in the README!](https://github.com/servertap-io/servertap#using-the-developer-api). Thanks to @Velyn-N for this awesome feature.
+advantage of all the boilerplate that ServerTap provides (like auth, routing, security etc). Read more about it [in the README!](https://github.com/servertap-io/servertap#using-the-developer-api). Thanks to [@Velyn-N](https://github.com/Velyn-N) for this awesome feature.
 * There is a new `/servertap reload` command which can be used to reload ServerTap's config on the fly
 
 ### Internals/Bugfixes
 
-* The entire internal structure of the API has been refactored (@Velyn-N, @srmullaney)
-* Updated ServerTap to be compatible with Paper `1.20+` (@TimeCodings)
+* The entire internal structure of the API has been refactored ([@Velyn-N](https://github.com/Velyn-N) & [@srmullaney](https://github.com/srmullaney))
+* Updated ServerTap to be compatible with Paper `1.20+` ([@TimeCodings]((https://github.com/TimeCodings)))
 * ServerTap now lives in its own org at <https://github.com/servertap-io/servertap>
 
 ## v0.5.3
@@ -26,7 +26,7 @@ advantage of all the boilerplate that ServerTap provides (like auth, routing, se
 
 * You can now disable swagger by setting `disable-swagger` to `true`
 in your config (default false)
-* You can now block individual paths in your config (thanks @Velyn-N)
+* You can now block individual paths in your config (thanks [@Velyn-N](https://github.com/Velyn-N))
 
 ### Internals/Bugfixes
 
