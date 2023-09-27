@@ -12,9 +12,9 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
-        <java.version>16</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -57,13 +57,7 @@
             <version>1.18.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- MockBukkit Dependency -->
-        <dependency>
-            <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.18</artifactId>
-            <version>2.85.2</version>
-            <scope>test</scope>
-        </dependency>
+
         <!-- HTTP Server -->
         <dependency>
             <groupId>io.javalin</groupId>
@@ -116,6 +110,7 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
+
         <!-- NBT API integration -->
         <dependency>
             <groupId>de.tr7zw</groupId>
@@ -155,13 +150,16 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- testing framework (not included in jar) -->
+        <!-- test dependencies -->
+
+        <!-- MockBukkit Dependency -->
         <dependency>
             <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.16</artifactId>
-            <version>1.5.0</version>
+            <artifactId>MockBukkit-v1.18</artifactId>
+            <version>2.85.2</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
@@ -169,6 +167,7 @@
             <classifier>standalone</classifier>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
