@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.6.0
+
+### ⚠️ BREAKING CHANGES ⚠️
+
+* Lowest supported version of Minecraft/Bukkit/Paper/Spigot is now `1.18.2`
+* ServerTap is no longer supported on `1.16.5`
+* ServerTap `v0.5.3` is now the last version that supports `1.16.5`
+
+### New Features
+
+* We have a new developer API! This means you can create plugins that extend servertap's functionality while taking 
+advantage of all the boilerplate that ServerTap provides (like auth, routing, security etc). Read more about it [in the README!](https://github.com/servertap-io/servertap#using-the-developer-api). Thanks to @Velyn-N for this awesome feature.
+* There is a new `/servertap reload` command which can be used to reload ServerTap's config on the fly
+
+### Internals/Bugfixes
+
+* The entire internal structure of the API has been refactored (@Velyn-N, @srmullaney)
+* Updated ServerTap to be compatible with Paper `1.20+` (@TimeCodings)
+* ServerTap now lives in its own org at <https://github.com/servertap-io/servertap>
+
 ## v0.5.3
 
 ### New Features
