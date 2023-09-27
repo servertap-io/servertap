@@ -10,9 +10,9 @@
 
 ### New Features
 
-* We have a new developer API! This means you can create plugins that exte4nd servertap's functionality while taking 
+* We have a new developer API! This means you can create plugins that extend servertap's functionality while taking 
 advantage of all the boilerplate that ServerTap provides (like auth, routing, security etc). Read more about it [in the README!](https://github.com/servertap-io/servertap#using-the-developer-api). Thanks to @Velyn-N for this awesome feature.
-* There is a new `/servertap reload` command which can be used to reload new ServerTap plugins on the fly
+* There is a new `/servertap reload` command which can be used to reload ServerTap's config on the fly
 
 ### Internals/Bugfixes
 
