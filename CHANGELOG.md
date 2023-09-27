@@ -17,7 +17,7 @@
 ### Internals/Bugfixes
 
 * The entire internal structure of the API has been refactored ([@Velyn-N](https://github.com/Velyn-N) & [@srmullaney](https://github.com/srmullaney))
-* Updated ServerTap to be compatible with Paper `1.20+` ([@TimeCodings]((https://github.com/TimeCodings)))
+* Updated ServerTap to be compatible with Paper `1.20+` ([@TimeCodings](https://github.com/TimeCodings))
 * ServerTap now lives in its own org at <https://github.com/servertap-io/servertap>
 
 ## v0.5.3
