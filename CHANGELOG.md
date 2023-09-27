@@ -18,6 +18,7 @@ advantage of all the boilerplate that ServerTap provides (like auth, routing, se
 
 * The entire internal structure of the API has been refactored (@Velyn-N, @srmullaney)
 * Updated ServerTap to be compatible with Paper `1.20+` (@TimeCodings)
+* ServerTap now lives in its own org at <https://github.com/servertap-io/servertap>
 
 ## v0.5.3
 
