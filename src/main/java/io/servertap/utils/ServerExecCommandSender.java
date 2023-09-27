@@ -2,12 +2,15 @@ package io.servertap.utils;
 
 import io.servertap.Constants;
 import io.servertap.ServerTapMain;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -15,14 +18,18 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-public class ServerExecCommandSender implements RemoteConsoleCommandSender {
+public class ServerExecCommandSender implements ConsoleCommandSender {
 
     private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(1);
     private static final ConsoleCommandSender CONSOLE_COMMAND_SENDER = Bukkit.getConsoleSender();
@@ -149,6 +156,31 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
         return CONSOLE_COMMAND_SENDER.getServer();
     }
 
+    @Override
+    public boolean isConversing() {
+        return CONSOLE_COMMAND_SENDER.isConversing();
+    }
+
+    @Override
+    public void acceptConversationInput(@NotNull String input) {
+        CONSOLE_COMMAND_SENDER.acceptConversationInput(input);
+    }
+
+    @Override
+    public boolean beginConversation(@NotNull Conversation conversation) {
+        return CONSOLE_COMMAND_SENDER.beginConversation(conversation);
+    }
+
+    @Override
+    public void abandonConversation(@NotNull Conversation conversation) {
+        CONSOLE_COMMAND_SENDER.abandonConversation(conversation);
+    }
+
+    @Override
+    public void abandonConversation(@NotNull Conversation conversation, @NotNull ConversationAbandonedEvent details) {
+        CONSOLE_COMMAND_SENDER.abandonConversation(conversation, details);
+    }
+
     public void sendRawMessage(String raw) {
         CONSOLE_COMMAND_SENDER.sendRawMessage(raw);
     }
@@ -168,4 +200,8 @@ public class ServerExecCommandSender implements RemoteConsoleCommandSender {
         }
     }
 
+    @Override
+    public @NotNull Component name() {
+        return CONSOLE_COMMAND_SENDER.name();
+    }
 }

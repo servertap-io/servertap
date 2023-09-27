@@ -23,12 +23,6 @@
     </properties>
 
     <repositories>
-        <!-- for spigot -->
-        <repository>
-            <id>spigotmc</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-
         <!-- for vault -->
         <repository>
             <id>codemc-repo</id>
@@ -42,7 +36,7 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
 
-        <!-- for mockbukkit -->
+        <!-- for mockbukkit & paper -->
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
@@ -56,12 +50,19 @@
     </repositories>
 
     <dependencies>
-        <!-- Minecraft plugin -->
+        <!-- Paper Dependency -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- MockBukkit Dependency -->
+        <dependency>
+            <groupId>com.github.seeseemelk</groupId>
+            <artifactId>MockBukkit-v1.18</artifactId>
+            <version>2.85.2</version>
+            <scope>test</scope>
         </dependency>
         <!-- HTTP Server -->
         <dependency>
@@ -136,6 +137,11 @@
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.20.0</version>
             <scope>provided</scope>
@@ -191,7 +197,6 @@
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
