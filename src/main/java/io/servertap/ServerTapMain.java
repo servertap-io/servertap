@@ -2,6 +2,7 @@ package io.servertap;
 
 import io.servertap.api.v1.models.ConsoleLine;
 import io.servertap.auth.RequestAuthProvider;
+import io.servertap.auth.UselessAuthProvider;
 import io.servertap.commands.ServerTapCommand;
 import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
@@ -22,6 +23,7 @@ import org.bukkit.plugin.java.JavaPluginLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class ServerTapMain extends JavaPlugin {
 
     private static final java.util.logging.Logger log = Bukkit.getLogger();
     private final Logger rootLogger = (Logger) LogManager.getRootLogger();
+    private static final String defaultAuthProviderName = "io.servertap.auth.UselessAuthProvider";
     private final List<ConsoleLine> consoleBuffer = new ArrayList<>();
     private ExternalPluginWrapperRepo externalPluginWrapperRepo;
     private WebhookEventListener webhookEventListener;
@@ -87,6 +90,26 @@ public class ServerTapMain extends JavaPlugin {
         app = new WebServer(this, bukkitConfig, log);
         app.start(bukkitConfig.getInt("port", 4567));
         WebServerRoutes.addV1Routes(this, log, lagDetector, app, consoleListener, externalPluginWrapperRepo);
+
+        try {
+            String providerName = bukkitConfig.getString("auth.provider", defaultAuthProviderName);
+            Class<?> provider = Class.forName(providerName);
+            RequestAuthProvider requestAuthProvider = (RequestAuthProvider) provider.getDeclaredConstructor().newInstance();
+            setAuthProvider(requestAuthProvider);
+
+            log.info(String.format("Using auth provider: %s", providerName));
+        }
+        catch (ClassNotFoundException cex) {
+            throw new RuntimeException(cex);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void reload() {

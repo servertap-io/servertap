@@ -4,6 +4,9 @@ useKeyAuth: true
 key: 'change_me'
 normalizeMessages: true
 
+auth:
+  provider: io.servertap.auth.UselessAuthProvider
+
 # TLS (a.k.a. SSL) options
 tls:
   # Set to true to enable TLS
