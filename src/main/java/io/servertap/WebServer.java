@@ -1,5 +1,6 @@
 package io.servertap;
 
+import com.google.gson.JsonObject;
 import io.javalin.Javalin;
 import io.javalin.community.ssl.SSLPlugin;
 import io.javalin.config.JavalinConfig;
@@ -12,10 +13,15 @@ import io.javalin.openapi.plugin.swagger.SwaggerConfiguration;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.javalin.security.RouteRole;
 import io.javalin.websocket.WsConfig;
+import io.servertap.enums.RequestType;
+import io.servertap.services.RadomUrlSafeGenerator;
+import io.servertap.services.RequestBuilder;
+import io.servertap.services.TokenValidator;
 import io.servertap.utils.GsonJsonMapper;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -43,7 +49,11 @@ public class WebServer {
     private final List<String> corsOrigin;
     private final int securePort;
 
-    public WebServer(ServerTapMain main, FileConfiguration bukkitConfig, Logger logger) {
+    private final String webApiUrl;
+
+    private final String webhookString;
+
+    public WebServer(ServerTapMain main, FileConfiguration bukkitConfig, Logger logger, String websocketString) {
         this.log = logger;
 
         this.isDebug = bukkitConfig.getBoolean("debug", false);
@@ -57,12 +67,16 @@ public class WebServer {
         this.authKey = bukkitConfig.getString("key", "change_me");
         this.corsOrigin = bukkitConfig.getStringList("corsOrigins");
         this.securePort = bukkitConfig.getInt("port", 4567);
+        this.webApiUrl = bukkitConfig.getString("webApiUrl", "https://warp-mc.azurewebsites.net");
+
 
         this.javalin = Javalin.create(config -> configureJavalin(config, main));
 
         if (bukkitConfig.getBoolean("debug")) {
             this.javalin.before(ctx -> log.info(ctx.req().getPathInfo()));
         }
+        this.webhookString = websocketString;
+
     }
 
     private void configureJavalin(JavalinConfig config, ServerTapMain main) {
@@ -93,6 +107,7 @@ public class WebServer {
      */
     private void manageAccess(Handler handler, Context ctx, Set<? extends RouteRole> routeRoles) throws Exception {
         // If auth is not enabled just serve it all
+
         if (!this.isAuthEnabled) {
             handler.handle(ctx);
             return;
@@ -110,15 +125,21 @@ public class WebServer {
             return;
         }
 
-        // If the request is still not handled, check for a cookie (websockets use cookies for auth)
-        String authCookie = ctx.cookie(SERVERTAP_KEY_COOKIE);
-        if (authCookie != null && Objects.equals(authCookie, authKey)) {
+        String token = ctx.queryParam("token");
+        System.out.println(token);
+        if (token != null && token.equals(webhookString)) {
+            // Instantiate the RequestBuilder with the authentication server UR
+            System.out.println("handling");
             handler.handle(ctx);
+
+            System.out.println("Handled");
             return;
         }
+        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+        // If the request is still not handled, check for a cookie (websockets use cookies for auth)
 
         // fall through, failsafe
-        ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+
     }
 
     private static boolean isNoAuthPath(String requestPath) {
@@ -127,6 +148,8 @@ public class WebServer {
 
     private void configureCors(JavalinConfig config) {
         config.plugins.enableCors(cors -> cors.add(corsConfig -> {
+            corsConfig.anyHost();
+            /*
             if (corsOrigin.contains("*")) {
                 log.info("[ServerTap] Enabling CORS for *");
                 corsConfig.anyHost();
@@ -136,6 +159,7 @@ public class WebServer {
                     corsConfig.allowHost(origin);
                 });
             }
+            */
         }));
     }
 

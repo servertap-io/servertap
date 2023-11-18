@@ -19,12 +19,12 @@ public class ApiV1Initializer {
     private final PAPIApi papiApi;
 
     public ApiV1Initializer(ServerTapMain main, Logger log, LagDetector lagDetector, ConsoleListener consoleListener,
-                            ExternalPluginWrapperRepo externalPluginWrapperRepo) {
+                            ExternalPluginWrapperRepo externalPluginWrapperRepo, String websocketKey) {
         this.websocketHandler = new WebsocketHandler(main, log, consoleListener);
         this.advancementsApi = new AdvancementsApi();
         this.economyApi = new EconomyApi(externalPluginWrapperRepo.getEconomyWrapper());
         this.pluginApi = new PluginApi(main, log);
-        this.serverApi = new ServerApi(main, log, lagDetector, externalPluginWrapperRepo.getEconomyWrapper());
+        this.serverApi = new ServerApi(main, log, lagDetector, externalPluginWrapperRepo.getEconomyWrapper(), websocketKey);
         this.playerApi = new PlayerApi(main, log, externalPluginWrapperRepo.getEconomyWrapper());
         this.worldApi = new WorldApi(main, log);
         this.papiApi = new PAPIApi();

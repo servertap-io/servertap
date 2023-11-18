@@ -38,11 +38,14 @@ public class ServerApi {
     private final ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
     private final LagDetector lagDetector;
 
-    public ServerApi(ServerTapMain main, Logger log, LagDetector lagDetector, EconomyWrapper economy) {
+    private final String websocketKey;
+
+    public ServerApi(ServerTapMain main, Logger log, LagDetector lagDetector, EconomyWrapper economy, String websocketKey) {
         this.log = log;
         this.main = main;
         this.economy = economy;
         this.lagDetector = lagDetector;
+        this.websocketKey = websocketKey;
     }
 
     @OpenApi(
@@ -58,6 +61,23 @@ public class ServerApi {
     )
     public void ping(Context ctx) {
         ctx.json("pong");
+    }
+
+    @OpenApi(
+            path = "/v1/websocket-key",
+            summary = "key!",
+            tags = {"Server"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json"))
+            }
+    )
+    public void websocketKey(Context ctx) {
+        MessageResponse message = new MessageResponse(this.websocketKey);
+
+        ctx.json(message);
     }
 
     @OpenApi(

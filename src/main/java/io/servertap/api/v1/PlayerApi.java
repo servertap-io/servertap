@@ -445,6 +445,174 @@ public class PlayerApi {
 
     }
 
+    @OpenApi(
+            path = "/v1/players/set-rank",
+            methods = {HttpMethod.POST},
+            summary = "Sets Player Rank",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "voteRank", type = "string"),
+                                            @OpenApiContentProperty(name = "staffRank", type = "string"),
+                                    }
+                            )
+                    }
+            ),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class))
+            }
+    )
+    public void setPlayerRank(Context ctx) {
+        String voteRank = ctx.formParam("voteRank");
+        String staffRank = ctx.formParam("staffRank");
+
+        ArrayList<String> voteRanks = new ArrayList<String>(4);
+        voteRanks.add("farmer");
+        voteRanks.add("knight");
+        voteRanks.add("minotaur");
+        voteRanks.add("dragon");
+        if (!voteRanks.contains(voteRank)) {
+            throw new BadRequestResponse(voteRank + " not found");
+        }
+
+        ArrayList<String> staffRanks = new ArrayList<String>(6);
+        voteRanks.add("owner");
+        voteRanks.add("developer");
+        voteRanks.add("sr.mod");
+        voteRanks.add("mod");
+        voteRanks.add("helper");
+        voteRanks.add("");
+
+        if (!voteRanks.contains(staffRank)) {
+            throw new BadRequestResponse(staffRank+ " not found");
+        }
+        String command = "setPlayerRank " + voteRank + " " + staffRank;
+        String timeRaw = "0";
+
+        AtomicLong time = new AtomicLong(Long.parseLong(timeRaw));
+        if (time.get() < 0) time.set(0);
+
+        ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
+                        ret -> {
+                            String output = String.join("\n", ret);
+                            if ("application/json".equalsIgnoreCase(ctx.contentType())) {
+                                ctx.json(output);
+                            } else {
+                                ctx.html(output);
+                            }
+                        }
+                )
+                .exceptionally(throwable -> {
+                    throw new RuntimeException(throwable);
+                }));
+
+    }
+
+    @OpenApi(
+            path = "/v1/players/jail",
+            methods = {HttpMethod.POST},
+            summary = "jails a player",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            requestBody = @OpenApiRequestBody(
+                    required = true,
+                    content = {
+                            @OpenApiContent(
+                                    mimeType = "application/x-www-form-urlencoded",
+                                    properties = {
+                                            @OpenApiContentProperty(name = "playerName", type = "string"),
+                                            @OpenApiContentProperty(name = "action", type = "string"),
+                                    }
+                            )
+                    }
+            ),
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class))
+            }
+    )
+    public void jailPlayer(Context ctx) {
+        String playerNameStr = ctx.formParam("playerName");
+        String punishment = ctx.formParam("action").toLowerCase();
+        ArrayList<String> arr = new ArrayList<String>(3);
+        arr.add("fakeJail");
+        arr.add("inprison");
+        arr.add("release");
+        if (!arr.contains(punishment)) {
+            throw new BadRequestResponse(punishment + " command not found");
+        }
+
+        String timeRaw = "0";
+
+        AtomicLong time = new AtomicLong(Long.parseLong(timeRaw));
+        if (time.get() < 0) time.set(0);
+
+        String command = "jail " + punishment + " " + playerNameStr;
+
+        ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
+                        ret -> {
+                            String output = String.join("\n", ret);
+                            if ("application/json".equalsIgnoreCase(ctx.contentType())) {
+                                ctx.json(output);
+                            } else {
+                                ctx.html(output);
+                            }
+                        }
+                )
+                .exceptionally(throwable -> {
+                    throw new RuntimeException(throwable);
+                }));
+
+    }
+
+    @OpenApi(
+            path = "/v1/players/vote/{username}",
+            methods = {HttpMethod.POST},
+            summary = "Sends a vote command",
+            tags = {"Player"},
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            pathParams = {
+                    @OpenApiParam(name = "uuid", description = "UUID of the player")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class))
+            }
+    )
+    public void recordPlayerVote(Context ctx) {
+        String username = ctx.pathParam("username");
+        if (username.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_UUID_MISSING);
+        String command = "recordPlayerVote " + username;
+        String timeRaw = "0";
+
+        AtomicLong time = new AtomicLong(Long.parseLong(timeRaw));
+        if (time.get() < 0) time.set(0);
+
+        ctx.future(() -> runCommandAsync(command, time.get()).thenAccept(
+                        ret -> {
+                            String output = String.join("\n", ret);
+                            if ("application/json".equalsIgnoreCase(ctx.contentType())) {
+                                ctx.json(output);
+                            } else {
+                                ctx.html(output);
+                            }
+                        }
+                )
+                .exceptionally(throwable -> {
+                    throw new RuntimeException(throwable);
+                }));
+
+    }
+
 
     private CompletableFuture<List<String>> runCommandAsync(String command, long time) {
         return new ServerExecCommandSender(main).executeCommand(command, time, TimeUnit.MILLISECONDS);

@@ -3,21 +3,25 @@ debug: false
 useKeyAuth: true
 key: 'change_me'
 normalizeMessages: true
-
+jwtAudience: "warpmc-59b8b"
 # TLS (a.k.a. SSL) options
 tls:
   # Set to true to enable TLS
-  enabled: false
+  enabled: true
   # The path to your keystore (relative to ServerTap's plugin dir)
   keystore: keystore.jks
   # The password for the keystore
-  keystorePassword: ""
+  keystorePassword: "YqUBE6n8c#oPQCtIl4en"
   # Enforce Server Name Indication (SNI) or not
   sni: false
 
 # Use this list to set allowed CORS Origins ("*" by default)
 corsOrigins:
-  - "*"
+  - "http://localhost:3000"
+
+
+# API URL:
+webApiUrl: "http://localhost:3000"
 
 # Example webhook configuration
 #webhooks:

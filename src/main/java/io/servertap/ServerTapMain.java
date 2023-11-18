@@ -5,6 +5,7 @@ import io.servertap.commands.ServerTapCommand;
 import io.servertap.metrics.Metrics;
 import io.servertap.plugin.api.ServerTapWebserverService;
 import io.servertap.plugin.api.ServerTapWebserverServiceImpl;
+import io.servertap.services.RadomUrlSafeGenerator;
 import io.servertap.utils.ConsoleListener;
 import io.servertap.utils.LagDetector;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
@@ -82,9 +83,10 @@ public class ServerTapMain extends JavaPlugin {
     }
 
     private void setupWebServer(FileConfiguration bukkitConfig) {
-        app = new WebServer(this, bukkitConfig, log);
+        String webhookString = RadomUrlSafeGenerator.generateRandomURLSafeString(60);
+        app = new WebServer(this, bukkitConfig, log, webhookString);
         app.start(bukkitConfig.getInt("port", 4567));
-        WebServerRoutes.addV1Routes(this, log, lagDetector, app, consoleListener, externalPluginWrapperRepo);
+        WebServerRoutes.addV1Routes(this, log, lagDetector, app, consoleListener, externalPluginWrapperRepo, webhookString);
     }
 
     public void reload() {

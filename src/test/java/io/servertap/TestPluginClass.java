@@ -29,6 +29,7 @@ public class TestPluginClass {
     void verifyTestEnvironment() {
         HttpResponse<JsonNode> response = Unirest.get(TEST_URL_BASE + "/v1/players/all").asJson();
         Assertions.assertEquals(401, response.getStatus());
+        //Assertions.assertEquals(401, 401);
     }
 
     @Test

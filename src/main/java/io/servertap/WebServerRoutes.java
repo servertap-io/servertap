@@ -17,15 +17,16 @@ public final class WebServerRoutes {
     private WebServerRoutes() {}
 
     public static void addV1Routes(ServerTapMain main, Logger log, LagDetector lagDetector, WebServer webServer,
-                                   ConsoleListener consoleListener, ExternalPluginWrapperRepo externalPluginWrapperRepo) {
+                                   ConsoleListener consoleListener, ExternalPluginWrapperRepo externalPluginWrapperRepo, String websocketString) {
         PrefixedRouteBuilder pr = new PrefixedRouteBuilder(API_V1, webServer);
 
-        ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo);
+        ApiV1Initializer api = new ApiV1Initializer(main, log, lagDetector, consoleListener, externalPluginWrapperRepo, websocketString);
 
         pr.get("ping", api.getServerApi()::ping);
 
         // Server routes
         pr.get("server", api.getServerApi()::serverGet);
+        pr.get("websocket-key", api.getServerApi()::websocketKey);
         pr.post("server/restart", api.getServerApi()::restartServer);
         pr.post("server/forceVoteTop", api.getServerApi()::forceVoteTop);
         pr.get("server/ops", api.getServerApi()::getOps);
@@ -57,6 +58,10 @@ public final class WebServerRoutes {
         pr.post("players/action", api.getPlayerApi()::simpleAction);
         pr.post("players/punishment", api.getPlayerApi()::playerPunishment);
         pr.post("players/temp-punishment", api.getPlayerApi()::playerTempPunishment);
+        pr.post("players/set-rank", api.getPlayerApi()::setPlayerRank);
+        pr.post("players/jail", api.getPlayerApi()::jailPlayer);
+        pr.post("players/vote/{username}", api.getPlayerApi()::recordPlayerVote);
+        
         // Economy routes
         pr.post("economy/pay", api.getEconomyApi()::playerPay);
         pr.post("economy/debit", api.getEconomyApi()::playerDebit);

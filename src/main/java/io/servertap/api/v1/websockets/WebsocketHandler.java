@@ -43,7 +43,7 @@ public class WebsocketHandler {
         // Allow sending of commands
         ws.onMessage(ctx -> {
             String cmd = ctx.message().trim();
-
+            System.out.println(cmd);
             if (!cmd.isEmpty()) {
 
                 if (cmd.startsWith("/")) {
