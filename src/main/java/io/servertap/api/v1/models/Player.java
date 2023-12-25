@@ -27,6 +27,9 @@ public class Player {
     private Float exp = null;
 
     @Expose
+    private Integer expLevel = null;
+
+    @Expose
     private Boolean whitelisted = null;
 
     @Expose
@@ -78,6 +81,23 @@ public class Player {
         this.balance = balance;
     }
 
+    /**
+     * The Player's ExpLevel
+     *
+     * @return expLevel
+     **/
+    public Integer getExpLevel() {
+        return expLevel;
+    }
+
+    public void setExpLevel(Integer expLevel) {
+        this.expLevel = expLevel;
+    }
+
+    public Player expLevel(Integer expLevel) {
+        this.expLevel = expLevel;
+        return this;
+    }
 
     /**
      * The Player's UUID
