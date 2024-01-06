@@ -94,6 +94,7 @@ public class PlayerApi {
 
         p.setExhaustion(player.getExhaustion());
         p.setExp(player.getExp());
+        p.setExpLevel(player.getLevel());
 
         p.setWhitelisted(player.isWhitelisted());
         p.setBanned(player.isBanned());
