@@ -310,7 +310,7 @@ public class ServerApi {
             }
     )
     public void whitelistGet(Context ctx) {
-        if (bukkitServer.hasWhitelist()) {
+        if (!bukkitServer.hasWhitelist()) {
             // TODO: Handle Errors better
             ctx.json("error: The server has whitelist disabled");
             return;
