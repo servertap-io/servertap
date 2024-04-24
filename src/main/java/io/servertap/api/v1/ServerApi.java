@@ -13,7 +13,7 @@ import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
