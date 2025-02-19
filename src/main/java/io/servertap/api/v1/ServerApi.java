@@ -13,7 +13,7 @@ import io.servertap.api.v1.models.*;
 import io.servertap.mojang.api.MojangApiService;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -223,6 +223,10 @@ public class ServerApi {
     )
 
     public void scoreboardGet(Context ctx) {
+        if (scoreboardManager == null) {
+            throw new ServiceUnavailableResponse("Scoreboard manager is not initialized");
+        }
+        
         org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
         Scoreboard scoreboardModel = new Scoreboard();
         Set<String> objectives = new HashSet<>();
@@ -252,6 +256,10 @@ public class ServerApi {
             }
     )
     public void objectiveGet(Context ctx) {
+        if (scoreboardManager == null) {
+            throw new ServiceUnavailableResponse("Scoreboard manager is not initialized");
+        }
+        
         String objectiveName = ctx.pathParam("name");
         org.bukkit.scoreboard.Scoreboard gameScoreboard = scoreboardManager.getMainScoreboard();
         org.bukkit.scoreboard.Objective objective = gameScoreboard.getObjective(objectiveName);
