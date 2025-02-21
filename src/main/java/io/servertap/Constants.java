@@ -10,6 +10,8 @@ public class Constants {
     public static final String VAULT_GREATER_THAN_ZERO = "You must use a value greater than zero";
     public static final String ECONOMY_PLUGIN_MISSING = "Missing economy plugin";
 
+    // Luckperms Related Messages
+    public static final String LUCKPERMS_PLUGIN_MISSING = "LuckPerms plugin is not installed or failed to load";
     // Player Related Messages
     public static final String PLAYER_MISSING_PARAMS = "Missing uuid and/or world";
     public static final String PLAYER_UUID_MISSING = "Player UUID is required";

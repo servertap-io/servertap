@@ -12,6 +12,7 @@ public class ApiV1Initializer {
     private final WebsocketHandler websocketHandler;
     private final AdvancementsApi advancementsApi;
     private final EconomyApi economyApi;
+    private final LuckpermsApi luckpermsApi;
     private final PluginApi pluginApi;
     private final ServerApi serverApi;
     private final PlayerApi playerApi;
@@ -23,6 +24,7 @@ public class ApiV1Initializer {
         this.websocketHandler = new WebsocketHandler(main, log, consoleListener);
         this.advancementsApi = new AdvancementsApi();
         this.economyApi = new EconomyApi(externalPluginWrapperRepo.getEconomyWrapper());
+        this.luckpermsApi = new LuckpermsApi(externalPluginWrapperRepo.getLuckpermsWrapper());
         this.pluginApi = new PluginApi(main, log);
         this.serverApi = new ServerApi(main, log, lagDetector, externalPluginWrapperRepo.getEconomyWrapper());
         this.playerApi = new PlayerApi(log, externalPluginWrapperRepo.getEconomyWrapper());
@@ -40,6 +42,10 @@ public class ApiV1Initializer {
 
     public EconomyApi getEconomyApi() {
         return economyApi;
+    }
+
+    public LuckpermsApi getLuckpermsApi() {
+        return luckpermsApi;
     }
 
     public PluginApi getPluginApi() {
