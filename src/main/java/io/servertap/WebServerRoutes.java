@@ -62,12 +62,13 @@ public final class WebServerRoutes {
         // Luckperms routes
         pr.get("luckperms", api.getLuckpermsApi()::getLuckpermsInformation);
         pr.get("luckperms/groups", api.getLuckpermsApi()::getGroups);
+        pr.post("luckperms/groups", api.getLuckpermsApi()::addGroup);
         pr.get("luckperms/user/{uuid}/groups", api.getLuckpermsApi()::getUserGroups);
         pr.get("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::getUserPermissions);
         pr.post("luckperms/user/{uuid}/groups/{group}", api.getLuckpermsApi()::addUserToGroup);
         pr.delete("luckperms/user/{uuid}/groups/{group}", api.getLuckpermsApi()::removeUserFromGroup);
-        pr.post("luckperms/user/{uuid}/permissions/{permission}", api.getLuckpermsApi()::addUserPermission);
-        pr.delete("luckperms/user/{uuid}/permissions/{permission}", api.getLuckpermsApi()::removeUserPermission);
+        pr.post("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::addUserPermission);
+        pr.delete("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::removeUserPermission);
         
 
         // Plugin routes

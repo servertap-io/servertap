@@ -7,6 +7,8 @@ import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.openapi.*;
 import io.servertap.Constants;
 import io.servertap.utils.pluginwrappers.LuckpermsWrapper;
+import io.servertap.api.v1.models.PermissionRequest;
+import io.servertap.api.v1.models.GroupRequest;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
@@ -14,12 +16,18 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.query.QueryOptions;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class LuckpermsApi {
     private final org.bukkit.Server bukkitServer = Bukkit.getServer();
@@ -198,12 +206,11 @@ public class LuckpermsApi {
         UUID playerUUID = validateUUID(ctx.pathParam("uuid"));
         User user = loadUser(playerUUID);
 
-        Set<String> groups = new HashSet<>();
-        user.getNodes().forEach(node -> {
-            if (node.getType().name().equals("INHERITANCE")) {
-                groups.add(node.getKey().substring(6)); // Remove 'group.' prefix
-            }
-        });
+        // Use CachedData for more efficient group lookup
+        Collection<Group> inheritedGroups = user.getInheritedGroups(user.getQueryOptions());
+        Set<String> groups = inheritedGroups.stream()
+            .map(Group::getName)
+            .collect(Collectors.toSet());
 
         ctx.json(groups);
     }
@@ -231,17 +238,36 @@ public class LuckpermsApi {
         UUID playerUUID = validateUUID(ctx.pathParam("uuid"));
         User user = loadUser(playerUUID);
 
-        List<Map<String, Object>> permissions = new ArrayList<>();
-        user.getNodes().forEach(node -> {
-            if (node.getType().name().equals("PERMISSION")) {
+        List<Map<String, Object>> permissionList = new ArrayList<>();
+        
+        // Get directly set permissions with full context
+        user.getNodes().stream()
+            .filter(node -> node.getType() == NodeType.PERMISSION)
+            .map(node -> (PermissionNode) node)
+            .forEach(node -> {
+                Map<String, Object> perm = createPermissionData(node);
+                perm.put("direct", true);
+                permissionList.add(perm);
+            });
+
+        // Get inherited/effective permissions
+        CachedPermissionData permissionData = user.getCachedData().getPermissionData();
+        permissionData.getPermissionMap().forEach((permission, value) -> {
+            // Only add if not already in the list (not directly set)
+            boolean isDirect = permissionList.stream()
+                .anyMatch(p -> p.get("permission").equals(permission));
+                
+            if (!isDirect) {
                 Map<String, Object> perm = new HashMap<>();
-                perm.put("permission", node.getKey());
-                perm.put("value", node.getValue());
-                permissions.add(perm);
+                perm.put("permission", permission);
+                perm.put("value", value);
+                perm.put("direct", false);
+                perm.put("contexts", new ArrayList<>()); // Empty contexts for inherited perms
+                permissionList.add(perm);
             }
         });
 
-        ctx.json(permissions);
+        ctx.json(permissionList);
     }
 
     @OpenApi(
@@ -276,7 +302,9 @@ public class LuckpermsApi {
             throw new BadRequestResponse("Group not found");
         }
 
-        user.data().add(Node.builder("group." + group.getName()).build());
+        // Use InheritanceNode builder for better type safety
+        InheritanceNode node = InheritanceNode.builder(group).build();
+        user.data().add(node);
         saveUser(user);
         
         ctx.json("Successfully added user to group");
@@ -307,23 +335,34 @@ public class LuckpermsApi {
         String groupName = ctx.pathParam("group");
         
         User user = loadUser(playerUUID);
+        LuckPerms luckperms = getLuckPermsApi();
+
+        // Get the group to ensure it exists and for type safety
+        Group group = luckperms.getGroupManager().getGroup(groupName);
+        if (group == null) {
+            throw new BadRequestResponse("Group not found");
+        }
         
-        user.data().remove(Node.builder("group." + groupName).build());
+        // Use InheritanceNode builder for better type safety
+        InheritanceNode node = InheritanceNode.builder(group).build();
+        user.data().remove(node);
         saveUser(user);
 
         ctx.json("Successfully removed group from user");
     }
 
     @OpenApi(
-            path = "/v1/luckperms/user/{uuid}/permissions/{permission}",
+            path = "/v1/luckperms/user/{uuid}/permissions",
             methods = {HttpMethod.POST},
             summary = "Add permission to user",
             description = "Adds a permission to the specified user",
             tags = {"Luckperms"},
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "The UUID of the player"),
-                    @OpenApiParam(name = "permission", description = "The permission node")
+                    @OpenApiParam(name = "uuid", description = "The UUID of the player")
             },
+            requestBody = @OpenApiRequestBody(content = {
+                    @OpenApiContent(from = PermissionRequest.class)
+            }),
             headers = {
                     @OpenApiParam(name = "key")
             },
@@ -336,26 +375,40 @@ public class LuckpermsApi {
     )
     public void addUserPermission(Context ctx) {
         UUID playerUUID = validateUUID(ctx.pathParam("uuid"));
-        String permission = ctx.pathParam("permission");
+        
+        // Parse JSON manually
+        JsonObject json = new Gson().fromJson(ctx.body(), JsonObject.class);
+        String permission = json.has("permission") ? json.get("permission").getAsString() : null;
+        Boolean value = json.has("value") ? json.get("value").getAsBoolean() : true;
+        
+        if (permission == null || permission.isEmpty()) {
+            throw new BadRequestResponse("Permission is required");
+        }
         
         User user = loadUser(playerUUID);
         
-        user.data().add(Node.builder(permission).build());
+        // Use PermissionNode builder for better type safety
+        PermissionNode node = PermissionNode.builder(permission)
+            .value(value)
+            .build();
+        user.data().add(node);
         saveUser(user);
 
         ctx.json("Successfully added permission to user");
     }
 
     @OpenApi(
-            path = "/v1/luckperms/user/{uuid}/permissions/{permission}",
+            path = "/v1/luckperms/user/{uuid}/permissions",
             methods = {HttpMethod.DELETE},
             summary = "Remove permission from user",
             description = "Removes a permission from the specified user",
             tags = {"Luckperms"},
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "The UUID of the player"),
-                    @OpenApiParam(name = "permission", description = "The permission node")
+                    @OpenApiParam(name = "uuid", description = "The UUID of the player")
             },
+            requestBody = @OpenApiRequestBody(content = {
+                    @OpenApiContent(from = PermissionRequest.class)
+            }),
             headers = {
                     @OpenApiParam(name = "key")
             },
@@ -368,11 +421,23 @@ public class LuckpermsApi {
     )
     public void removeUserPermission(Context ctx) {
         UUID playerUUID = validateUUID(ctx.pathParam("uuid"));
-        String permission = ctx.pathParam("permission");
+        
+        // Parse JSON manually
+        JsonObject json = new Gson().fromJson(ctx.body(), JsonObject.class);
+        String permission = json.has("permission") ? json.get("permission").getAsString() : null;
+        Boolean value = json.has("value") ? json.get("value").getAsBoolean() : true;
+        
+        if (permission == null || permission.isEmpty()) {
+            throw new BadRequestResponse("Permission is required");
+        }
         
         User user = loadUser(playerUUID);
         
-        user.data().remove(Node.builder(permission).build());
+        // Use PermissionNode builder for better type safety
+        PermissionNode node = PermissionNode.builder(permission)
+            .value(value)
+            .build();
+        user.data().remove(node);
         saveUser(user);
 
         ctx.json("Successfully removed permission from user");
@@ -402,5 +467,84 @@ public class LuckpermsApi {
         );
 
         ctx.json(groupsList);
+    }
+
+    @OpenApi(
+            path = "/v1/luckperms/groups",
+            methods = {HttpMethod.POST},
+            summary = "Create a new group",
+            description = "Creates a new LuckPerms group with the specified properties",
+            tags = {"Luckperms"},
+            requestBody = @OpenApiRequestBody(content = {
+                    @OpenApiContent(from = GroupRequest.class)
+            }),
+            headers = {
+                    @OpenApiParam(name = "key")
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/json")),
+                    @OpenApiResponse(status = "400", content = @OpenApiContent(type = "application/json")),
+                    @OpenApiResponse(status = "424", content = @OpenApiContent(type = "application/json")),
+                    @OpenApiResponse(status = "500", content = @OpenApiContent(type = "application/json"))
+            }
+    )
+    public void addGroup(Context ctx) {
+        LuckPerms luckperms = getLuckPermsApi();
+        
+        // Parse request body using Gson
+        Gson gson = new Gson();
+        GroupRequest request = gson.fromJson(ctx.body(), GroupRequest.class);
+
+        // Validate required fields
+        if (request.getName() == null || request.getName().isEmpty()) {
+            throw new BadRequestResponse("Group name is required");
+        }
+
+        // Check if group already exists
+        if (luckperms.getGroupManager().getGroup(request.getName()) != null) {
+            throw new BadRequestResponse("Group already exists");
+        }
+
+        try {
+            // Create the group
+            Group group = luckperms.getGroupManager().createAndLoadGroup(request.getName()).get();
+
+            // Set display name if provided
+            if (request.getDisplayName() != null && !request.getDisplayName().isEmpty()) {
+                group.data().add(Node.builder("displayname." + request.getDisplayName()).build());
+            }
+
+            // Set weight if provided
+            if (request.getWeight() != null) {
+                group.data().add(Node.builder("weight." + request.getWeight()).build());
+            }
+
+            // Set prefix if provided
+            if (request.getPrefix() != null) {
+                group.data().add(Node.builder("prefix." + request.getPrefix()).build());
+            }
+
+            // Set suffix if provided
+            if (request.getSuffix() != null) {
+                group.data().add(Node.builder("suffix." + request.getSuffix()).build());
+            }
+
+            // Add parent group if provided
+            if (request.getParent() != null && !request.getParent().isEmpty()) {
+                Group parentGroup = luckperms.getGroupManager().getGroup(request.getParent());
+                if (parentGroup == null) {
+                    throw new BadRequestResponse("Parent group not found");
+                }
+                group.data().add(InheritanceNode.builder(parentGroup).build());
+            }
+
+            // Save the group
+            luckperms.getGroupManager().saveGroup(group);
+
+            ctx.json("Successfully created group");
+
+        } catch (Exception e) {
+            throw new InternalServerErrorResponse("Failed to create group: " + e.getMessage());
+        }
     }
 }
