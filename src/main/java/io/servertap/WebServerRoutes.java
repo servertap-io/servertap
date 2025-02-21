@@ -59,6 +59,18 @@ public final class WebServerRoutes {
         pr.post("economy/debit", api.getEconomyApi()::playerDebit);
         pr.get("economy", api.getEconomyApi()::getEconomyPluginInformation);
 
+        // Luckperms routes
+        pr.get("luckperms", api.getLuckpermsApi()::getLuckpermsInformation);
+        pr.get("luckperms/groups", api.getLuckpermsApi()::getGroups);
+        pr.post("luckperms/groups", api.getLuckpermsApi()::addGroup);
+        pr.get("luckperms/user/{uuid}/groups", api.getLuckpermsApi()::getUserGroups);
+        pr.get("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::getUserPermissions);
+        pr.post("luckperms/user/{uuid}/groups/{group}", api.getLuckpermsApi()::addUserToGroup);
+        pr.delete("luckperms/user/{uuid}/groups/{group}", api.getLuckpermsApi()::removeUserFromGroup);
+        pr.post("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::addUserPermission);
+        pr.delete("luckperms/user/{uuid}/permissions", api.getLuckpermsApi()::removeUserPermission);
+        
+
         // Plugin routes
         pr.get("plugins", api.getPluginApi()::listPlugins);
         pr.post("plugins", api.getPluginApi()::installPlugin);

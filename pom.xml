@@ -167,6 +167,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- luckperms API integration -->
+        <dependency>
+            <groupId>net.luckperms</groupId>
+            <artifactId>api</artifactId>
+            <version>5.4</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Guava dependency - moved out of test dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>
