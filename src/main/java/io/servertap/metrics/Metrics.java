@@ -32,6 +32,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.servertap.utils.SchedulerUtils;
 
 public class Metrics {
 
@@ -87,7 +88,13 @@ public class Metrics {
                         enabled,
                         this::appendPlatformData,
                         this::appendServiceData,
-                        submitDataTask -> Bukkit.getScheduler().runTask(plugin, submitDataTask),
+                        submitDataTask -> {
+                            if (SchedulerUtils.isFolia()) {
+                                Bukkit.getGlobalRegionScheduler().run(plugin, task -> submitDataTask.run());
+                            } else {
+                                Bukkit.getScheduler().runTask(plugin, submitDataTask);
+                            }
+                        },
                         plugin::isEnabled,
                         (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error),
                         (message) -> this.plugin.getLogger().log(Level.INFO, message),

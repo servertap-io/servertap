@@ -2,6 +2,7 @@ package io.servertap.utils;
 
 import io.servertap.Constants;
 import io.servertap.ServerTapMain;
+import io.servertap.utils.SchedulerUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.CompletionException;
 
 public class ServerExecCommandSender implements ConsoleCommandSender {
 
@@ -42,10 +44,25 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
     }
 
     public CompletableFuture<List<String>> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
-        Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
-                main,
-                () -> Bukkit.dispatchCommand(this, command)
-        );
+        CompletableFuture<Boolean> commandFuture;
+
+        if (SchedulerUtils.isFolia()) {
+            // Use Folia's global region scheduler for console commands
+            commandFuture = new CompletableFuture<>();
+            Bukkit.getGlobalRegionScheduler().run(main, (task) -> {
+                boolean result = Bukkit.dispatchCommand(this, command);
+                commandFuture.complete(result);
+            });
+        } else {
+            // Use Bukkit's scheduler for traditional servers
+            commandFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return Bukkit.getScheduler().callSyncMethod(main, () -> Bukkit.dispatchCommand(this, command)).get(5, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    throw new CompletionException(e);
+                }
+            });
+        }
 
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 

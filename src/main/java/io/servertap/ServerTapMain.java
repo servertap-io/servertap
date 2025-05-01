@@ -7,6 +7,7 @@ import io.servertap.plugin.api.ServerTapWebserverService;
 import io.servertap.plugin.api.ServerTapWebserverServiceImpl;
 import io.servertap.utils.ConsoleListener;
 import io.servertap.utils.LagDetector;
+import io.servertap.utils.SchedulerUtils;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
 import io.servertap.webhooks.WebhookEventListener;
 import org.apache.logging.log4j.LogManager;
@@ -61,7 +62,7 @@ public class ServerTapMain extends JavaPlugin {
         externalPluginWrapperRepo = new ExternalPluginWrapperRepo(this, log);
 
         // Start the TPS Counter with a 100 tick Delay every 1 tick
-        Bukkit.getScheduler().runTaskTimer(this, lagDetector, 100, 1);
+        SchedulerUtils.runRepeatingTask(this, lagDetector, 100, 1);
 
         // Initialize config file + set defaults
         saveDefaultConfig();
