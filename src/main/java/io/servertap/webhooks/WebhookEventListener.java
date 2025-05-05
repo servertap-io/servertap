@@ -6,6 +6,7 @@ import io.servertap.api.v1.models.ItemStack;
 import io.servertap.api.v1.models.Player;
 import io.servertap.utils.pluginwrappers.EconomyWrapper;
 import io.servertap.utils.GsonSingleton;
+import io.servertap.utils.SchedulerUtils;
 import io.servertap.utils.pluginwrappers.ExternalPluginWrapperRepo;
 import io.servertap.webhooks.models.events.*;
 import net.md_5.bungee.api.ChatColor;
@@ -147,7 +148,8 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskAsynchronously(main, () -> sendHttpRequest(eventModel, webhook));
+            // Use the SchedulerUtils for HTTP requests
+            SchedulerUtils.runTaskAsynchronously(main, () -> sendHttpRequest(eventModel, webhook));
         }
     }
 

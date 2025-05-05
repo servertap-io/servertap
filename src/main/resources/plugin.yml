@@ -6,6 +6,7 @@ authors: [phybros, ATechAdventurer, c1oneman, Earlh21, Scarsz, au5ton, Aberdeene
 load: STARTUP
 website: https://servertap.io
 api-version: 1.16
+folia-supported: true
 softdepend:
   - Vault
   - PlaceholderAPI

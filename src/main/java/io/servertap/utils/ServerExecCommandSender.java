@@ -2,6 +2,7 @@ package io.servertap.utils;
 
 import io.servertap.Constants;
 import io.servertap.ServerTapMain;
+import io.servertap.utils.SchedulerUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
-
 public class ServerExecCommandSender implements ConsoleCommandSender {
 
     private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(1);
@@ -42,17 +42,42 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
     }
 
     public CompletableFuture<List<String>> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
-        Future<Boolean> commandFuture = Bukkit.getScheduler().callSyncMethod(
-                main,
-                () -> Bukkit.dispatchCommand(this, command)
-        );
+        CompletableFuture<Boolean> commandFuture = new CompletableFuture<>();
+
+        try {
+            if (SchedulerUtils.isFolia()) {
+                // Use Folia's global region scheduler for console commands
+                Bukkit.getGlobalRegionScheduler().run(main, (task) -> {
+                    try {
+                        boolean result = Bukkit.dispatchCommand(this, command);
+                        commandFuture.complete(result);
+                    } catch (Exception e) {
+                        commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
+                    }
+                });
+            } else {
+                // Use Bukkit's scheduler for traditional servers
+                Bukkit.getScheduler().callSyncMethod(main, () -> {
+                    try {
+                        boolean result = Bukkit.dispatchCommand(this, command);
+                        commandFuture.complete(result);
+                        return result;
+                    } catch (Exception e) {
+                        commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
+                        return false;
+                    }
+                });
+            }
+        } catch (Exception e) {
+            commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
+        }
 
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         EXECUTOR.schedule(() -> {
             try {
                 commandFuture.get(5, TimeUnit.SECONDS);
-                future.complete(messageBuffer);
+                future.complete(new ArrayList<>(messageBuffer)); // Create a copy to avoid concurrent modification
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 future.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
             }
