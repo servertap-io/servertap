@@ -88,13 +88,7 @@ public class Metrics {
                         enabled,
                         this::appendPlatformData,
                         this::appendServiceData,
-                        submitDataTask -> {
-                            if (SchedulerUtils.isFolia()) {
-                                Bukkit.getGlobalRegionScheduler().run(plugin, task -> submitDataTask.run());
-                            } else {
-                                Bukkit.getScheduler().runTask(plugin, submitDataTask);
-                            }
-                        },
+                        submitDataTask -> SchedulerUtils.runTask(plugin, submitDataTask),
                         plugin::isEnabled,
                         (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error),
                         (message) -> this.plugin.getLogger().log(Level.INFO, message),

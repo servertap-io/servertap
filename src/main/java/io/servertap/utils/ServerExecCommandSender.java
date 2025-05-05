@@ -44,24 +44,34 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
     }
 
     public CompletableFuture<List<String>> executeCommand(String command, long messagingTime, TimeUnit messagingUnit) {
-        CompletableFuture<Boolean> commandFuture;
+        CompletableFuture<Boolean> commandFuture = new CompletableFuture<>();
 
-        if (SchedulerUtils.isFolia()) {
-            // Use Folia's global region scheduler for console commands
-            commandFuture = new CompletableFuture<>();
-            Bukkit.getGlobalRegionScheduler().run(main, (task) -> {
-                boolean result = Bukkit.dispatchCommand(this, command);
-                commandFuture.complete(result);
-            });
-        } else {
-            // Use Bukkit's scheduler for traditional servers
-            commandFuture = CompletableFuture.supplyAsync(() -> {
-                try {
-                    return Bukkit.getScheduler().callSyncMethod(main, () -> Bukkit.dispatchCommand(this, command)).get(5, TimeUnit.SECONDS);
-                } catch (Exception e) {
-                    throw new CompletionException(e);
-                }
-            });
+        try {
+            if (SchedulerUtils.isFolia()) {
+                // Use Folia's global region scheduler for console commands
+                Bukkit.getGlobalRegionScheduler().run(main, (task) -> {
+                    try {
+                        boolean result = Bukkit.dispatchCommand(this, command);
+                        commandFuture.complete(result);
+                    } catch (Exception e) {
+                        commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
+                    }
+                });
+            } else {
+                // Use Bukkit's scheduler for traditional servers
+                Bukkit.getScheduler().callSyncMethod(main, () -> {
+                    try {
+                        boolean result = Bukkit.dispatchCommand(this, command);
+                        commandFuture.complete(result);
+                        return result;
+                    } catch (Exception e) {
+                        commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
+                        return false;
+                    }
+                });
+            }
+        } catch (Exception e) {
+            commandFuture.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
         }
 
         CompletableFuture<List<String>> future = new CompletableFuture<>();
@@ -69,7 +79,7 @@ public class ServerExecCommandSender implements ConsoleCommandSender {
         EXECUTOR.schedule(() -> {
             try {
                 commandFuture.get(5, TimeUnit.SECONDS);
-                future.complete(messageBuffer);
+                future.complete(new ArrayList<>(messageBuffer)); // Create a copy to avoid concurrent modification
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 future.completeExceptionally(new RuntimeException(Constants.COMMAND_GENERIC_ERROR, e));
             }

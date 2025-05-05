@@ -62,6 +62,7 @@ public class ServerTapMain extends JavaPlugin {
         externalPluginWrapperRepo = new ExternalPluginWrapperRepo(this, log);
 
         // Start the TPS Counter with a 100 tick Delay every 1 tick
+        // This works on both Bukkit/Paper and Folia servers
         SchedulerUtils.runRepeatingTask(this, lagDetector, 100, 1);
 
         // Initialize config file + set defaults

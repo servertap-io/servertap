@@ -148,12 +148,8 @@ public class WebhookEventListener implements Listener {
                 continue;
             }
 
-            // Use the AsyncScheduler for HTTP requests as they're not region-specific
-            if (SchedulerUtils.isFolia()) {
-                Bukkit.getAsyncScheduler().runNow(main, (task) -> sendHttpRequest(eventModel, webhook));
-            } else {
-                Bukkit.getScheduler().runTaskAsynchronously(main, () -> sendHttpRequest(eventModel, webhook));
-            }
+            // Use the SchedulerUtils for HTTP requests
+            SchedulerUtils.runTaskAsynchronously(main, () -> sendHttpRequest(eventModel, webhook));
         }
     }
 
