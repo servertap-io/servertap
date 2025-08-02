@@ -18,8 +18,8 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <javalin.version>5.6.2</javalin.version>
-        <javalin.openapi.version>5.6.2-2</javalin.openapi.version>
+        <javalin.version>6.7.0</javalin.version>
+        <javalin.openapi.version>6.7.0-1</javalin.openapi.version>
     </properties>
 
     <repositories>
