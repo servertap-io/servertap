@@ -314,7 +314,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Whitelist.class, isArray = true))
             }
     )
     public void whitelistGet(Context ctx) {
@@ -556,7 +556,8 @@ public class ServerApi {
                     @OpenApiResponse(
                             status = "200",
                             content = @OpenApiContent(
-                                    from = io.servertap.api.v1.models.OfflinePlayer.class
+                                    from = io.servertap.api.v1.models.OfflinePlayer.class,
+                                    isArray = true
                             )
                     )
             }

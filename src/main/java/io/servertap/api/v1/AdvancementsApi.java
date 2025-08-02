@@ -19,7 +19,7 @@ public class AdvancementsApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Advancement.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Advancement.class, isArray = true))
             }
     )
     public void getAdvancements(Context ctx) {

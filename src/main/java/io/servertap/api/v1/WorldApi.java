@@ -221,7 +221,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class, isArray = true))
             }
     )
     public void worldsGet(Context ctx) {
