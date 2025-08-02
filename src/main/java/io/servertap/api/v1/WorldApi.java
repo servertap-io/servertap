@@ -73,7 +73,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "The UUID of the World to save")
+                    @OpenApiParam(name = "uuid", description = "The UUID of the World to save", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200")
@@ -144,7 +144,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "The UUID of the World to download")
+                    @OpenApiParam(name = "uuid", description = "The UUID of the World to download", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(type = "application/zip")),
@@ -239,7 +239,7 @@ public class WorldApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "The uuid of the world")
+                    @OpenApiParam(name = "uuid", description = "The uuid of the world", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = World.class))

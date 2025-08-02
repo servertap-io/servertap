@@ -55,7 +55,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "uuid", description = "UUID of the player")
+                    @OpenApiParam(name = "uuid", description = "UUID of the player", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class))
@@ -172,8 +172,8 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "playerUuid", description = "UUID of the player"),
-                    @OpenApiParam(name = "worldUuid", description = "UUID of the world")
+                    @OpenApiParam(name = "playerUuid", description = "UUID of the player", required = true),
+                    @OpenApiParam(name = "worldUuid", description = "UUID of the world", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack[].class))

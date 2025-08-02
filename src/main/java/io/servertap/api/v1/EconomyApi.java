@@ -78,7 +78,7 @@ public class EconomyApi {
                                     mimeType = "application/x-www-form-urlencoded",
                                     properties = {
                                             @OpenApiContentProperty(name = "uuid", type = "string"),
-                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                            @OpenApiContentProperty(name = "amount", type = "number")
                                     }
                             )
                     }
@@ -108,7 +108,7 @@ public class EconomyApi {
                                     mimeType = "application/x-www-form-urlencoded",
                                     properties = {
                                             @OpenApiContentProperty(name = "uuid", type = "string"),
-                                            @OpenApiContentProperty(name = "amount", type = "double")
+                                            @OpenApiContentProperty(name = "amount", type = "number")
                                     }
                             )
                     }

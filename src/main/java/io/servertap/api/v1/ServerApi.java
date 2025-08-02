@@ -249,7 +249,7 @@ public class ServerApi {
                     @OpenApiParam(name = "key")
             },
             pathParams = {
-                    @OpenApiParam(name = "name", description = "The name of the objective to get")
+                    @OpenApiParam(name = "name", description = "The name of the objective to get", required = true)
             },
             responses = {
                     @OpenApiResponse(status = "200", content = @OpenApiContent(from = Objective.class))
@@ -411,18 +411,10 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            requestBody = @OpenApiRequestBody(
-                    required = true,
-                    content = {
-                            @OpenApiContent(
-                                    mimeType = "application/x-www-form-urlencoded",
-                                    properties = {
-                                            @OpenApiContentProperty(name = "uuid", type = "string"),
-                                            @OpenApiContentProperty(name = "name", type = "string")
-                                    }
-                            )
-                    }
-            ),
+            queryParams = {
+                    @OpenApiParam(name = "uuid", description = "UUID of the player"),
+                    @OpenApiParam(name = "name", description = "Name of the player")
+            },
             responses = {@OpenApiResponse(status = "200")}
     )
     public void whitelistDelete(Context ctx) {
@@ -431,8 +423,8 @@ public class ServerApi {
             return;
         }
 
-        String uuid = ctx.formParam("uuid");
-        String name = ctx.formParam("name");
+        String uuid = ctx.queryParam("uuid");
+        String name = ctx.queryParam("name");
 
         if (uuid == null && name == null) throw new BadRequestResponse(Constants.WHITELIST_MISSING_PARAMS);
 
@@ -517,21 +509,13 @@ public class ServerApi {
             headers = {
                     @OpenApiParam(name = "key")
             },
-            requestBody = @OpenApiRequestBody(
-                    required = true,
-                    content = {
-                            @OpenApiContent(
-                                    mimeType = "application/x-www-form-urlencoded",
-                                    properties = {
-                                            @OpenApiContentProperty(name = "playerUuid", type = "string")
-                                    }
-                            )
-                    }
-            ),
+            queryParams = {
+                    @OpenApiParam(name = "playerUuid", description = "UUID of the player")
+            },
             responses = {@OpenApiResponse(status = "200")}
     )
     public void deopPlayer(Context ctx) {
-        String uuid = ctx.formParam("playerUuid");
+        String uuid = ctx.queryParam("playerUuid");
 
         if (uuid.isEmpty()) throw new BadRequestResponse(Constants.PLAYER_MISSING_PARAMS);
 
@@ -602,7 +586,7 @@ public class ServerApi {
                                     mimeType = "application/x-www-form-urlencoded",
                                     properties = {
                                             @OpenApiContentProperty(name = "command", type = "string"),
-                                            @OpenApiContentProperty(name = "time", type = "long")
+                                            @OpenApiContentProperty(name = "time", type = "integer")
                                     }
                             )
                     }
