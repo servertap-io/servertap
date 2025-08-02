@@ -37,7 +37,7 @@ public class PluginApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Plugin.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Plugin[].class))
             }
     )
     public void listPlugins(Context ctx) {

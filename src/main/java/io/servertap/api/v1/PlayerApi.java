@@ -35,7 +35,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = Player[].class))
             }
     )
     public void playersGet(Context ctx) {
@@ -133,7 +133,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "key")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.OfflinePlayer[].class))
             }
     )
     public void offlinePlayersGet(Context ctx) {
@@ -176,7 +176,7 @@ public class PlayerApi {
                     @OpenApiParam(name = "worldUuid", description = "UUID of the world")
             },
             responses = {
-                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack.class, isArray = true))
+                    @OpenApiResponse(status = "200", content = @OpenApiContent(from = io.servertap.api.v1.models.ItemStack[].class))
             }
     )
     public void getPlayerInv(Context ctx) {
