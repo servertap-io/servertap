@@ -1,7 +1,7 @@
 package io.servertap;
 
 import io.javalin.Javalin;
-import io.javalin.community.ssl.SSLPlugin;
+import io.javalin.community.ssl.SslPlugin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
@@ -21,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class WebServer {
 
@@ -60,6 +62,9 @@ public class WebServer {
 
         this.javalin = Javalin.create(config -> configureJavalin(config, main));
 
+        // Add beforeMatched handler for authentication (replaces AccessManager from Javalin 5)
+        this.javalin.beforeMatched(this::manageAccess);
+
         if (bukkitConfig.getBoolean("debug")) {
             this.javalin.before(ctx -> log.info(ctx.req().getPathInfo()));
         }
@@ -78,47 +83,53 @@ public class WebServer {
             log.warning("[ServerTap] CHANGE THE key IN THE config.yml FILE");
             log.warning("[ServerTap] FAILURE TO CHANGE THE KEY MAY RESULT IN SERVER COMPROMISE");
         }
-        config.accessManager(this::manageAccess);
 
         if (!disableSwagger) {
-            config.plugins.register(new OpenApiPlugin(getOpenApiConfig(main)));
-            SwaggerConfiguration swaggerConfiguration = new SwaggerConfiguration();
-            swaggerConfiguration.setDocumentationPath("/swagger-docs");
-            config.plugins.register(new SwaggerPlugin(swaggerConfiguration));
+            config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
+                pluginConfig.withDocumentationPath("/swagger-docs");
+                pluginConfig.withDefinitionConfiguration((version, definition) -> definition
+                        .withOpenApiInfo((openApiInfo) -> {
+                            openApiInfo.setTitle(main.getDescription().getName());
+                            openApiInfo.setVersion(main.getDescription().getVersion());
+                            openApiInfo.setDescription(main.getDescription().getDescription());
+                        })
+                        .withSecurity(openApiSecurity -> {
+                            openApiSecurity.withApiKeyAuth("ApiKeyAuth", "key");
+                        }));
+            }));
+            config.registerPlugin(new SwaggerPlugin());
         }
     }
 
     /**
-     * Verifies the Path is a wagger call or has the correct authentication
+     * Verifies the Path is a swagger call or has the correct authentication
+     * Migrated from AccessManager to beforeMatched for Javalin 6
      */
-    private void manageAccess(Handler handler, Context ctx, Set<? extends RouteRole> routeRoles) throws Exception {
-        // If auth is not enabled just serve it all
+    private void manageAccess(Context ctx) {
+        // If auth is not enabled just continue
         if (!this.isAuthEnabled) {
-            handler.handle(ctx);
             return;
         }
 
         if (isNoAuthPath(ctx.req().getPathInfo())) {
-            handler.handle(ctx);
             return;
         }
 
         // Auth is turned on, make sure there is a header called "key"
         String authHeader = ctx.header(SERVERTAP_KEY_HEADER);
         if (authHeader != null && Objects.equals(authHeader, authKey)) {
-            handler.handle(ctx);
             return;
         }
 
         // If the request is still not handled, check for a cookie (websockets use cookies for auth)
         String authCookie = ctx.cookie(SERVERTAP_KEY_COOKIE);
         if (authCookie != null && Objects.equals(authCookie, authKey)) {
-            handler.handle(ctx);
             return;
         }
 
-        // fall through, failsafe
+        // fall through, failsafe - throw exception to stop processing
         ctx.status(401).result("Unauthorized key, reference the key existing in config.yml");
+        ctx.skipRemainingHandlers();
     }
 
     private static boolean isNoAuthPath(String requestPath) {
@@ -126,17 +137,19 @@ public class WebServer {
     }
 
     private void configureCors(JavalinConfig config) {
-        config.plugins.enableCors(cors -> cors.add(corsConfig -> {
-            if (corsOrigin.contains("*")) {
-                log.info("[ServerTap] Enabling CORS for *");
-                corsConfig.anyHost();
-            } else {
-                corsOrigin.forEach(origin -> {
-                    log.info(String.format("[ServerTap] Enabling CORS for %s", origin));
-                    corsConfig.allowHost(origin);
-                });
-            }
-        }));
+        config.bundledPlugins.enableCors(cors -> {
+            cors.addRule(corsRule -> {
+                if (corsOrigin.contains("*")) {
+                    log.info("[ServerTap] Enabling CORS for *");
+                    corsRule.anyHost();
+                } else {
+                    corsOrigin.forEach(origin -> {
+                        log.info(String.format("[ServerTap] Enabling CORS for %s", origin));
+                        corsRule.allowHost(origin);
+                    });
+                }
+            });
+        });
     }
 
     private void configureTLS(JavalinConfig config, ServerTapMain main) {
@@ -149,7 +162,7 @@ public class WebServer {
 
             if (Files.exists(Paths.get(fullKeystorePath))) {
                 // Register the SSL plugin
-                SSLPlugin plugin = new SSLPlugin(conf -> {
+                SslPlugin plugin = new SslPlugin(conf -> {
                     conf.keystoreFromPath(fullKeystorePath, keyStorePassword);
                     conf.http2 = false;
                     conf.insecure = false;
@@ -157,7 +170,7 @@ public class WebServer {
                     conf.securePort = securePort;
                     conf.sniHostCheck = sni;
                 });
-                config.plugins.register(plugin);
+                config.registerPlugin(plugin);
                 log.info("[ServerTap] TLS is enabled.");
             } else {
                 log.warning(String.format("[ServerTap] TLS is enabled but %s doesn't exist. TLS disabled.", fullKeystorePath));
@@ -168,16 +181,7 @@ public class WebServer {
         }
     }
 
-    private OpenApiPluginConfiguration getOpenApiConfig(ServerTapMain main) {
-        return new OpenApiPluginConfiguration()
-                .withDocumentationPath("/swagger-docs")
-                .withDefinitionConfiguration((version, definition) -> definition
-                        .withOpenApiInfo((openApiInfo) -> {
-                            openApiInfo.setTitle(main.getDescription().getName());
-                            openApiInfo.setVersion(main.getDescription().getVersion());
-                            openApiInfo.setDescription(main.getDescription().getDescription());
-                        }));
-    }
+
 
     public void get(String route, Handler handler) {
         this.addRoute(HandlerType.GET, route, handler);
@@ -199,7 +203,7 @@ public class WebServer {
         // Checks to see if passed route is blocked in the config.
         // Note: The second check is for any blocked routes that start with a /
         if (!(blockedPaths.contains(route) || blockedPaths.contains("/" + route))) {
-            this.javalin.addHandler(httpMethod, route, handler);
+            this.javalin.addHttpHandler(httpMethod, route, handler);
         } else if (isDebug) {
             log.info(String.format("Not adding Route '%s' because it is blocked in the config.", route));
         }

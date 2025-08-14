@@ -84,6 +84,6 @@ public class WebsocketHandler {
      * @return String the hash
      */
     private String clientHash(WsContext ctx) {
-        return String.format("sub-%s-%s", ctx.host(), ctx.getSessionId());
+        return String.format("sub-%s-%s", ctx.host(), ctx.sessionId());
     }
 }
